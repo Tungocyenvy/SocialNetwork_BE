@@ -1,6 +1,10 @@
 const express = require('express');
 //const router = express.Router();
 
-function router(app) {}
+const account = require('./accountRouter');
+
+function router(app) {
+  app.use('/account', account);
+}
 
 module.exports = router;

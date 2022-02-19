@@ -1,0 +1,57 @@
+const { createToken } = require('./jwtService');
+const bcrypt = require('bcrypt');
+const Account = require('../models/accountModel');
+
+// Sign in
+const SigninService = async (body) => {
+  let { _id, password } = body;
+
+  // kiểm tra tài khoản tồn tại trong Account chưa
+  var data = await Account.findOne({ _id });
+  console.log(data);
+  if (data != null) {
+    if (data.isDelete) {
+      return {
+        msg: 'Your user account has been disabled!',
+        statusCode: 300,
+      };
+    }
+    const hashPassword = data.password;
+    const result = await bcrypt.compare(password, hashPassword);
+    try {
+      if (result) {
+        const id = data._id;
+        const token = createToken(id);
+        //const token = data.Token;
+        return {
+          msg: 'Login Successfull!',
+          statusCode: 200,
+          data: {
+            Token: token,
+            Role: data.role,
+          },
+        };
+      } else {
+        return {
+          msg: 'Your username or password is incorrect. please try again!',
+          statusCode: 300,
+        };
+      }
+    } catch {
+      return {
+        msg: 'An error occurred during the login process',
+        statusCode: 300,
+      };
+    }
+  } else {
+    return {
+      msg: 'Account does not exist',
+      statusCode: 300,
+    };
+  }
+};
+
+
+module.exports = {
+  SigninService
+};
