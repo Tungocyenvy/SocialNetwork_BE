@@ -1,0 +1,39 @@
+{
+  "name": "socialnetwork_be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start:dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tungocyenvy/SocialNetwork_BE.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tungocyenvy/SocialNetwork_BE/issues"
+  },
+  "homepage": "https://github.com/Tungocyenvy/SocialNetwork_BE#readme",
+  "devDependencies": {
+    "husky": "^4.3.8",
+    "lint-staged": "^12.3.4",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1"
+  },
+  "lint-staged": {
+    "src/**/*.{js,json,scss}": "prettier --single-quote --trailing-comma all --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "dependencies": {
+    "mongoose": "^6.2.2"
+  }
+}
+
