@@ -17,7 +17,6 @@ function createToken(data) {
 
 async function verify(req, res, next) {
   try {
-    Q;
     const header = req.headers.authorization;
 
     if (!header) {

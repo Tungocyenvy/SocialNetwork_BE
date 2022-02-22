@@ -3,12 +3,8 @@ const bcrypt = require('bcrypt');
 const Account = require('../models/accountModel');
 const Profile = require('../models/profileModel');
 const { sendSMS } = require('./smsService'); 
-const rand = require('random');
-const secureRandom = require('secure-random')
 
 //create OTP
-//Tạo id cho Post
-
 const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min;
 };
