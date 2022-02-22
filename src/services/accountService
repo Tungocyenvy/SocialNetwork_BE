@@ -1,6 +1,28 @@
 const { createToken } = require('./jwtService');
 const bcrypt = require('bcrypt');
 const Account = require('../models/accountModel');
+const Profile = require('../models/profileModel');
+const { sendSMS } = require('./smsService'); 
+const rand = require('random');
+const secureRandom = require('secure-random')
+
+//create OTP
+//Tạo id cho Post
+
+const getRandomInt = (min, max) => {
+  return Math.floor(Math.random() * (max - min)) + min;
+};
+const getOTP = () => {
+  let otp='';
+  const base = '0123456789'
+  for(var i=0;i<6;i++)
+  {
+    const randNum = getRandomInt(0, base.length);
+    otp+=base[randNum];
+  }
+  return otp;
+};
+
 
 // Sign in
 const SigninService = async (body) => {
@@ -51,7 +73,38 @@ const SigninService = async (body) => {
   }
 };
 
+//forgotPassword
+const forgotPassword = async (body) => {
+  let { _id } = body;
+  // check account
+  var data = await Profile.findById({ _id });
+  console.log(data);
+  if (data != null) {
+    try {
+      var toPhone = data.phone;
+      var content = getOTP()+" is your OTP. Only valid for 3 min!";
+      const sendsms=sendSMS(toPhone,content);
+      return {
+        msg: 'Please check your sms for a six-digital security code and enter below.',
+        statusCode: 200,
+        data:{content}
+      };
+    }
+    catch {
+      return {
+        msg: 'An error occurred during the forgot password process!',
+        statusCode: 300,
+      };
+    }
+  } else {
+    return {
+      msg: 'Account does not exist. Please check the username and try again!',
+      statusCode: 300,
+    };
+  }
+};
 
 module.exports = {
-  SigninService
+  SigninService,
+  forgotPassword
 };

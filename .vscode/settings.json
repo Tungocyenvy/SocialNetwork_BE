@@ -1,0 +1,4 @@
+{
+    "files.autoSave": "onWindowChange",
+    "prettier.requireConfig": true
+}
