@@ -1,8 +1,9 @@
 const controller = require('./index');
 const accountService = require('../services/accountService');
 
+//ACCOUNT
 const signin = async (req, res, next) => {
-  const resService = await accountService.SigninService(req.body);
+  const resService = await accountService.signinService(req.body);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -72,10 +73,49 @@ const updateProfile = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const signup = async (req, res, next) => {
+  const resService = await accountService.signup(req.body);
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const deleteAccount = async (req, res, next) => {
+  const resService = await accountService.deleteAccount(req.body);
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const recoveryAccount = async (req, res, next) => {
+  const resService = await accountService.recoveryAccount(req.body);
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   signin,
   forgotPass,
   changePassword,
   getProfile,
   updateProfile,
+  signup,
+  deleteAccount,
+  recoveryAccount,
 };

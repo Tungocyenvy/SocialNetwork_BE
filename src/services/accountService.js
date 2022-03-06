@@ -18,8 +18,20 @@ const getOTP = () => {
   return otp;
 };
 
+const getRandomString = () => {
+  let result = '';
+  const base = '0123456789';
+  const baseLength = base.length;
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = getRandomInt(0, baseLength);
+    result += base[randomIndex];
+  }
+  return result;
+};
+
 // Sign in
-const SigninService = async (body) => {
+const signinService = async (body) => {
   let { _id, password } = body;
 
   // kiểm tra tài khoản tồn tại trong Account chưa
@@ -184,10 +196,155 @@ const updateProfile = async (AccountId, body) => {
   }
 };
 
+// Sign up both excel and handle
+const signup = async (body) => {
+  try {
+    // console.log(body[0]);
+    let logs = [];
+    let accountData = {};
+    let message = '';
+    for (var i in body) {
+      let objAccount = {};
+      let data = body[i];
+      const profile = await Profile.findById({ _id: data._id });
+      const account = await Account.findById({ _id: data._id });
+      //check profile && account
+      if (profile || account) {
+        message = data._id + ' already exists';
+        logs.push(message);
+        console.log(logs);
+        continue;
+      }
+
+      data.email = data._id + '@gmail.com';
+      data.dob = new Date(data.dob);
+      const newProfile = new Profile(data);
+      console.log(newProfile);
+
+      try {
+        await newProfile.save();
+      } catch {
+        message = ' An error occurred during signup profile at ' + data._id;
+        logs.push(message);
+        console.log(logs);
+        continue;
+      }
+      const randomNum = getRandomString();
+      const password = data._id + '@social' + randomNum;
+      const saltOrRound = 8;
+      const hassPassword = await bcrypt.hash(password, saltOrRound);
+      const newAccount = new Account({
+        _id: data._id,
+        password: hassPassword,
+        role: data.role,
+      });
+
+      try {
+        await newAccount.save();
+      } catch {
+        await Profile.findByIdAndDelete({ _id: data._id });
+        message = ' An error occurred during signup account at ' + data._id;
+        logs.push(message);
+        console.log(logs);
+        continue;
+      }
+
+      objAccount._id = data._id;
+      objAccount.password = password;
+      accountData[i] = objAccount;
+    }
+    return {
+      msg: 'signup account successful',
+      statusCode: 200,
+      data: { logs, accountData },
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      msg: 'An error occurred during signup proccess',
+      statusCode: 300,
+    };
+  }
+};
+
+// delete Account (change isDelete: false->true)
+const deleteAccount = async (body) => {
+  try {
+    // console.log(body[0]);
+    let logs = [];
+    let message = '';
+    for (var i in body) {
+      let data = body[i];
+      const account = await Account.findById({ _id: data._id });
+      //check profile && account
+      if (account) {
+        account.isDelete = true;
+        try {
+          await account.save();
+        } catch {
+          message = 'An error occurred during delete account at ' + data._id;
+          logs.push(message);
+          console.log(logs);
+          continue;
+        }
+      } else {
+        message = data._id + ' does not exists';
+        logs.push(message);
+        console.log(logs);
+        continue;
+      }
+    }
+    return {
+      msg: 'delete account successful',
+      statusCode: 200,
+      data: { logs },
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      msg: 'An error occurred during delete account proccess',
+      statusCode: 300,
+    };
+  }
+};
+
+// recovery Account (change isDelete: true->false)
+const recoveryAccount = async (body) => {
+  let { _id } = body;
+  try {
+    const account = await Account.findById(_id);
+    //check profile && account
+    if (account) {
+      account.isDelete = false;
+      await account.save();
+      return {
+        msg: 'recovery account successful',
+        statusCode: 200,
+        data: account,
+      };
+    } else {
+      return {
+        msg: 'account does not exists',
+        statusCode: 200,
+        data: account,
+      };
+    }
+  } catch (err) {
+    console.log(err);
+    return {
+      msg: 'An error occurred during recovery account proccess',
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
-  SigninService,
+  signinService,
   forgotPassword,
   changePassword,
   getProfile,
   updateProfile,
+  signup,
+  deleteAccount,
+  recoveryAccount,
 };
