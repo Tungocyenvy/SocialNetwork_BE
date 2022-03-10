@@ -1,0 +1,51 @@
+const MainGroup = require('../models/maingroupModel');
+const SubGroup = require('../models/subgroupModel');
+
+const addUser = async (body) => {
+  let { _id, groupId, type, role } = body;
+  try {
+    let group;
+    switch (type) {
+      case 'main': {
+        group = await MainGroup.findById({ _id: groupId });
+        group.listUserId[0].push(_id);
+        await MainGroup.findByIdAndUpdate({ _id: groupId }, group);
+        break;
+      }
+      case 'fac': {
+        group = await MainGroup.findById({ _id: groupId });
+        //faculity group: [0] student, [1] teacher
+        if ((role = 'student')) group.listUserId[0].push(_id);
+        else group.listUserId[1].push(_id);
+        await MainGroup.findByIdAndUpdate({ _id: groupId }, group);
+        break;
+      }
+      default: {
+        group = await SubGroup.findById({ _id: groupId });
+        group.listUserId.push(_id);
+        await SubGroup.findByIdAndUpdate({ _id: groupId }, group);
+        break;
+      }
+    }
+    // await group.save();
+    console.log(group);
+    return {
+      msg: 'Add ' + _id + ' to ' + groupId + ' successful!',
+      statusCode: 200,
+    };
+  } catch {
+    return {
+      msg:
+        'An error occurred during add ' +
+        _id +
+        ' to group ' +
+        groupId +
+        ' process',
+      statusCode: 300,
+    };
+  }
+};
+
+module.exports = {
+  addUser,
+};

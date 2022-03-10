@@ -10,6 +10,8 @@ cloudinary.config({
   secure: true,
 });
 
+// cloudinary.uploader.unsigned_upload(storage,"angular_cloudinary");
+
 const storage = new CloudinaryStorage({
   cloudinary,
   allowedFormats: ['jpg', 'png', 'jpeg'],

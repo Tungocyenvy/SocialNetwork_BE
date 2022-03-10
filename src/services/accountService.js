@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const Account = require('../models/accountModel');
 const Profile = require('../models/profileModel');
 const { sendSMS } = require('./smsService');
+const GroupService = require('./groupService');
 
 //create OTP
 const getRandomInt = (min, max) => {
@@ -221,6 +222,7 @@ const signup = async (body) => {
       const newProfile = new Profile(data);
       console.log(newProfile);
 
+      //create Profile
       try {
         await newProfile.save();
       } catch {
@@ -229,6 +231,9 @@ const signup = async (body) => {
         console.log(logs);
         continue;
       }
+
+      //createAccount
+      const role = data.role;
       const randomNum = getRandomString();
       const password = data._id + '@social' + randomNum;
       const saltOrRound = 8;
@@ -236,7 +241,7 @@ const signup = async (body) => {
       const newAccount = new Account({
         _id: data._id,
         password: hassPassword,
-        role: data.role,
+        role,
       });
 
       try {
@@ -248,6 +253,66 @@ const signup = async (body) => {
         console.log(logs);
         continue;
       }
+
+      //add main group
+      var groupId = 'grsv';
+      if (role !== 'student') groupId = 'grgv';
+      var type = 'main';
+      for (var i = 0; i < 2; i++) {
+        //i=0 add grsv,grgv, =1 add gr fac
+        if (i === 1) {
+          groupId = data.faculity;
+          type = 'fac';
+        }
+        try {
+          const stt = (
+            await GroupService.addUser({ _id: data._id, groupId, type, role })
+          ).statusCode;
+          if (stt === 300) {
+            message =
+              'An error occurred during add ' +
+              data._id +
+              ' to group ' +
+              groupId +
+              ' process';
+            logs.push(message);
+            console.log(logs);
+            continue;
+          }
+        } catch {
+          message =
+            'An error occurred during add ' +
+            data._id +
+            ' to group ' +
+            groupId +
+            ' process';
+          logs.push(message);
+          console.log(logs);
+          continue;
+        }
+      }
+
+      // try{
+      //   const stt=(await GroupService.addUser({_id:data._id, groupId, type,role})).statusCode;
+      //   if(stt===300)
+      //   {
+      //     message = 'An error occurred during add ' + data._id + ' to group ' + groupId + ' process';
+      //     logs.push(message);
+      //     console.log(logs);
+      //     continue;
+      //   }
+      // }catch {
+      //   message = 'An error occurred during add '+ data._id + ' to group '+ groupId+ ' process';
+      //   logs.push(message);
+      //   console.log(logs);
+      //   continue;
+      // }
+      // var groupId="grsv";
+      // var facId= data.faculity;
+      // if(data.role!=="student") groupId="grgv";
+      // var group = await MainGroup.findById({_id:groupId});
+      // group.listUserId.push(data._id);
+      // group.
 
       objAccount._id = data._id;
       objAccount.password = password;
