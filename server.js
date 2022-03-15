@@ -4,11 +4,23 @@ const morgan = require('morgan');
 const route = require('./src/routers');
 
 const cors = require('cors');
+const app = express();
+const Socket = require('./socket')
+//socket
+const server = require('http').Server(app);
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+  }
+});
+
+
+
 
 const db = require('./src/config/database');
 db.connectDb();
 
-const app = express();
 
 //Implement cors
 app.use(cors());
@@ -21,15 +33,18 @@ app.use(function (req, res, next) {
 });
 
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true, }));
+app.use(express.json({
+  limit: '50mb'
+}));
+app.use(express.urlencoded({
+  limit: '50mb',
+  extended: true,
+}));
 
 app.use(morgan("dev"))
 
 
 route(app);
-
-//route(app);
-//app.get('/', (req, res) => res.sendFile(__dirname + "/index.html"));
+Socket(io)
 const port = process.env.PORT;
-app.listen(port, () => console.log(`http://localhost:${port}`))
+server.listen(port, () => console.log(`http://localhost:${port}`));
