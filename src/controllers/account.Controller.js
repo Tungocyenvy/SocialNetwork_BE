@@ -1,10 +1,34 @@
 const controller = require('./index');
-const commentService = require('../services/commentService');
+const accountService = require('../services/account.Service');
 
-//get comment by postId
-const getComment = async (req, res, next) => {
-  const postId = req.params.postId;
-  const resService = await commentService.getComment({ postId });
+//ACCOUNT
+const signin = async (req, res, next) => {
+  const resService = await accountService.signinService(req.body);
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const forgotPass = async (req, res, next) => {
+  const resService = await accountService.forgotPassword(req.body);
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const changePassword = async (req, res, next) => {
+  const tokenID = req.value.body.token.data;
+  const resService = await accountService.changePassword(tokenID, req.body);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -16,13 +40,41 @@ const getComment = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
-const createComment = async (req, res, next) => {
+const getProfile = async (req, res, next) => {
   const token = req.value.body.token.data;
-  const resService = await commentService.createComment(
-    { userId: token },
-    req.body,
-  );
+  const resService = await accountService.getProfile({
+    AccountId: token,
+  });
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
 
+const updateProfile = async (req, res, next) => {
+  // const TokenID = req.value.body.token?.data;
+  // const { token, ...data } = req.value.body;
+  const token = req.value.body.token.data;
+  console.log(req.body);
+  const resService = await accountService.updateProfile(token, req.body);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const signup = async (req, res, next) => {
+  const resService = await accountService.signup(req.body);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -33,13 +85,8 @@ const createComment = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
-const replyComment = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const resService = await commentService.replyComment(
-    { userId: token },
-    req.body,
-  );
-
+const deleteAccount = async (req, res, next) => {
+  const resService = await accountService.deleteAccount(req.body);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -50,69 +97,8 @@ const replyComment = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
-const updateComment = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const resService = await commentService.updateComment(
-    { userId: token },
-    req.body,
-  );
-
-  if (resService.statusCode === 200 || resService.statusCode === 201)
-    return controller.sendSuccess(
-      res,
-      resService.data,
-      resService.statusCode,
-      resService.msg,
-    );
-  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
-};
-
-const updateReply = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const resService = await commentService.updateReply(
-    { userId: token },
-    req.body,
-  );
-
-  if (resService.statusCode === 200 || resService.statusCode === 201)
-    return controller.sendSuccess(
-      res,
-      resService.data,
-      resService.statusCode,
-      resService.msg,
-    );
-  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
-};
-
-const deleteComment = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const idComment = req.params.id;
-  //console.log(idComment);
-  const resService = await commentService.deleteComment(
-    { userId: token },
-    idComment,
-  );
-
-  if (resService.statusCode === 200 || resService.statusCode === 201)
-    return controller.sendSuccess(
-      res,
-      resService.data,
-      resService.statusCode,
-      resService.msg,
-    );
-  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
-};
-
-const deleteReply = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const idCmt = req.params.idCmt;
-  const idRl = req.params.idRl;
-  const resService = await commentService.deleteReply(
-    { userId: token },
-    idCmt,
-    idRl,
-  );
-
+const recoveryAccount = async (req, res, next) => {
+  const resService = await accountService.recoveryAccount(req.body);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -124,11 +110,12 @@ const deleteReply = async (req, res, next) => {
 };
 
 module.exports = {
-  getComment,
-  createComment,
-  replyComment,
-  updateComment,
-  updateReply,
-  deleteComment,
-  deleteReply,
+  signin,
+  forgotPass,
+  changePassword,
+  getProfile,
+  updateProfile,
+  signup,
+  deleteAccount,
+  recoveryAccount,
 };

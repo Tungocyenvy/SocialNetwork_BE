@@ -1,8 +1,9 @@
 const controller = require('./index');
-const conversationService = require('../services/conversationService');
+const participantService = require('../services/participant.Service');
 
-const createConversation = async (req, res, next) => {
-  const resService = await conversationService.createConversation(req.body);
+const addParticipant = async (req, res, next) => {
+  const resService = await participantService.addParticipant(req.body);
+
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -14,5 +15,5 @@ const createConversation = async (req, res, next) => {
 };
 
 module.exports = {
-  createConversation,
+  addParticipant,
 };

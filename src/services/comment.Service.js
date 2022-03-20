@@ -1,6 +1,6 @@
-const Comment = require('../models/commentModel');
-const Account = require('../models/accountModel');
-const Profile = require('../models/profileModel');
+const Comment = require('../models/comment.Model');
+const Account = require('../models/account.Model');
+const Profile = require('../models/profile.Model');
 
 //get comment by postId
 const getComment = async (body) => {

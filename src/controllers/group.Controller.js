@@ -1,5 +1,5 @@
 const controller = require('./index');
-const groupService = require('../services/groupService');
+const groupService = require('../services/group.Service');
 
 //get comment by postId
 const addUser = async (req, res, next) => {

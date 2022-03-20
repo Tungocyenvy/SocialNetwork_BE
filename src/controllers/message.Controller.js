@@ -1,9 +1,13 @@
 const controller = require('./index');
-const participantService = require('../services/participantService');
+const messageService = require('../services/message.Service');
 
-const addParticipant = async (req, res, next) => {
-  const resService = await participantService.addParticipant(req.body);
+const createMessage = async (req, res, next) => {
+  console.log(
+    '🚀 ~ file: messageController.js ~ line 5 ~ createMessage ~ req',
+    req.body,
+  );
 
+  const resService = await messageService.createMessage(req.body);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -15,5 +19,5 @@ const addParticipant = async (req, res, next) => {
 };
 
 module.exports = {
-  addParticipant,
+  createMessage,
 };

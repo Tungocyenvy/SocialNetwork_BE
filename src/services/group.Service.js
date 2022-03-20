@@ -1,5 +1,5 @@
-const MainGroup = require('../models/maingroupModel');
-const SubGroup = require('../models/subgroupModel');
+const MainGroup = require('../models/maingroup.Model');
+const SubGroup = require('../models/subgroup.Model');
 
 // const checkGroup= async (body) =>{
 //     let {group}=body;

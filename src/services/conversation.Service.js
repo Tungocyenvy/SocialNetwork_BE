@@ -1,5 +1,5 @@
-const conversation = require('../models/conversationModel');
-const participantService = require('../services/participantService');
+const conversation = require('../models/conversation.Model');
+const participantService = require('./participant.Service');
 
 const createConversation = async (body) => {
   try {

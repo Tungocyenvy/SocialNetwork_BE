@@ -1,9 +1,10 @@
-const { createToken } = require('./jwtService');
+const { createToken } = require('./jwt.Service');
 const bcrypt = require('bcrypt');
-const Account = require('../models/accountModel');
-const Profile = require('../models/profileModel');
-const { sendSMS } = require('./smsService');
-const GroupService = require('./groupService');
+const Account = require('../models/account.Model');
+const Profile = require('../models/profile.Model');
+const { sendSMS } = require('./sms.Service');
+const GroupService = require('./group.Service');
+const Profile = require('../models/profile.Model');
 
 //create OTP
 const getRandomInt = (min, max) => {
@@ -51,13 +52,15 @@ const signinService = async (body) => {
       if (result) {
         const id = data._id;
         const token = createToken(id);
+        const profile = await Profile.findById({ _id: id });
         //const token = data.Token;
         return {
           msg: 'Login Successfull!',
           statusCode: 200,
           data: {
-            Token: token,
-            Role: data.role,
+            token,
+            role: data.role,
+            profile,
           },
         };
       } else {
@@ -291,28 +294,6 @@ const signup = async (body) => {
           continue;
         }
       }
-
-      // try{
-      //   const stt=(await GroupService.addUser({_id:data._id, groupId, type,role})).statusCode;
-      //   if(stt===300)
-      //   {
-      //     message = 'An error occurred during add ' + data._id + ' to group ' + groupId + ' process';
-      //     logs.push(message);
-      //     console.log(logs);
-      //     continue;
-      //   }
-      // }catch {
-      //   message = 'An error occurred during add '+ data._id + ' to group '+ groupId+ ' process';
-      //   logs.push(message);
-      //   console.log(logs);
-      //   continue;
-      // }
-      // var groupId="grsv";
-      // var facId= data.faculity;
-      // if(data.role!=="student") groupId="grgv";
-      // var group = await MainGroup.findById({_id:groupId});
-      // group.listUserId.push(data._id);
-      // group.
 
       objAccount._id = data._id;
       objAccount.password = password;

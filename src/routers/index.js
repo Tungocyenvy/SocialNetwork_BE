@@ -1,13 +1,13 @@
 const express = require('express');
 //const router = express.Router();
 
-const account = require('./accountRouter');
-const comment = require('./commentRouter');
-const image = require('./imageRouter');
-const group = require('./groupRouter');
-const conversation = require('./conversationRouter');
-const message = require('./messageRouter');
-const participant = require('./participantRouter');
+const account = require('./account.Router');
+const comment = require('./comment.Router');
+const image = require('./image.Router');
+const group = require('./group.Router');
+const conversation = require('./conversation.Router');
+const message = require('./message.Router');
+const participant = require('./participant.Router');
 
 function router(app) {
   app.use('/account', account);
