@@ -3,8 +3,8 @@ const schema = mongoose.Schema;
 
 const Notify_templateSchema = new schema({
   _id: { type: String },
-  type: { type: String, require: true },
-  content: { type: String, require: true },
+  type: { type: String, required: true },
+  content: { type: String, required: true },
 });
 
 const notify_template = mongoose.model(

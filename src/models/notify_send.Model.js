@@ -3,11 +3,11 @@ const schema = mongoose.Schema;
 
 const Notify_sendSchema = new schema({
   _id: { type: String },
-  postId: { type: String, require: true },
-  templateId: { type: String, require: true },
-  senderId: { type: String, require: true },
-  receiverId: { type: String, require: true },
-  createdDate: { type: Date, require: true, default: Date.now() },
+  postId: { type: String, required: true },
+  templateId: { type: String, required: true },
+  senderId: { type: String, required: true },
+  receiverId: { type: String, required: true },
+  createdDate: { type: Date, required: true, default: Date.now() },
 });
 
 const notify_send = mongoose.model('notify_send', Notify_sendSchema);

@@ -6,7 +6,7 @@ const Notify_queueSchema = new schema({
   listNotify: [
     {
       notifyId: { type: String },
-      isRead: { type: String, require: true, default: false },
+      isRead: { type: String, required: true, default: false },
     },
   ],
 });
