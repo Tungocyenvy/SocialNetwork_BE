@@ -6,7 +6,7 @@ const MessageSchema = new schema({
     type: String,
     required: true,
   },
-  userSenderId: {
+  senderId: {
     type: String,
     required: true,
   },
@@ -30,9 +30,9 @@ const MessageSchema = new schema({
     default: 0,
     enum: [0, 1],
   },
-  createdAt: {
+  createdDate: {
     type: Date,
-    default: new Date(),
+    default: Date.now(),
   },
 });
 
