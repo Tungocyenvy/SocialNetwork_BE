@@ -19,10 +19,6 @@ const addParticipant = async (data) => {
       };
     }
   } catch (err) {
-    console.log(
-      '🚀 ~ file: participantService.js ~ line 22 ~ addParticipant ~ err',
-      err,
-    );
     return {
       msg: 'An error occurred during adding participants',
       statusCode: 300,

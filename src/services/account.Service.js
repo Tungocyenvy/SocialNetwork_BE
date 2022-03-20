@@ -4,7 +4,6 @@ const Account = require('../models/account.Model');
 const Profile = require('../models/profile.Model');
 const { sendSMS } = require('./sms.Service');
 const GroupService = require('./group.Service');
-const Profile = require('../models/profile.Model');
 
 //create OTP
 const getRandomInt = (min, max) => {

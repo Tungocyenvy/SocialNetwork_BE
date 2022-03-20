@@ -2,9 +2,11 @@ const mongoose = require('mongoose');
 const schema = mongoose.Schema;
 
 const ConversationSchema = new schema({
+  _id: { type: String },
   name: {
     type: String,
     required: true,
+    default: 'Chat box',
   },
   lastestMessage: {
     type: String,

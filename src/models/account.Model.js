@@ -6,7 +6,8 @@ const AccountSchema = new schema({
   password: { type: String, required: true },
   role: { type: String, required: true },
   isDelete: { type: Boolean, required: true, default: false },
+  deletedDate: { type: Date, default: Date.now() },
 });
 
-const Account = mongoose.model('Account', AccountSchema);
-module.exports = Account;
+const account = mongoose.model('account', AccountSchema);
+module.exports = account;

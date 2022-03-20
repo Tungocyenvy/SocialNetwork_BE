@@ -1,26 +1,27 @@
 const EVENT_MESSAGE_CSS = require('../events/client/message');
 const EVENT_MESSAGE_SSC = require('../events/server/message');
+const message = require('../../services/message.Service');
+const conversation = require('../../services/conversation.Service');
 
 function MessageHandler(socket) {
   const listens = {};
-  listens[EVENT_MESSAGE_CSS.SEND_MESSAGE_CSS] = (payload) => {
-    console.log({
-      room: payload.room,
-      clientRoom: socket.adapter.rooms,
-    });
+  listens[EVENT_MESSAGE_CSS.SEND_MESSAGE_CSS] = async (payload) => {
     //add message, update lastest message
-    socket.to(payload.room).emit(EVENT_MESSAGE_SSC.SEND_MESSAGE_SSC, {
-      data: payload,
+    const res = (await message.createMessage(payload)).data;
+    const isAuth = res.isAuth;
+    socket.to(payload.conversationId).emit(EVENT_MESSAGE_SSC.SEND_MESSAGE_SSC, {
+      data: { payload, isAuth },
       msg: 'send mess room success',
       status: 200,
     });
   };
 
-  listens[EVENT_MESSAGE_CSS.JOIN_ROOM_CSS] = (payload) => {
+  listens[EVENT_MESSAGE_CSS.JOIN_ROOM_CSS] = async (payload) => {
     console.log({
       payload,
     });
 
+    const res = await conversation.createConversation(payload);
     socket.join(payload.room);
     socket.to(payload.room).emit(EVENT_MESSAGE_SSC.JOIN_ROOM_SSC, {
       data: null,
