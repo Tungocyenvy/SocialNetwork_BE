@@ -1,8 +1,8 @@
-const message = require('../models/messageModel');
+const message = require('../models/message.Model');
 
 const createMessage = async (data) => {
   console.log(
-    '🚀 ~ file: messageService.js ~ line 4 ~ createMessage ~ data',
+    '🚀 ~ file: message.Service.js ~ line 4 ~ createMessage ~ data',
     data,
   );
   try {
