@@ -39,7 +39,7 @@ const createMessage = async (data) => {
   }
 };
 
-const getMessage = async (req, body) => {
+const getMessage = async (req, body, userId) => {
   let { conversationId } = body;
   let perPage = 7;
   let { page } = req.query || 1;
@@ -50,12 +50,17 @@ const getMessage = async (req, body) => {
       .skip(perPage * page - perPage)
       .limit(perPage);
 
-    console.log(message);
+    const lstMessage = message.map((x) => {
+      var objMessage = {};
+      objMessage.data = x.data;
+      objMessage.isAuth = x.senderId === userId ? true : false;
+      return objMessage;
+    });
 
     return {
       msg: 'get message successfully',
       statusCode: 200,
-      data: message.data,
+      data: lstMessage,
     };
   } catch (err) {
     return {
