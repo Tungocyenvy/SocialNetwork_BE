@@ -21,9 +21,9 @@ function MessageHandler(socket) {
       payload,
     });
 
-    const res = await conversation.createConversation(payload);
-    socket.join(payload.room);
-    socket.to(payload.room).emit(EVENT_MESSAGE_SSC.JOIN_ROOM_SSC, {
+    const res = (await conversation.createConversation(payload)).data;
+    socket.join(res._id);
+    socket.to(res._id).emit(EVENT_MESSAGE_SSC.JOIN_ROOM_SSC, {
       data: null,
       msg: 'joined room success',
       status: 200,

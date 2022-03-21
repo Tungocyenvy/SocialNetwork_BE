@@ -26,7 +26,7 @@ const createConversation = async (body) => {
         _id: conversationId,
       });
       if (res) {
-        const participants = body.participantIds.map((participantId) => {
+        const participants = body.map((participantId) => {
           return {
             conversationId: res._id,
             participantId,
@@ -65,9 +65,13 @@ const createConversation = async (body) => {
 
 const updateConversation = async (body) => {
   try {
+    const conversation = new Conversation();
+    conversation._id = body.conversationId;
+    conversation.lastestMessage = body.data;
+    conversation.updatedDate = Date.now();
     const res = await Conversation.findByIdAndUpdate(
       { _id: body.conversationId },
-      body.data,
+      conversation,
     );
     return {
       msg: 'update a conversation successfully',
@@ -87,10 +91,7 @@ const getListConversation = async (userId, req) => {
   let { page } = req.query || 1;
   try {
     //get top 10 lastest conversation
-    const participant = await Participant.find({ participantId: userId })
-      .sort({ length: -1 })
-      .skip(perPage * page - perPage)
-      .limit(perPage);
+    const participant = await Participant.find({ participantId: userId });
 
     //get top 10 conversationId
     const conversationIds = map(participant, 'conversationId');
@@ -98,7 +99,10 @@ const getListConversation = async (userId, req) => {
     //get top 10 conversation by conversationId
     const conversation = await Conversation.find({
       _id: { $in: conversationIds },
-    });
+    })
+      .sort({ updatedDate: -1 })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
 
     //get top 10 participant of user
     let lstParticipant = await Participant.find({
@@ -125,6 +129,7 @@ const getListConversation = async (userId, req) => {
       return {
         _id,
         lastestMessage,
+        participantId,
         fullname,
         avatar,
       };
