@@ -3,9 +3,6 @@ const conversationService = require('./conversation.Service');
 
 const createMessage = async (data) => {
   try {
-    let isAuth = false;
-    const userId = data.userId;
-    delete data.userId;
     const res = await Message.create(data);
     if (res) {
       try {
@@ -17,12 +14,10 @@ const createMessage = async (data) => {
             statusCode: 300,
           };
         }
-
-        if (userId === data.senderId) isAuth = true;
         return {
           msg: 'add message & update message lastest successfully',
           statusCode: 200,
-          data: { res, isAuth },
+          data: res,
         };
       } catch (err) {
         return {
@@ -44,6 +39,33 @@ const createMessage = async (data) => {
   }
 };
 
+const getMessage = async (req, body) => {
+  let { conversationId } = body;
+  let perPage = 7;
+  let { page } = req.query || 1;
+  try {
+    //get top 7 lastest message
+    const message = await Message.find({ conversationId: conversationId })
+      .sort({ length: -1 })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+
+    console.log(message);
+
+    return {
+      msg: 'get message successfully',
+      statusCode: 200,
+      data: message.data,
+    };
+  } catch (err) {
+    return {
+      msg: 'An error occurred during the get message process',
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   createMessage,
+  getMessage,
 };

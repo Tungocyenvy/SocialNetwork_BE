@@ -7,10 +7,9 @@ function MessageHandler(socket) {
   const listens = {};
   listens[EVENT_MESSAGE_CSS.SEND_MESSAGE_CSS] = async (payload) => {
     //add message, update lastest message
-    const res = (await message.createMessage(payload)).data;
-    const isAuth = res.isAuth;
+    const res = await message.createMessage(payload);
     socket.to(payload.conversationId).emit(EVENT_MESSAGE_SSC.SEND_MESSAGE_SSC, {
-      data: { payload, isAuth },
+      data: { payload },
       msg: 'send mess room success',
       status: 200,
     });
