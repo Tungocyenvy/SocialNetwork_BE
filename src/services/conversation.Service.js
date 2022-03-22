@@ -5,21 +5,28 @@ const participantService = require('./participant.Service');
 const { map, keyBy } = require('lodash');
 
 const getConversationId = (userOne, userTwo) => {
+  const sub = 'admin';
   var result = '';
-  if (userOne > userTwo) {
-    result = userTwo + '' + userOne;
-  } else if (isNaN(userOne) || isNaN(userTwo)) {
-    result = isNaN(userOne) ? userOne + '' + userTwo : userTwo + '' + userOne;
+  if (keyword.indexOf(sub) === 0) {
+    if (userOne > userTwo) {
+      result = userTwo + '' + userOne;
+    } else {
+      result = userOne + '' + userTwo;
+    }
   } else {
-    result = userOne + '' + userTwo;
+    if (Number(userOne) > Number(userTwo)) {
+      result = userTwo + '' + userOne;
+    } else {
+      result = userOne + '' + userTwo;
+    }
   }
   return result;
 };
 
 const createConversation = async (body) => {
   try {
-    var userOne = Number(body[0]);
-    var userTwo = Number(body[1]);
+    var userOne = body[0];
+    var userTwo = body[1];
 
     const conversationId = getConversationId(userOne, userTwo);
     const conversation = await Conversation.findById({
