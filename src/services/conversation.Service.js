@@ -2,6 +2,7 @@ const Conversation = require('../models/conversation.Model');
 const Participant = require('../models/participant.Model');
 const Profile = require('../models/profile.Model');
 const participantService = require('./participant.Service');
+const moment = require('moment');
 const { map, keyBy } = require('lodash');
 
 const getConversationId = (userOne, userTwo) => {
@@ -91,7 +92,7 @@ const updateConversation = async (body) => {
     const conversation = new Conversation();
     conversation._id = body.conversationId;
     conversation.lastestMessage = body.data;
-    conversation.updatedDate = Date.now();
+    conversation.updatedDate = moment().format('YYYY-MM-DD HH:mm:ss');
     const res = await Conversation.findByIdAndUpdate(
       {
         _id: body.conversationId,

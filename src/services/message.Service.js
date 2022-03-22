@@ -51,7 +51,7 @@ const getMessage = async (req, userId) => {
     });
     if (total > 0) {
       const message = await Message.find({ conversationId: conversationId })
-        .sort({ _id: -1 })
+        .sort({ createdDate: -1 })
         .skip(perPage * page - perPage)
         .limit(perPage);
 

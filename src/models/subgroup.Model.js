@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 const schema = mongoose.Schema;
 
 const subGroupSchema = new schema({
@@ -8,7 +9,11 @@ const subGroupSchema = new schema({
   listAdminId: { type: Array, required: true },
   listPostId: { type: Array, required: true },
   image: { type: String, required: true },
-  createdDate: { type: Date, required: true, default: Date.now() },
+  createdDate: {
+    type: Date,
+    required: true,
+    default: moment().format('YYYY-MM-DD HH:mm:ss'),
+  },
   cateId: { type: String, required: true },
 });
 

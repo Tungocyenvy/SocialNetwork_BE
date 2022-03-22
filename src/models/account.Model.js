@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 const schema = mongoose.Schema;
 
 const AccountSchema = new schema({
@@ -6,7 +7,7 @@ const AccountSchema = new schema({
   password: { type: String, required: true },
   role: { type: String, required: true },
   isDelete: { type: Boolean, required: true, default: false },
-  deletedDate: { type: Date, default: Date.now() },
+  deletedDate: { type: Date, default: moment().format('YYYY-MM-DD HH:mm:ss') },
 });
 
 const account = mongoose.model('account', AccountSchema);
