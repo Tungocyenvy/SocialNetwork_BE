@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 const schema = mongoose.Schema;
 
 const MessageSchema = new schema({
@@ -32,7 +33,7 @@ const MessageSchema = new schema({
   },
   createdDate: {
     type: Date,
-    default: new Date(),
+    default: moment().format('YYYY-MM-DD HH:mm:ss'),
   },
 });
 
