@@ -7,11 +7,20 @@ const { map, keyBy } = require('lodash');
 const getConversationId = (userOne, userTwo) => {
   const sub = 'admin';
   var result = '';
-  if (keyword.indexOf(sub) === 0) {
-    if (userOne > userTwo) {
-      result = userTwo + '' + userOne;
+  if (userOne.indexOf(sub) === 0 || userTwo.indexOf(sub) === 0) {
+    if (userOne.indexOf(sub) === -1) {
+      //TH userOne is User, userTwo is admin
+      result = userTwo + '' + userOne; //....admin
+    } else if (userTwo.indexOf(sub) === -1) {
+      //TH userOne is admin, userTwo is user
+      result = userTwo + '' + userOne; //....admin
     } else {
-      result = userOne + '' + userTwo;
+      //TH 2 admin
+      if (userOne > userTwo) {
+        result = userTwo + '' + userOne;
+      } else {
+        result = userOne + '' + userTwo;
+      }
     }
   } else {
     if (Number(userOne) > Number(userTwo)) {
