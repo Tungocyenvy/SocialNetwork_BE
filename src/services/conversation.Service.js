@@ -8,6 +8,8 @@ const getConversationId = (userOne, userTwo) => {
   var result = '';
   if (userOne > userTwo) {
     result = userTwo + '' + userOne;
+  } else if (isNaN(userOne) || isNaN(userTwo)) {
+    result = isNaN(userOne) ? userOne + '' + userTwo : userTwo + '' + userOne;
   } else {
     result = userOne + '' + userTwo;
   }
@@ -20,7 +22,9 @@ const createConversation = async (body) => {
     var userTwo = Number(body[1]);
 
     const conversationId = getConversationId(userOne, userTwo);
-    const conversation = await Conversation.findById({ _id: conversationId });
+    const conversation = await Conversation.findById({
+      _id: conversationId,
+    });
     if (!conversation) {
       const res = await Conversation.create({
         _id: conversationId,
@@ -55,6 +59,9 @@ const createConversation = async (body) => {
         };
       }
     }
+    return {
+      data: conversation,
+    };
   } catch (err) {
     return {
       msg: 'An error occurred during creating conversation',
@@ -70,7 +77,9 @@ const updateConversation = async (body) => {
     conversation.lastestMessage = body.data;
     conversation.updatedDate = Date.now();
     const res = await Conversation.findByIdAndUpdate(
-      { _id: body.conversationId },
+      {
+        _id: body.conversationId,
+      },
       conversation,
     );
     return {
@@ -93,7 +102,9 @@ const getListConversation = async (userId, req) => {
     let result = [];
     let total = 0;
 
-    const participant = await Participant.find({ participantId: userId });
+    const participant = await Participant.find({
+      participantId: userId,
+    });
 
     if (participant.length > 0) {
       console.log(1);
@@ -102,18 +113,26 @@ const getListConversation = async (userId, req) => {
 
       //get top 10 conversation by conversationId
       total = await Conversation.countDocuments({
-        _id: { $in: conversationIds },
+        _id: {
+          $in: conversationIds,
+        },
       });
       const conversation = await Conversation.find({
-        _id: { $in: conversationIds },
+        _id: {
+          $in: conversationIds,
+        },
       })
-        .sort({ updatedDate: -1 })
+        .sort({
+          updatedDate: -1,
+        })
         .skip(perPage * page - perPage)
         .limit(perPage);
 
       //get top 10 participant of user
       let lstParticipant = await Participant.find({
-        conversationId: { $in: conversationIds },
+        conversationId: {
+          $in: conversationIds,
+        },
       });
       lstParticipant = lstParticipant.filter((x) => x.participantId != userId);
 
@@ -121,7 +140,11 @@ const getListConversation = async (userId, req) => {
       const participantIds = map(lstParticipant, 'participantId');
 
       //get profile of lstParticipant
-      const profile = await Profile.find({ _id: { $in: participantIds } });
+      const profile = await Profile.find({
+        _id: {
+          $in: participantIds,
+        },
+      });
 
       const objProfile = keyBy(profile, '_id');
 
@@ -146,7 +169,10 @@ const getListConversation = async (userId, req) => {
     return {
       msg: 'get list conversation successfully',
       statusCode: 200,
-      data: { result, total },
+      data: {
+        result,
+        total,
+      },
     };
   } catch (err) {
     return {
