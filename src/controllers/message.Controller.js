@@ -3,7 +3,7 @@ const messageService = require('../services/message.Service');
 
 const getMessage = async (req, res, next) => {
   const userId = req.value.body.token.data;
-  const resService = await messageService.getMessage(req, req.body, userId);
+  const resService = await messageService.getMessage(req, userId);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,

@@ -39,8 +39,8 @@ const createMessage = async (data) => {
   }
 };
 
-const getMessage = async (req, body, userId) => {
-  let { conversationId } = body;
+const getMessage = async (req, userId) => {
+  let { conversationId } = req.query;
   let perPage = 7;
   let { page } = req.query || 1;
   try {
