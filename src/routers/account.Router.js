@@ -14,6 +14,8 @@ router.put('/recovery', accountController.recoveryAccount);
 //profile
 router.get('/profile', jwt.verify, accountController.getProfile);
 router.put('/profile', jwt.verify, accountController.updateProfile);
+//search
+router.get('/search', accountController.searchUser);
 
 //EXCEL
 

@@ -4,6 +4,7 @@ const Account = require('../models/account.Model');
 const Profile = require('../models/profile.Model');
 const { sendSMS } = require('./sms.Service');
 const GroupService = require('./group.Service');
+const { result } = require('lodash');
 
 //create OTP
 const getRandomInt = (min, max) => {
@@ -143,57 +144,6 @@ const changePassword = async (tokenID, body) => {
   } catch {
     return {
       msg: 'An error occurred during the change password process',
-      statusCode: 300,
-    };
-  }
-};
-
-//get Infor User
-const getProfile = async (body) => {
-  let { AccountId } = body;
-  console.log(AccountId);
-  try {
-    const data = await Profile.findById({ _id: AccountId });
-    if (!data) {
-      return {
-        msg: 'user not found',
-        statusCode: 300,
-      };
-    } else {
-      return {
-        msg: 'get user  profile successful! ',
-        statusCode: 200,
-        data: data,
-      };
-    }
-  } catch {
-    return {
-      msg: 'An error occurred during the get  user profile  process',
-      statusCode: 300,
-    };
-  }
-};
-
-const updateProfile = async (AccountId, body) => {
-  try {
-    console.log(body);
-    await Profile.findOneAndUpdate({ _id: AccountId }, body);
-    const res = await Profile.findById({ _id: AccountId });
-    if (res) {
-      return {
-        msg: 'update user profile successful',
-        statusCode: 200,
-        data: res,
-      };
-    } else {
-      return {
-        msg: 'user not found!',
-        statusCode: 300,
-      };
-    }
-  } catch (err) {
-    return {
-      msg: 'An error occurred during the get  update user profile  process',
       statusCode: 300,
     };
   }
@@ -383,13 +333,106 @@ const recoveryAccount = async (body) => {
   }
 };
 
+//**PROFILE */
+//get Infor User
+const getProfile = async (body) => {
+  let { AccountId } = body;
+  console.log(AccountId);
+  try {
+    const data = await Profile.findById({ _id: AccountId });
+    if (!data) {
+      return {
+        msg: 'user not found',
+        statusCode: 300,
+      };
+    } else {
+      return {
+        msg: 'get user  profile successful! ',
+        statusCode: 200,
+        data: data,
+      };
+    }
+  } catch {
+    return {
+      msg: 'An error occurred during the get  user profile  process',
+      statusCode: 300,
+    };
+  }
+};
+
+const updateProfile = async (AccountId, body) => {
+  try {
+    console.log(body);
+    await Profile.findOneAndUpdate({ _id: AccountId }, body);
+    const res = await Profile.findById({ _id: AccountId });
+    if (res) {
+      return {
+        msg: 'update user profile successful',
+        statusCode: 200,
+        data: res,
+      };
+    } else {
+      return {
+        msg: 'user not found!',
+        statusCode: 300,
+      };
+    }
+  } catch (err) {
+    return {
+      msg: 'An error occurred during the get  update user profile  process',
+      statusCode: 300,
+    };
+  }
+};
+
+//search by name or identify
+const searchUser = async (req) => {
+  let keyword = req.query.keyword;
+  let perPage = 10;
+  let { page } = req.query || 1;
+  try {
+    const sub = 'admin';
+
+    let result;
+
+    //filter special characters and uppercase, lowercase
+    let key = new RegExp(
+      keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      'i',
+    );
+
+    //check key is identify (number or admin)
+    if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
+      result = await Profile.findById({ _id: keyword })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+    } else {
+      //search by name
+      result = await Profile.find({ fullname: key })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+    }
+    return {
+      msg: 'search successful',
+      data: result,
+      statusCode: 200,
+    };
+  } catch {
+    return {
+      msg: 'An error occurred during the search user profile  process',
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   signinService,
   forgotPassword,
   changePassword,
-  getProfile,
-  updateProfile,
   signup,
   deleteAccount,
   recoveryAccount,
+  getProfile,
+  updateProfile,
+  searchUser,
 };

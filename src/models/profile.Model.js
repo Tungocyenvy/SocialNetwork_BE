@@ -5,6 +5,7 @@ const avatarDefaul =
 const ProfileSchema = new schema({
   _id: { type: String, required: true },
   fullname: { type: String, required: true },
+  faculity: { type: String },
   dob: { type: Date, required: true },
   address: { type: String, required: true },
   phone: { type: String, required: true },
