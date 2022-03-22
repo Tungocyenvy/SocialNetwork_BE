@@ -41,7 +41,7 @@ const createMessage = async (data) => {
 
 const getMessage = async (req, userId) => {
   let { conversationId } = req.query;
-  let perPage = 7;
+  let perPage = 10;
   let { page } = req.query || 1;
   try {
     let lstMessage = [];
@@ -55,6 +55,7 @@ const getMessage = async (req, userId) => {
         .skip(perPage * page - perPage)
         .limit(perPage);
 
+      message.reverse();
       lstMessage = message.map((x) => {
         var objMessage = {};
         objMessage.data = x.data;
