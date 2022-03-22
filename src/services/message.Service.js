@@ -44,23 +44,29 @@ const getMessage = async (req, body, userId) => {
   let perPage = 7;
   let { page } = req.query || 1;
   try {
+    let lstMessage = [];
     //get top 7 lastest message
-    const message = await Message.find({ conversationId: conversationId })
-      .sort({ length: -1 })
-      .skip(perPage * page - perPage)
-      .limit(perPage);
-
-    const lstMessage = message.map((x) => {
-      var objMessage = {};
-      objMessage.data = x.data;
-      objMessage.isAuth = x.senderId === userId ? true : false;
-      return objMessage;
+    const total = await Message.countDocuments({
+      conversationId: conversationId,
     });
+    if (total > 0) {
+      const message = await Message.find({ conversationId: conversationId })
+        .sort({ length: -1 })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+
+      lstMessage = message.map((x) => {
+        var objMessage = {};
+        objMessage.data = x.data;
+        objMessage.isAuth = x.senderId === userId ? true : false;
+        return objMessage;
+      });
+    }
 
     return {
       msg: 'get message successfully',
       statusCode: 200,
-      data: lstMessage,
+      data: { lstMessage, total },
     };
   } catch (err) {
     return {

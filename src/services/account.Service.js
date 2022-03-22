@@ -401,20 +401,28 @@ const searchUser = async (req) => {
       'i',
     );
 
+    let total = 0;
+
     //check key is identify (number or admin)
     if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
-      result = await Profile.findById({ _id: keyword })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
+      total = await Profile.countDocuments({ _id: keyword });
+      if (total > 0) {
+        result = await Profile.findById({ _id: keyword })
+          .skip(perPage * page - perPage)
+          .limit(perPage);
+      }
     } else {
       //search by name
-      result = await Profile.find({ fullname: key })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
+      total = await Profile.countDocuments({ fullname: key });
+      if (total > 0) {
+        result = await Profile.find({ fullname: key })
+          .skip(perPage * page - perPage)
+          .limit(perPage);
+      }
     }
     return {
       msg: 'search successful',
-      data: result,
+      data: { result, total },
       statusCode: 200,
     };
   } catch {

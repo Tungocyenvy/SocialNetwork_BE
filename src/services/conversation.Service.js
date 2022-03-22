@@ -90,56 +90,63 @@ const getListConversation = async (userId, req) => {
   let perPage = 10;
   let { page } = req.query || 1;
   try {
-    //get top 10 lastest conversation
+    let result = [];
+    let total = 0;
+
     const participant = await Participant.find({ participantId: userId });
 
-    //get top 10 conversationId
-    const conversationIds = map(participant, 'conversationId');
+    if (participant.length > 0) {
+      console.log(1);
+      //get conversationId
+      const conversationIds = map(participant, 'conversationId');
 
-    //get top 10 conversation by conversationId
-    const conversation = await Conversation.find({
-      _id: { $in: conversationIds },
-    })
-      .sort({ updatedDate: -1 })
-      .skip(perPage * page - perPage)
-      .limit(perPage);
+      //get top 10 conversation by conversationId
+      total = await Conversation.countDocuments({
+        _id: { $in: conversationIds },
+      });
+      const conversation = await Conversation.find({
+        _id: { $in: conversationIds },
+      })
+        .sort({ updatedDate: -1 })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
 
-    //get top 10 participant of user
-    let lstParticipant = await Participant.find({
-      conversationId: { $in: conversationIds },
-    });
-    lstParticipant = lstParticipant.filter((x) => x.participantId != userId);
+      //get top 10 participant of user
+      let lstParticipant = await Participant.find({
+        conversationId: { $in: conversationIds },
+      });
+      lstParticipant = lstParticipant.filter((x) => x.participantId != userId);
 
-    //get top 10 participantId
-    const participantIds = map(lstParticipant, 'participantId');
+      //get top 10 participantId
+      const participantIds = map(lstParticipant, 'participantId');
 
-    //get profile of lstParticipant
-    const profile = await Profile.find({ _id: { $in: participantIds } });
+      //get profile of lstParticipant
+      const profile = await Profile.find({ _id: { $in: participantIds } });
 
-    const objProfile = keyBy(profile, '_id');
+      const objProfile = keyBy(profile, '_id');
 
-    const objConversation = keyBy(conversation, '_id');
+      const objConversation = keyBy(conversation, '_id');
 
-    const objParticipant = keyBy(lstParticipant, 'conversationId');
+      const objParticipant = keyBy(lstParticipant, 'conversationId');
 
-    const result = conversationIds.map((item) => {
-      const { _id, lastestMessage } = objConversation[item];
-      const { participantId } = objParticipant[item];
-      const { fullname, avatar } = objProfile[participantId];
-      return {
-        _id,
-        lastestMessage,
-        participantId,
-        fullname,
-        avatar,
-      };
-    });
-
+      result = conversationIds.map((item) => {
+        const { _id, lastestMessage } = objConversation[item];
+        const { participantId } = objParticipant[item];
+        const { fullname, avatar } = objProfile[participantId];
+        return {
+          _id,
+          lastestMessage,
+          participantId,
+          fullname,
+          avatar,
+        };
+      });
+    }
     console.log(result);
     return {
       msg: 'get list conversation successfully',
       statusCode: 200,
-      data: result,
+      data: { result, total },
     };
   } catch (err) {
     return {
