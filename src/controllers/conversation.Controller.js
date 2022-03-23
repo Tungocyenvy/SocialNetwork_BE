@@ -38,8 +38,26 @@ const getListConversation = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const getConversationId = async (req, res, next) => {
+  const userOne = req.query.id1;
+  const userTwo = req.query.id2;
+  const resService = await conversationService.getConversationId(
+    userOne,
+    userTwo,
+  );
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   createConversation,
   updateConversation,
   getListConversation,
+  getConversationId,
 };

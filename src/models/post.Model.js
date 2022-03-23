@@ -7,9 +7,10 @@ const PostSchema = new schema({
   title: { type: String, require: true },
   content: { type: String, require: true },
   author: { type: String, require: true },
+  groupId: { type: String, require: true },
+  isMainGroup: { type: Boolean, default: true },
   createdDate: {
     type: Date,
-    require: true,
     default: moment().format('YYYY-MM-DD HH:mm:ss'),
   },
 });

@@ -5,7 +5,7 @@ const participantService = require('./participant.Service');
 const moment = require('moment');
 const { map, keyBy } = require('lodash');
 
-const getConversationId = (userOne, userTwo) => {
+const getConversationId = async (userOne, userTwo) => {
   const sub = 'admin';
   var result = '';
   if (userOne.indexOf(sub) === 0 || userTwo.indexOf(sub) === 0) {
@@ -30,7 +30,12 @@ const getConversationId = (userOne, userTwo) => {
       result = userOne + '' + userTwo;
     }
   }
-  return result;
+
+  return {
+    msg: 'get conversationId successfully',
+    statusCode: 200,
+    data: result,
+  };
 };
 
 const createConversation = async (body) => {
@@ -38,7 +43,7 @@ const createConversation = async (body) => {
     var userOne = body[0];
     var userTwo = body[1];
 
-    const conversationId = getConversationId(userOne, userTwo);
+    const conversationId = (await getConversationId(userOne, userTwo)).data;
     const conversation = await Conversation.findById({
       _id: conversationId,
     });
@@ -203,4 +208,5 @@ module.exports = {
   createConversation,
   updateConversation,
   getListConversation,
+  getConversationId,
 };
