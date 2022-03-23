@@ -1,5 +1,7 @@
 const MainGroup = require('../models/maingroup.Model');
 const SubGroup = require('../models/subgroup.Model');
+const Notify = require('../models/notify_maingroup.Model');
+const Account = require('../models/account.Model');
 
 // const checkGroup= async (body) =>{
 //     let {group}=body;
@@ -11,6 +13,8 @@ const SubGroup = require('../models/subgroup.Model');
 //           };
 //     }
 // }
+
+//add user to group
 const addUser = async (body) => {
   let { _id, groupId, type, role } = body;
   try {
@@ -77,6 +81,40 @@ const addUser = async (body) => {
   }
 };
 
+//send Notify for maingroup
+const sendNotifyForMainGroup = async (body) => {
+  let { userId, postId, groupId } = body;
+  try {
+    const account = await Account.findById({ _id: userId });
+    if (!account) {
+      return {
+        msg: 'User ' + userId + ' not found!',
+        statusCode: 300,
+      };
+    }
+
+    const newNotify = new Notify({
+      userId,
+      postId,
+      groupId,
+    });
+    const res = await newNotify.save();
+    if (res) {
+      return {
+        msg: 'send notify to user ' + userId + ' successful!',
+        statusCode: 200,
+        data: res,
+      };
+    }
+  } catch (err) {
+    return {
+      msg: 'An error occurred during send notify to user ' + userId,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
+  sendNotifyForMainGroup,
 };

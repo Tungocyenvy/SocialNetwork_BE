@@ -6,4 +6,7 @@ const groupController = require('../controllers/group.Controller');
 //User
 router.post('/user', groupController.addUser);
 
+//sendNotify for maingroup
+router.post('/main/notify', groupController.sendNotifyForMainGroup);
+
 module.exports = router;
