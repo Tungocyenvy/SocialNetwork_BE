@@ -58,10 +58,10 @@ const createConversation = async (body) => {
             participantId,
           };
         });
-        const addParticipant = await participantService.addParticipant(
-          participants,
-        );
-        if (addParticipant) {
+        const addParticipant = (
+          await participantService.addParticipant(participants)
+        ).statusCode;
+        if (addParticipant === 200) {
           return {
             msg: 'create a conversation & add participants successfully',
             statusCode: 200,

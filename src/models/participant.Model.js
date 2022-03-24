@@ -16,5 +16,5 @@ const ParticipantSchema = new schema({
   },
 });
 
-const comment = mongoose.model('participant', ParticipantSchema);
-module.exports = comment;
+const participant = mongoose.model('participant', ParticipantSchema);
+module.exports = participant;

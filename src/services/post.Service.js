@@ -53,8 +53,6 @@ const createPost = async (userID, body) => {
     const res = await newPost.save();
     //send notify to listUser
     if (res) {
-      let logs = [];
-      let message = '';
       if (body.isMainGroup) {
         group.listPostId.push(id);
         await MainGroup.findByIdAndUpdate({ _id: groupId }, group);
@@ -64,28 +62,23 @@ const createPost = async (userID, body) => {
           if (!body.isStudent) lstUserId = group.listUserId[1];
         }
 
-        for (var i in lstUserId) {
-          try {
-            const userId = lstUserId[i];
-            const stt = (
-              await groupService.sendNotifyForMainGroup({
-                userId,
-                postId: id,
-                groupId,
-              })
-            ).statusCode;
-            if (stt === 300) {
-              message =
-                'An error occurred during send notify to user ' + lstUserId[i];
-              logs.push(message);
-              continue;
-            }
-          } catch {
-            message =
-              'An error occurred during send notify to user ' + lstUserId[i];
-            logs.push(message);
-            continue;
-          }
+        const lstNotify = lstUserId.map((userId) => {
+          return {
+            userId,
+            postId: id,
+            groupId,
+          };
+        });
+
+        const sendNotify = (
+          await groupService.sendNotifyForMainGroup(lstNotify)
+        ).statusCode;
+
+        if (sendNotify != 200) {
+          return {
+            msg: 'send notify falied!',
+            statusCode: 300,
+          };
         }
       } else {
         //gửi thông báo cho subgroup tạm thời xử lý sau
