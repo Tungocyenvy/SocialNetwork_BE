@@ -7,6 +7,6 @@ router.post('/', conversationController.createConversation);
 router.put('/', conversationController.updateConversation);
 router.get('/', jwt.verify, conversationController.getListConversation);
 
-router.get('/id', conversationController.getConversationId);
+router.get('/id', conversationController.getConversation);
 
 module.exports = router;

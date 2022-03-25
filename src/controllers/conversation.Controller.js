@@ -38,10 +38,10 @@ const getListConversation = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
-const getConversationId = async (req, res, next) => {
+const getConversation = async (req, res, next) => {
   const userOne = req.query.id1;
   const userTwo = req.query.id2;
-  const resService = await conversationService.getConversationId(
+  const resService = await conversationService.getConversation(
     userOne,
     userTwo,
   );
@@ -59,5 +59,5 @@ module.exports = {
   createConversation,
   updateConversation,
   getListConversation,
-  getConversationId,
+  getConversation,
 };

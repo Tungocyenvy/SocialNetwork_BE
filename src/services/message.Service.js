@@ -41,7 +41,7 @@ const createMessage = async (data) => {
 
 const getMessage = async (req, userId) => {
   let { conversationId } = req.query;
-  let perPage = 10;
+  let perPage = 15;
   let { page } = req.query || 1;
   try {
     let lstMessage = [];
@@ -50,8 +50,12 @@ const getMessage = async (req, userId) => {
       conversationId: conversationId,
     });
     if (total > 0) {
-      const message = await Message.find({ conversationId: conversationId })
-        .sort({ createdDate: -1 })
+      const message = await Message.find({
+        conversationId: conversationId,
+      })
+        .sort({
+          createdDate: -1,
+        })
         .skip(perPage * page - perPage)
         .limit(perPage);
 
@@ -67,7 +71,10 @@ const getMessage = async (req, userId) => {
     return {
       msg: 'get message successfully',
       statusCode: 200,
-      data: { lstMessage, total },
+      data: {
+        lstMessage,
+        total,
+      },
     };
   } catch (err) {
     return {

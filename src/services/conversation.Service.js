@@ -30,11 +30,29 @@ const getConversationId = async (userOne, userTwo) => {
       result = userOne + '' + userTwo;
     }
   }
+  return result;
+};
+const getConversation = async (userOne, userTwo) => {
+  const result = await getConversationId(userOne, userTwo);
+  const conversation = await Conversation.findById(result);
+  const user = await Profile.findById(userTwo);
+  const { _id, lastestMessage, participantId } = conversation || {};
+  const data = conversation
+    ? {
+        _id,
+        lastestMessage,
+        participantId,
+        user,
+      }
+    : {
+        _id: result,
+        user,
+      };
 
   return {
     msg: 'get conversationId successfully',
     statusCode: 200,
-    data: result,
+    data,
   };
 };
 
@@ -43,8 +61,7 @@ const createConversation = async (body) => {
     var userOne = body[0];
     var userTwo = body[1];
 
-    const conversationId = (await getConversationId(userOne, userTwo)).data;
-    console.log(conversationId);
+    const conversationId = await getConversationId(userOne, userTwo);
     const conversation = await Conversation.findById({
       _id: conversationId,
     });
@@ -180,13 +197,12 @@ const getListConversation = async (userId, req) => {
         .map((item) => {
           const { _id, lastestMessage } = objConversation[item._id];
           const { participantId } = objParticipant[item._id];
-          const { fullname, avatar } = objProfile[participantId];
+          const user = objProfile[participantId];
           return {
             _id,
             lastestMessage,
             participantId,
-            fullname,
-            avatar,
+            user,
           };
         });
     }
@@ -211,5 +227,5 @@ module.exports = {
   createConversation,
   updateConversation,
   getListConversation,
-  getConversationId,
+  getConversation,
 };
