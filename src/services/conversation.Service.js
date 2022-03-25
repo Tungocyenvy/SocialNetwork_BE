@@ -9,10 +9,10 @@ const getConversationId = async (userOne, userTwo) => {
   const sub = 'admin';
   var result = '';
   if (userOne.indexOf(sub) === 0 || userTwo.indexOf(sub) === 0) {
-    if (userOne.indexOf(sub) === -1) {
+    if (userOne.indexOf(sub) !== 0) {
       //TH userOne is User, userTwo is admin
-      result = userTwo + '' + userOne; //....admin
-    } else if (userTwo.indexOf(sub) === -1) {
+      result = userOne + '' + userOne; //....admin
+    } else if (userTwo.indexOf(sub) !== 0) {
       //TH userOne is admin, userTwo is user
       result = userTwo + '' + userOne; //....admin
     } else {
@@ -44,6 +44,7 @@ const createConversation = async (body) => {
     var userTwo = body[1];
 
     const conversationId = (await getConversationId(userOne, userTwo)).data;
+    console.log(conversationId);
     const conversation = await Conversation.findById({
       _id: conversationId,
     });
@@ -132,13 +133,13 @@ const getListConversation = async (userId, req) => {
       console.log(1);
       //get conversationId
       const conversationIds = map(participant, 'conversationId');
-
       //get top 10 conversation by conversationId
       total = await Conversation.countDocuments({
         _id: {
           $in: conversationIds,
         },
       });
+
       const conversation = await Conversation.find({
         _id: {
           $in: conversationIds,
@@ -150,6 +151,9 @@ const getListConversation = async (userId, req) => {
         .skip(perPage * page - perPage)
         .limit(perPage);
 
+      const lastesConversation = conversation.map((x) => {
+        return x._id;
+      });
       //get top 10 participant of user
       let lstParticipant = await Participant.find({
         conversationId: {
@@ -174,18 +178,20 @@ const getListConversation = async (userId, req) => {
 
       const objParticipant = keyBy(lstParticipant, 'conversationId');
 
-      result = conversationIds.map((item) => {
-        const { _id, lastestMessage } = objConversation[item];
-        const { participantId } = objParticipant[item];
-        const { fullname, avatar } = objProfile[participantId];
-        return {
-          _id,
-          lastestMessage,
-          participantId,
-          fullname,
-          avatar,
-        };
-      });
+      result = conversation
+        .filter((item) => item.lastestMessage !== null)
+        .map((item) => {
+          const { _id, lastestMessage } = objConversation[item._id];
+          const { participantId } = objParticipant[item._id];
+          const { fullname, avatar } = objProfile[participantId];
+          return {
+            _id,
+            lastestMessage,
+            participantId,
+            fullname,
+            avatar,
+          };
+        });
     }
     console.log(result);
     return {
