@@ -6,7 +6,9 @@ const addParticipant = async (data) => {
     //   return participant.create(item);
     // });
     // await Promise.all(add);
-    await participant.insertMany(data);
+    const res = await participant.insertMany(data, {
+      ordered: true,
+    });
     // if (res) {
     return {
       msg: 'add participants successfully',

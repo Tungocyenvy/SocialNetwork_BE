@@ -12,7 +12,7 @@ const ParticipantSchema = new schema({
   },
   status: {
     type: String,
-    required: 1,
+    default: 1,
   },
 });
 
