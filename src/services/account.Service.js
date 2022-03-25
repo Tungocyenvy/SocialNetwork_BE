@@ -184,7 +184,7 @@ const signup = async (body) => {
         continue;
       }
 
-      //createAccount
+      /**CREATE ACCOUNT */
       const role = data.role;
       const randomNum = getRandomString();
       const password = data._id + '@social' + randomNum;
@@ -206,7 +206,7 @@ const signup = async (body) => {
         continue;
       }
 
-      //add main group
+      /**ADD MAIN GROUP */
       var groupId = 'grsv';
       if (role !== 'student') groupId = 'grgv';
       var type = 'main';

@@ -2,10 +2,11 @@ const participant = require('../models/participant.Model');
 
 const addParticipant = async (data) => {
   try {
-    const add = data.map(async (item) => {
-      return participant.create(item);
-    });
-    await Promise.all(add);
+    // const add = data.map(async (item) => {
+    //   return participant.create(item);
+    // });
+    // await Promise.all(add);
+    await participant.insertMany(data);
     // if (res) {
     return {
       msg: 'add participants successfully',
