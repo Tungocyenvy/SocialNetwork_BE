@@ -87,13 +87,11 @@ const createPost = async (userID, body) => {
       return {
         msg: 'Create post and send notify to group successful!',
         statusCode: 200,
-        data: logs,
       };
     } else {
       return {
         msg: 'create post failed!',
         statusCode: 300,
-        data: logs,
       };
     }
   } catch (err) {
