@@ -151,9 +151,6 @@ const getListConversation = async (userId, req) => {
         .skip(perPage * page - perPage)
         .limit(perPage);
 
-      const lastesConversation = conversation.map((x) => {
-        return x._id;
-      });
       //get top 10 participant of user
       let lstParticipant = await Participant.find({
         conversationId: {
