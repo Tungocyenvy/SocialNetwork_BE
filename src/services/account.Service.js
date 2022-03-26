@@ -488,4 +488,5 @@ module.exports = {
   getProfile,
   updateProfile,
   searchUser,
+  changePassword,
 };
