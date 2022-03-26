@@ -123,13 +123,15 @@ const getListPostByUserId = async (userId, req) => {
     }
     if (lstNotify.length > 0) {
       //get top 10 post
-      const postIds = map(lstNotify, 'postId');
+      const total = await Post.countDocuments({ _id: { $in: postIds } });
       const listPost = await Post.find({ _id: { $in: postIds } })
         .sort({
           createdDate: -1,
         })
         .skip(perPage * page - perPage)
         .limit(perPage);
+
+      const postIds = map(listPost, '_id');
 
       //get profile author [fullname, avatar]
       const userIds = map(listPost, 'author');
@@ -158,7 +160,7 @@ const getListPostByUserId = async (userId, req) => {
       return {
         msg: 'Get list post successful!',
         statusCode: 200,
-        data: result,
+        data: { result, total },
       };
     } else {
       return {
@@ -181,6 +183,9 @@ const getListPostByGroupId = async (req) => {
   let { page } = req.query || 1;
   try {
     //get top 10 list post
+
+    const total = await Post.countDocuments({ groupId: groupId });
+
     const listPost = await Post.find({ groupId: groupId })
       .sort({
         createdDate: -1,
@@ -217,7 +222,7 @@ const getListPostByGroupId = async (req) => {
       return {
         msg: 'Get list post successful!',
         statusCode: 200,
-        data: result,
+        data: { result, total },
       };
     } else {
       return {
