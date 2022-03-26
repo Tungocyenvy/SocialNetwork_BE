@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('../services/jwt.Service');
+const jwt = require('../services/jwt.service');
 const postController = require('../controllers/post.Controller');
 
 //createPost

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const conversationController = require('../controllers/conversation.Controller');
-const jwt = require('../services/jwt.Service');
+const conversationController = require('../controllers/conversation.controller');
+const jwt = require('../services/jwt.service');
 
 router.post('/', conversationController.createConversation);
 router.put('/', conversationController.updateConversation);

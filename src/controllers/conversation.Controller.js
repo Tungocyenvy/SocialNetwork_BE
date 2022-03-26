@@ -1,5 +1,5 @@
 const controller = require('./index');
-const conversationService = require('../services/conversation.Service');
+const conversationService = require('../services/conversation.service');
 
 const createConversation = async (req, res, next) => {
   const resService = await conversationService.createConversation(req.body);

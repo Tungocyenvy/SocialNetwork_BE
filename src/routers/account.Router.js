@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('../services/jwt.Service');
-const accountController = require('../controllers/account.Controller');
+const jwt = require('../services/jwt.service');
+const accountController = require('../controllers/account.controller');
 
 //ACCOUNT
 router.post('/signin', accountController.signin);

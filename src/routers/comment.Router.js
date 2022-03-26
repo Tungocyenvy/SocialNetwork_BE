@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('../services/jwt.Service');
-const commentController = require('../controllers/comment.Controller');
+const jwt = require('../services/jwt.service');
+const commentController = require('../controllers/comment.controller');
 
 //CRUD COMMENT
 //read

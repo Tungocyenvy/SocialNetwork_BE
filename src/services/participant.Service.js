@@ -1,4 +1,4 @@
-const participant = require('../models/participant.Model');
+const participant = require('../models/participant.model');
 
 const addParticipant = async (data) => {
   try {

@@ -1,10 +1,9 @@
-const { createToken } = require('./jwt.Service');
+const { createToken } = require('./jwt.service');
 const bcrypt = require('bcrypt');
-const Account = require('../models/account.Model');
-const Profile = require('../models/profile.Model');
-const { sendSMS } = require('./sms.Service');
-const GroupService = require('./group.Service');
-const { result } = require('lodash');
+const Account = require('../models/account.model');
+const Profile = require('../models/profile.model');
+const { sendSMS } = require('./sms.service');
+const groupService = require('./group.service');
 
 //create OTP
 const getRandomInt = (min, max) => {
@@ -38,7 +37,6 @@ const signinService = async (body) => {
 
   // kiểm tra tài khoản tồn tại trong Account chưa
   var data = await Account.findOne({ _id });
-  console.log(data);
   if (data != null) {
     if (data.isDelete) {
       return {
@@ -88,7 +86,6 @@ const forgotPassword = async (body) => {
   let { _id } = body;
   // check account
   var data = await Profile.findById({ _id });
-  console.log(data);
   if (data != null) {
     try {
       var toPhone = data.phone;
@@ -124,7 +121,7 @@ const resetPassword = async (body) => {
         const saltOrRound = 8;
         const HashNewPassword = await bcrypt.hash(password, saltOrRound);
         account.password = HashNewPassword;
-        await Account.findByIdAndUpdate({ _id: tokenID }, account);
+        await Account.findByIdAndUpdate({ _id: userId }, account);
         return {
           msg: 'Reset password successful!',
           statusCode: 200,
@@ -210,14 +207,12 @@ const signup = async (body) => {
       if (profile || account) {
         message = data._id + ' already exists';
         logs.push(message);
-        console.log(logs);
         continue;
       }
 
       data.email = data._id + '@gmail.com';
       data.dob = new Date(data.dob);
       const newProfile = new Profile(data);
-      console.log(newProfile);
 
       //create Profile
       try {
@@ -225,7 +220,6 @@ const signup = async (body) => {
       } catch {
         message = ' An error occurred during signup profile at ' + data._id;
         logs.push(message);
-        console.log(logs);
         continue;
       }
 
@@ -247,23 +241,27 @@ const signup = async (body) => {
         await Profile.findByIdAndDelete({ _id: data._id });
         message = ' An error occurred during signup account at ' + data._id;
         logs.push(message);
-        console.log(logs);
         continue;
       }
 
       /**ADD MAIN GROUP */
-      var groupId = 'grsv';
+      let groupId = 'grsv';
       if (role !== 'student') groupId = 'grgv';
-      var type = 'main';
+      let type = 'main';
       for (var i = 0; i < 2; i++) {
-        //i=0 add grsv,grgv, =1 add gr fac
+        //i=0 add grsv,grgv,
+        //i=1 add gr faculity
         if (i === 1) {
-          groupId = data.faculity;
-          type = 'fac';
+          groupId = data.faculty;
         }
         try {
           const stt = (
-            await GroupService.addUser({ _id: data._id, groupId, type, role })
+            await groupService.addUser({
+              userId: data._id,
+              groupId,
+              type,
+              role,
+            })
           ).statusCode;
           if (stt === 300) {
             message =
@@ -273,7 +271,6 @@ const signup = async (body) => {
               groupId +
               ' process';
             logs.push(message);
-            console.log(logs);
             continue;
           }
         } catch {
@@ -284,7 +281,6 @@ const signup = async (body) => {
             groupId +
             ' process';
           logs.push(message);
-          console.log(logs);
           continue;
         }
       }

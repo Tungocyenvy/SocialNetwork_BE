@@ -1,7 +1,7 @@
 const EVENT_MESSAGE_CSS = require('../events/client/message');
 const EVENT_MESSAGE_SSC = require('../events/server/message');
-const message = require('../../services/message.Service');
-const conversation = require('../../services/conversation.Service');
+const message = require('../../services/message.service');
+const conversation = require('../../services/conversation.service');
 
 function MessageHandler(socket) {
   const listens = {};

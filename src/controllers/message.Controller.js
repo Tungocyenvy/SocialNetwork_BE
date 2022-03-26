@@ -1,5 +1,5 @@
 const controller = require('./index');
-const messageService = require('../services/message.Service');
+const messageService = require('../services/message.service');
 
 const getMessage = async (req, res, next) => {
   const userId = req.value.body.token.data;

@@ -1,5 +1,5 @@
 const controller = require('./index');
-const accountService = require('../services/account.Service');
+const accountService = require('../services/account.service');
 
 //ACCOUNT
 const signin = async (req, res, next) => {

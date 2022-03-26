@@ -1,9 +1,10 @@
-const Post = require('../models/post.Model');
-const MainGroup = require('../models/maingroup.Model');
-const SubGroup = require('../models/subgroup.Model');
-const groupService = require('./group.Service');
-const NotifyMainGroup = require('../models/notify_maingroup.Model');
-const Profile = require('../models/profile.Model');
+const Post = require('../models/post.model');
+const groupService = require('./group.service');
+const NotifyMainGroup = require('../models/notify_maingroup.model');
+const Profile = require('../models/profile.model');
+const userMainGroup = require('../models/user_maingroup.model');
+const userSubGroup = require('../models/user_subgroup.model');
+const Group = require('../models/group.model');
 const { map, keyBy } = require('lodash');
 
 const getPostId = (groupId, lastestPost) => {
@@ -15,15 +16,10 @@ const getPostId = (groupId, lastestPost) => {
 //create post and send notify
 const createPost = async (userID, body) => {
   try {
-    let group = {};
     const groupId = body.groupId;
-    if (body.isMainGroup) {
-      group = await MainGroup.findById({ _id: groupId });
-    } else {
-      group = await SubGroup.findById({ _id: groupId });
-    }
+    const group = await Group.find({ _id: groupId, isMain: body.isMainGroup });
 
-    if (!group) {
+    if (group.length <= 0) {
       return {
         msg: 'GroupId not found!',
         statusCode: 300,
@@ -33,7 +29,6 @@ const createPost = async (userID, body) => {
     const post = await Post.find({
       _id: { $regex: groupId, $options: 'is' },
     });
-    console.log(post);
     let id = groupId + 1;
     if (post.length > 0) {
       const lastedPostId = post[post.length - 1]._id;
@@ -54,17 +49,14 @@ const createPost = async (userID, body) => {
     //send notify to listUser
     if (res) {
       if (body.isMainGroup) {
-        group.listPostId.push(id);
-        await MainGroup.findByIdAndUpdate({ _id: groupId }, group);
-        let lstUserId = group.listUserId[0];
-        //group of faculity listUser student:0, teacher:1
-        if (body.isStudent != null) {
-          if (!body.isStudent) lstUserId = group.listUserId[1];
-        }
+        const lstUser = await userMainGroup.find({
+          groupId: groupId,
+          isStudent: body.isStudent,
+        });
 
-        const lstNotify = lstUserId.map((userId) => {
+        const lstNotify = lstUser.map((item) => {
           return {
-            userId,
+            userId: item._id,
             postId: id,
             groupId,
           };

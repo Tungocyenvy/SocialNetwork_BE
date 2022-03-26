@@ -1,5 +1,5 @@
 const controller = require('./index');
-const commentService = require('../services/comment.Service');
+const commentService = require('../services/comment.service');
 
 //get comment by postId
 const getComment = async (req, res, next) => {

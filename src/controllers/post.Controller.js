@@ -1,5 +1,5 @@
 const controller = require('./index');
-const postService = require('../services/post.Service');
+const postService = require('../services/post.service');
 
 const createPost = async (req, res, next) => {
   const userID = req.value.body.token.data;

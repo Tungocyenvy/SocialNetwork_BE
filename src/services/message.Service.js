@@ -1,5 +1,5 @@
-const Message = require('../models/message.Model');
-const conversationService = require('./conversation.Service');
+const Message = require('../models/message.model');
+const conversationService = require('./conversation.service');
 
 const createMessage = async (data) => {
   try {

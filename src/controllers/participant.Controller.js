@@ -1,5 +1,5 @@
 const controller = require('./index');
-const participantService = require('../services/participant.Service');
+const participantService = require('../services/participant.service');
 
 const addParticipant = async (req, res, next) => {
   const resService = await participantService.addParticipant(req.body);

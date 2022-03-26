@@ -1,7 +1,7 @@
-const Conversation = require('../models/conversation.Model');
-const Participant = require('../models/participant.Model');
-const Profile = require('../models/profile.Model');
-const participantService = require('./participant.Service');
+const Conversation = require('../models/conversation.model');
+const Participant = require('../models/participant.model');
+const Profile = require('../models/profile.model');
+const participantService = require('./participant.service');
 const moment = require('moment');
 const { map, keyBy } = require('lodash');
 

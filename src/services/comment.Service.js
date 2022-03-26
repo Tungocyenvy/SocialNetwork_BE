@@ -1,11 +1,10 @@
-const Comment = require('../models/comment.Model');
-const Account = require('../models/account.Model');
-const Profile = require('../models/profile.Model');
+const Comment = require('../models/comment.model');
+const Profile = require('../models/profile.model');
+const moment = require('moment');
 
 //get comment by postId
 const getComment = async (body) => {
   let { postId } = body;
-  console.log(postId);
   try {
     let comment = await Comment.find({ postId: postId });
     let countCmt = comment.length;
@@ -22,7 +21,6 @@ const getComment = async (body) => {
       const replys = comment[i].reply;
       countCmt += replys.length;
     }
-    console.log(countCmt);
     // get comment author avatar
     for (var i in comment) {
       const data = comment[i];
@@ -79,7 +77,6 @@ const createComment = async (token, body) => {
   let { content, postId } = body;
   try {
     const rsCmt = (await getComment({ postId: postId })).data;
-    console.log(rsCmt);
     const countCmt = rsCmt.countCmt;
     const dataCmt = rsCmt.comment;
     //don't have any comment _id begin 1
@@ -102,10 +99,9 @@ const createComment = async (token, body) => {
       userId: userId,
       content,
       postId,
-      createdDate: Date.now(),
+      createdDate: moment().format('YYYY-MM-DD HH:mm:ss'),
     });
     const resSave = await newComment.save();
-    console.log(resSave);
     if (resSave) {
       return {
         msg: 'Your comment submission was successful!',
@@ -161,7 +157,7 @@ const replyComment = async (token, body) => {
     objReply._id = replyId;
     objReply.userId = userId;
     objReply.content = content;
-    objReply.createdDate = Date.now();
+    objReply.createdDate = moment().format('YYYY-MM-DD HH:mm:ss');
     replys.push(objReply);
     comment.reply = replys;
     console.log(comment);
@@ -201,7 +197,7 @@ const updateComment = async (token, body) => {
     // }
 
     comment.content = content;
-    comment.createdDate = Date.now();
+    comment.createdDate = moment().format('YYYY-MM-DD HH:mm:ss');
     await Comment.findByIdAndUpdate({ _id }, comment);
     return {
       msg: 'Edit Comment Successful!',
@@ -234,7 +230,7 @@ const updateReply = async (token, body) => {
     var temp = replys.find((x) => x._id === _id);
     if (temp) {
       temp.content = content;
-      temp.createdDate = Date.now();
+      temp.createdDate = moment().format('YYYY-MM-DD HH:mm:ss');
 
       replys = replys.map((x) => (x._id === _id ? temp : x));
 
