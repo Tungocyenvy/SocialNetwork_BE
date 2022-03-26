@@ -146,12 +146,13 @@ const getListPostByUserId = async (userId, req) => {
       const objPost = keyBy(listPost, '_id');
 
       const result = postIds.map((item) => {
-        const { author, title, content, createdDate } = objPost[item];
+        const { _id, author, title, createdDate } = objPost[item];
         const { fullname, avatar } = objProfile[author];
         return {
+          _id,
           title,
-          content,
           createdDate,
+          author,
           fullname,
           avatar,
         };
@@ -208,12 +209,13 @@ const getListPostByGroupId = async (req) => {
       const objPost = keyBy(listPost, '_id');
 
       const result = postIds.map((item) => {
-        const { author, title, content, createdDate } = objPost[item];
+        const { _id, author, title, createdDate } = objPost[item];
         const { fullname, avatar } = objProfile[author];
         return {
+          _id,
           title,
-          content,
           createdDate,
+          author,
           fullname,
           avatar,
         };
