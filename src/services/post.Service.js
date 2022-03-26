@@ -123,15 +123,16 @@ const getListPostByUserId = async (userId, req) => {
     }
     if (lstNotify.length > 0) {
       //get top 10 post
+      const postIds = map(lstNotify, 'postId');
       const total = await Post.countDocuments({ _id: { $in: postIds } });
+
+      console.log(total);
       const listPost = await Post.find({ _id: { $in: postIds } })
         .sort({
           createdDate: -1,
         })
         .skip(perPage * page - perPage)
         .limit(perPage);
-
-      const postIds = map(listPost, '_id');
 
       //get profile author [fullname, avatar]
       const userIds = map(listPost, 'author');
@@ -143,10 +144,8 @@ const getListPostByUserId = async (userId, req) => {
 
       const objProfile = keyBy(profile, '_id');
 
-      const objPost = keyBy(listPost, '_id');
-
-      const result = postIds.map((item) => {
-        const { _id, author, title, createdDate } = objPost[item];
+      const result = listPost.map((item) => {
+        const { _id, author, title, createdDate } = item;
         const { fullname, avatar } = objProfile[author];
         return {
           _id,
@@ -194,8 +193,6 @@ const getListPostByGroupId = async (req) => {
       .skip(perPage * page - perPage)
       .limit(perPage);
     if (listPost.length > 0) {
-      const postIds = map(listPost, '_id');
-
       //get profile author [fullname, avatar]
       const userIds = map(listPost, 'author');
       const profile = await Profile.find({
@@ -206,10 +203,8 @@ const getListPostByGroupId = async (req) => {
 
       const objProfile = keyBy(profile, '_id');
 
-      const objPost = keyBy(listPost, '_id');
-
-      const result = postIds.map((item) => {
-        const { _id, author, title, createdDate } = objPost[item];
+      const result = listPost.map((item) => {
+        const { _id, author, title, createdDate } = item;
         const { fullname, avatar } = objProfile[author];
         return {
           _id,
