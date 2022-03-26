@@ -26,6 +26,19 @@ const forgotPass = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const resetPassword = async (req, res, next) => {
+  const resService = await accountService.resetPassword(req.body);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 const changePassword = async (req, res, next) => {
   const tokenID = req.value.body.token.data;
   const resService = await accountService.changePassword(tokenID, req.body);
@@ -125,11 +138,12 @@ const searchUser = async (req, res, next) => {
 module.exports = {
   signin,
   forgotPass,
-  changePassword,
+  resetPassword,
   getProfile,
   updateProfile,
   signup,
   deleteAccount,
   recoveryAccount,
   searchUser,
+  changePassword,
 };

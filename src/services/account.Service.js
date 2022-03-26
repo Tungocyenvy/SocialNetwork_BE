@@ -113,12 +113,12 @@ const forgotPassword = async (body) => {
   }
 };
 
-// Change Password
-const changePassword = async (tokenID, body) => {
-  let { password, confirmPassword } = body;
+// Reset Password
+const resetPassword = async (body) => {
+  let { userId, password, confirmPassword } = body;
 
   try {
-    const account = await Account.findById({ _id: tokenID });
+    const account = await Account.findById({ _id: userId });
     if (account != null) {
       if (password === confirmPassword) {
         const saltOrRound = 8;
@@ -132,6 +132,51 @@ const changePassword = async (tokenID, body) => {
       } else {
         return {
           msg: 'The password confirmation does not match!',
+          statusCode: 300,
+        };
+      }
+    } else {
+      return {
+        msg: 'Account does not exist!',
+        statusCode: 300,
+      };
+    }
+  } catch {
+    return {
+      msg: 'An error occurred during the reset password process',
+      statusCode: 300,
+    };
+  }
+};
+
+// Change Password
+const changePassword = async (userID, body) => {
+  let { password, newPassword, confirmPassword } = body;
+
+  try {
+    const account = await Account.findById({ _id: userID });
+    if (account != null) {
+      const hashPassword = account.PassWord;
+      const result = await bcrypt.compare(password, hashPassword);
+      if (result) {
+        if (newPassword === confirmPassword) {
+          const saltOrRound = 8;
+          const hashNewPassword = await bcrypt.hash(newPassword, saltOrRound);
+          account.PassWord = hashNewPassword;
+          await account.save();
+          return {
+            msg: 'Change Password Successful!',
+            statusCode: 200,
+          };
+        } else {
+          return {
+            msg: 'The password confirmation does not match!',
+            statusCode: 300,
+          };
+        }
+      } else {
+        return {
+          msg: 'Password incorrect',
           statusCode: 300,
         };
       }
@@ -436,7 +481,7 @@ const searchUser = async (req) => {
 module.exports = {
   signinService,
   forgotPassword,
-  changePassword,
+  resetPassword,
   signup,
   deleteAccount,
   recoveryAccount,

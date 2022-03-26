@@ -6,6 +6,7 @@ const accountController = require('../controllers/account.Controller');
 //ACCOUNT
 router.post('/signin', accountController.signin);
 router.post('/forgotPass', accountController.forgotPass);
+router.post('/resetPass', accountController.resetPassword);
 router.post('/changePass', jwt.verify, accountController.changePassword);
 router.post('/signup', accountController.signup); //both excel, handle
 router.delete('/delete', accountController.deleteAccount); //both excel, handle
