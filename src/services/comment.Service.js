@@ -4,7 +4,7 @@ const moment = require('moment');
 
 //get comment by postId
 const getComment = async (body) => {
-  let { postId } = body;
+  let { postId } = body || {};
   try {
     let comment = await Comment.find({ postId: postId });
     let countCmt = comment.length;
@@ -74,7 +74,7 @@ const getComment = async (body) => {
 //create comment
 const createComment = async (token, body) => {
   let { userId } = token;
-  let { content, postId } = body;
+  let { content, postId } = body || {};
   try {
     const rsCmt = (await getComment({ postId: postId })).data;
     const countCmt = rsCmt.countCmt;
@@ -126,8 +126,7 @@ const createComment = async (token, body) => {
 //reply comment
 const replyComment = async (token, body) => {
   let { userId } = token;
-  console.log(userId);
-  let { content, _id } = body;
+  let { content, _id } = body || {};
   try {
     const comment = await Comment.findById({ _id });
     if (!comment) {
@@ -177,8 +176,7 @@ const replyComment = async (token, body) => {
 
 const updateComment = async (token, body) => {
   let { userId } = token;
-  console.log(userId);
-  let { content, _id } = body;
+  let { content, _id } = body || {};
   try {
     const comment = await Comment.findById({ _id });
     if (!comment) {
@@ -214,7 +212,7 @@ const updateComment = async (token, body) => {
 
 const updateReply = async (token, body) => {
   let { userId } = token;
-  let { content, _id, idComment } = body;
+  let { content, _id, idComment } = body || {};
   //console.log(_id);
   try {
     const comment = await Comment.findById({ _id: idComment });
@@ -271,7 +269,7 @@ const updateReply = async (token, body) => {
 
 const deleteComment = async (token, idComment) => {
   let { userId } = token;
-  let id = idComment;
+  let id = idComment || {};
   try {
     const comment = await Comment.findById({ _id: id });
     if (!comment) {
@@ -303,11 +301,10 @@ const deleteComment = async (token, idComment) => {
 
 const deleteReply = async (token, idCmt, idRl) => {
   let { userId } = token;
-  let idComment = idCmt;
-  let idReply = idRl;
+  let idComment = idCmt || {};
+  let idReply = idRl || {};
   try {
     const comment = await Comment.findById({ _id: idComment });
-    console.log(comment);
     // const account = await Account.findOne({ _id: userId });
     if (!comment) {
       return {
@@ -317,7 +314,6 @@ const deleteReply = async (token, idCmt, idRl) => {
       };
     }
     const replys = comment.reply;
-    console.log(replys);
     for (var i = 0; i < replys.length; i++) {
       if (replys[i]._id === idReply) {
         // if (replys[i].userId !== userId && !account.IsAdmin) {

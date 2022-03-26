@@ -147,7 +147,6 @@ const getListConversation = async (userId, req) => {
     });
 
     if (participant.length > 0) {
-      console.log(1);
       //get conversationId
       const conversationIds = map(participant, 'conversationId');
       //get top 10 conversation by conversationId

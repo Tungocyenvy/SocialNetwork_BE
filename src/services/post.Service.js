@@ -5,6 +5,7 @@ const Profile = require('../models/profile.model');
 const userMainGroup = require('../models/user_maingroup.model');
 const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
+const Account = require('../models/account.model');
 const { map, keyBy } = require('lodash');
 
 const getPostId = (groupId, lastestPost) => {
@@ -15,9 +16,9 @@ const getPostId = (groupId, lastestPost) => {
 
 //create post and send notify
 const createPost = async (userID, body) => {
+  let { groupId, isMainGroup, isStudent } = body || {};
   try {
-    const groupId = body.groupId;
-    const group = await Group.find({ _id: groupId, isMain: body.isMainGroup });
+    const group = await Group.find({ _id: groupId, isMain: isMainGroup });
 
     if (group.length <= 0) {
       return {
@@ -48,15 +49,15 @@ const createPost = async (userID, body) => {
     const res = await newPost.save();
     //send notify to listUser
     if (res) {
-      if (body.isMainGroup) {
+      if (isMainGroup) {
         const lstUser = await userMainGroup.find({
           groupId: groupId,
-          isStudent: body.isStudent,
+          isStudent: isStudent,
         });
 
         const lstNotify = lstUser.map((item) => {
           return {
-            userId: item._id,
+            userId: item.userId,
             postId: id,
             groupId,
           };
@@ -97,14 +98,29 @@ const createPost = async (userID, body) => {
 
 //get post by userId for main group
 const getListPostByUserId = async (userId, req) => {
-  let { groupId } = req.params;
+  let { groupId } = req.params || {};
   let perPage = 10;
-  let { page } = req.query || 1;
+  let { isStudent = true, page = 1 } = req.query || {};
   try {
-    const lstNotify = await NotifyMainGroup.find({
-      userId: userId,
-      groupId: groupId,
-    });
+    let lstNotify = [];
+    const account = await Account.findById({ _id: userId });
+    if (account.role === 'admin' || account.role === 'dean') {
+      const represent = await userMainGroup.findOne({
+        groupId: groupId,
+        isStudent: isStudent,
+      });
+      if (represent) {
+        lstNotify = await NotifyMainGroup.find({
+          userId: represent.userId,
+          groupId: groupId,
+        });
+      }
+    } else {
+      lstNotify = await NotifyMainGroup.find({
+        userId: userId,
+        groupId: groupId,
+      });
+    }
     if (lstNotify.length > 0) {
       //get top 10 post
       const postIds = map(lstNotify, 'postId');
@@ -160,7 +176,7 @@ const getListPostByUserId = async (userId, req) => {
 
 //get post by userId for sub group
 const getListPostByGroupId = async (req) => {
-  let { groupId } = req.params;
+  let { groupId } = req.params || {};
   let perPage = 10;
   let { page } = req.query || 1;
   try {

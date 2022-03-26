@@ -33,7 +33,7 @@ const getRandomString = () => {
 
 // Sign in
 const signinService = async (body) => {
-  let { _id, password } = body;
+  let { _id, password } = body || {};
 
   // kiểm tra tài khoản tồn tại trong Account chưa
   var data = await Account.findOne({ _id });
@@ -83,7 +83,7 @@ const signinService = async (body) => {
 
 //forgotPassword
 const forgotPassword = async (body) => {
-  let { _id } = body;
+  let { _id } = body || {};
   // check account
   var data = await Profile.findById({ _id });
   if (data != null) {
@@ -112,7 +112,7 @@ const forgotPassword = async (body) => {
 
 // Reset Password
 const resetPassword = async (body) => {
-  let { userId, password, confirmPassword } = body;
+  let { userId, password, confirmPassword } = body || {};
 
   try {
     const account = await Account.findById({ _id: userId });
@@ -148,7 +148,7 @@ const resetPassword = async (body) => {
 
 // Change Password
 const changePassword = async (userID, body) => {
-  let { password, newPassword, confirmPassword } = body;
+  let { password, newPassword, confirmPassword } = body || {};
 
   try {
     const account = await Account.findById({ _id: userID });
@@ -346,7 +346,7 @@ const deleteAccount = async (body) => {
 
 // recovery Account (change isDelete: true->false)
 const recoveryAccount = async (body) => {
-  let { _id } = body;
+  let { _id } = body || {};
   try {
     const account = await Account.findById(_id);
     //check profile && account
@@ -377,7 +377,7 @@ const recoveryAccount = async (body) => {
 //**PROFILE */
 //get Infor User
 const getProfile = async (body) => {
-  let { AccountId } = body;
+  let { AccountId } = body || {};
   console.log(AccountId);
   try {
     const data = await Profile.findById({ _id: AccountId });
@@ -403,7 +403,6 @@ const getProfile = async (body) => {
 
 const updateProfile = async (AccountId, body) => {
   try {
-    console.log(body);
     await Profile.findOneAndUpdate({ _id: AccountId }, body);
     const res = await Profile.findById({ _id: AccountId });
     if (res) {

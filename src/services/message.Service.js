@@ -40,7 +40,7 @@ const createMessage = async (data) => {
 };
 
 const getMessage = async (req, userId) => {
-  let { conversationId } = req.query;
+  let { conversationId } = req.query || {};
   let perPage = 15;
   let { page } = req.query || 1;
   try {

@@ -17,7 +17,7 @@ const Account = require('../models/account.model');
 
 //add user to group
 const addUser = async (body) => {
-  let { userId, groupId, type, role } = body;
+  let { userId, groupId, type, role } = body || {};
   try {
     let isStudent = true;
     if (role !== 'student') isStudent = false;
@@ -33,14 +33,14 @@ const addUser = async (body) => {
       }
     }
     return {
-      msg: 'Add ' + _id + ' to ' + groupId + ' successful!',
+      msg: 'Add ' + userId + ' to ' + groupId + ' successful!',
       statusCode: 200,
     };
   } catch {
     return {
       msg:
         'An error occurred during add ' +
-        _id +
+        userId +
         ' to group ' +
         groupId +
         ' process',
@@ -51,7 +51,7 @@ const addUser = async (body) => {
 
 //delete user from MainGroup
 const deleteListUser = async (body) => {
-  let { userIds, groupId, type } = body;
+  let { userIds, groupId, type } = body || {};
   try {
     const group = await Group.findById({ _id: groupId });
     if (!group) {
@@ -91,7 +91,7 @@ const deleteListUser = async (body) => {
 
 //Detele user
 const deleteUser = async (body) => {
-  let { userId, groupId, type } = body;
+  let { userId, groupId, type } = body || {};
   try {
     const group = await Group.findById({ _id: groupId });
     if (!group) {
