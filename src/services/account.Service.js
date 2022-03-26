@@ -156,7 +156,7 @@ const changePassword = async (userID, body) => {
   try {
     const account = await Account.findById({ _id: userID });
     if (account != null) {
-      const hashPassword = account.PassWord;
+      const hashPassword = account.password;
       const result = await bcrypt.compare(password, hashPassword);
       if (result) {
         if (newPassword === confirmPassword) {
