@@ -162,7 +162,7 @@ const changePassword = async (userID, body) => {
         if (newPassword === confirmPassword) {
           const saltOrRound = 8;
           const hashNewPassword = await bcrypt.hash(newPassword, saltOrRound);
-          account.PassWord = hashNewPassword;
+          account.password = hashNewPassword;
           await account.save();
           return {
             msg: 'Change Password Successful!',
