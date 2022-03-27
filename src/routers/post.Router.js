@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('../services/jwt.service');
-const postController = require('../controllers/post.Controller');
+const postController = require('../controllers/post.controller');
 
 //createPost
 router.post('/', jwt.verify, postController.createPost);
