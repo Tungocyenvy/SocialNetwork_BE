@@ -149,9 +149,43 @@ const sendNotifyForMainGroup = async (body) => {
   }
 };
 
+const getListFaculty = async () => {
+  try {
+    const listGroupMain = await Group.find({ isMain: true });
+    if (listGroupMain.length <= 0) {
+      return {
+        msg: 'Not have dara',
+        statusCode: 300,
+      };
+    }
+
+    const result = listGroupMain.filter(
+      (x) => x._id !== 'grsv' && x._id != 'grgv',
+    );
+    if (result.length > 0) {
+      return {
+        msg: 'get list faculty susscessful',
+        statusCode: 200,
+        data: result,
+      };
+    } else {
+      return {
+        msg: 'No have data',
+        statusCode: 300,
+      };
+    }
+  } catch (err) {
+    return {
+      msg: 'An error occurred during get list faculty',
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
   deleteUser,
   deleteListUser,
+  getListFaculty,
 };

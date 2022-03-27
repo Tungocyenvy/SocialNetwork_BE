@@ -57,9 +57,24 @@ const deleteListUser = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+//getListFaculty
+const getListFaculty = async (req, res, next) => {
+  const resService = await groupService.getListFaculty();
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
   deleteUser,
   deleteListUser,
+  getListFaculty,
 };

@@ -3,6 +3,9 @@ const router = express.Router();
 const jwt = require('../services/jwt.service');
 const groupController = require('../controllers/group.controller');
 
+//group
+router.get('/', groupController.getListFaculty);
+
 //User
 router.post('/user', groupController.addUser);
 //delte one user
