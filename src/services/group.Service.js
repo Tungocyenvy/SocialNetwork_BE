@@ -23,7 +23,7 @@ const addUser = async (body) => {
     if (role != null && role !== 'student') isStudent = false;
     if (!userId || !groupId) {
       return {
-        msg: 'Not have userId or groupId',
+        msg: "Don't have userId or groupId",
         statusCode: 300,
       };
     }
@@ -69,7 +69,7 @@ const deleteListUser = async (body) => {
   try {
     if (!userIds || !groupId) {
       return {
-        msg: 'Not have userIds or GroupId!',
+        msg: "Don't have userIds or groupId",
         statusCode: 300,
       };
     }
@@ -117,7 +117,7 @@ const deleteUser = async (body) => {
   try {
     if (!userId || !groupId) {
       return {
-        msg: 'Not have userId or GroupId!',
+        msg: "Don't have userId or groupId",
         statusCode: 300,
       };
     }
@@ -190,7 +190,7 @@ const getListFaculty = async () => {
     const listGroupMain = await Group.find({ isMain: true });
     if (listGroupMain.length <= 0) {
       return {
-        msg: 'Not have dara',
+        msg: "Don't have main group",
         statusCode: 300,
       };
     }
@@ -206,7 +206,7 @@ const getListFaculty = async () => {
       };
     } else {
       return {
-        msg: 'No have data',
+        msg: "Don't have any faculty",
         statusCode: 300,
       };
     }
