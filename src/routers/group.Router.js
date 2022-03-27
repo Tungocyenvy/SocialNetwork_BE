@@ -4,7 +4,7 @@ const jwt = require('../services/jwt.service');
 const groupController = require('../controllers/group.controller');
 
 //group
-router.get('/', groupController.getListFaculty);
+router.get('/main/fac', groupController.getListFaculty);
 
 //User
 router.post('/user', groupController.addUser);
