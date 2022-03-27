@@ -1,67 +1,113 @@
 const Comment = require('../models/comment.model');
 const Profile = require('../models/profile.model');
-const moment = require('moment');
+const Reply = require('../models/reply.model');
+const Post = require('../models/post.model');
+const { map, keyBy } = require('lodash');
 
+/**COMMENT */
 //get comment by postId
-const getComment = async (body) => {
-  let { postId } = body || {};
+const getComment = async (req) => {
+  let perPage = 5;
+  let { page } = req.query || 1;
+  let { postId } = req.params || {};
   try {
-    let comment = await Comment.find({ postId: postId });
-    let countCmt = comment.length;
-    if (countCmt === 0) {
-      comment = {};
+    if (!postId) {
       return {
-        msg: "Don't have any comments!",
+        msg: "Don't have postId!",
         statusCode: 300,
-        data: { comment, countCmt },
       };
     }
-    // count total cmt and reply
-    for (var i = 0; i < comment.length; i++) {
-      const replys = comment[i].reply;
-      countCmt += replys.length;
+    const post = await Post.findById({ _id: postId });
+
+    if (!post) {
+      return {
+        msg: 'PostId not found!',
+        statusCode: 300,
+      };
     }
-    // get comment author avatar
+
+    let countCmt = await Comment.countDocuments({ postId: postId });
+
+    if (countCmt <= 0) {
+      return {
+        msg: "Don't have any comments!",
+        statusCode: 200,
+        data: { comment: {}, countCmt },
+      };
+    }
+    //get top 5 comment
+    let comment = await Comment.find({ postId: postId })
+      .sort({
+        createdDate: -1,
+      })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+
+    comment.reverse();
+
+    //get reply
+    let listComment = [];
     for (var i in comment) {
-      const data = comment[i];
-      const userId = data.userId;
-      const profile = await Profile.findOne({ _id: userId });
-
-      //get avatar reply and return
-      var replys = data.reply;
-      let result = [];
-      for (var k in replys) {
-        const reply = replys[k];
-        const userReply = reply.userId;
-        const profileReply = await Profile.findOne({ _id: userReply });
-
-        let objReply = {};
-        objReply._id = reply._id;
-        objReply.avatar = profileReply.avatar;
-        objReply.fullname = profileReply.fullname;
-        objReply.identifier = userReply;
-        objReply.content = reply.content;
-        objReply.createdDate = reply.createdDate;
-
-        result.push(objReply);
+      let reply = [];
+      let tmp = comment[i];
+      if (tmp.countReply !== 0) {
+        req.params.commentID = tmp._id;
+        const rsReply = (await getReply(req)).data;
+        if (rsReply) {
+          reply = rsReply.result;
+        }
       }
-      //return obj cmt
-      let dataCmt = {};
-      dataCmt._id = data._id;
-      dataCmt.avatar = profile.avatar;
-      dataCmt.fullname = profile.fullname;
-      dataCmt.identifier = userId;
-      dataCmt.content = data.content;
-      dataCmt.createdDate = data.createdDate;
-      dataCmt.reply = result;
 
-      comment[i] = dataCmt;
+      let objComment = {};
+      objComment.commentId = tmp._id;
+      objComment.userId = tmp.userId;
+      objComment.content = tmp.content;
+      objComment.postId = tmp.postId;
+      objComment.countReply = tmp.countReply;
+      objComment.reply = reply;
+      objComment.createdDate = tmp.createdDate;
+
+      listComment.push(objComment);
     }
+
+    // get comment author avatar
+    const userIds = map(listComment, 'userId');
+    const profile = await Profile.find({
+      _id: {
+        $in: userIds,
+      },
+    });
+
+    objProfile = keyBy(profile, '_id');
+
+    const result = listComment.map((item) => {
+      const {
+        commentId,
+        userId,
+        content,
+        postId,
+        countReply,
+        reply,
+        createdDate,
+      } = item;
+      const { fullname, avatar } = objProfile[userId];
+      return {
+        commentId,
+        userId,
+        fullname,
+        avatar,
+        content,
+        postId,
+        countReply,
+        reply,
+        createdDate,
+      };
+    });
 
     return {
       msg: 'Get comment by postId successful!',
       statusCode: 200,
-      data: { comment, countCmt },
+      data: { result, countCmt },
     };
   } catch (error) {
     return {
@@ -76,15 +122,31 @@ const createComment = async (token, body) => {
   let { userId } = token;
   let { content, postId } = body || {};
   try {
-    const rsCmt = (await getComment({ postId: postId })).data;
-    const countCmt = rsCmt.countCmt;
-    const dataCmt = rsCmt.comment;
-    //don't have any comment _id begin 1
+    if (!postId) {
+      return {
+        msg: "Don't have postId!",
+        statusCode: 300,
+      };
+    }
+
+    const post = await Post.findById({ _id: postId });
+
+    if (!post) {
+      return {
+        msg: 'PostId not found!',
+        statusCode: 300,
+      };
+    }
+
+    const comment = await Comment.find({
+      _id: { $regex: postId, $options: 'is' },
+      postId: postId,
+    });
     var _id = postId + '_CMT01';
-    if (countCmt != 0) {
+    if (comment.length > 0) {
       //get lastId
-      var temp = dataCmt[dataCmt.length - 1]._id;
-      var str = temp.match(/[0-9]+$/);
+      let lastedCmtId = comment[comment.length - 1]._id;
+      var str = lastedCmtId.match(/[0-9]+$/);
       //increment Id
       var str2 = Number(str ? str[0] : 0) + 1;
       if (str2 < 10) {
@@ -99,7 +161,6 @@ const createComment = async (token, body) => {
       userId: userId,
       content,
       postId,
-      createdDate: moment().format('YYYY-MM-DD HH:mm:ss'),
     });
     const resSave = await newComment.save();
     if (resSave) {
@@ -123,62 +184,11 @@ const createComment = async (token, body) => {
   }
 };
 
-//reply comment
-const replyComment = async (token, body) => {
-  let { userId } = token;
-  let { content, _id } = body || {};
-  try {
-    const comment = await Comment.findById({ _id });
-    if (!comment) {
-      return {
-        msg: 'Comment not found!',
-        statusCode: 300,
-        data: comment,
-      };
-    }
-    var replys = comment.reply;
-
-    var replyId = 'RL01';
-    if (replys.length > 0) {
-      //get lastId
-      var temp = replys[replys.length - 1]._id;
-      var str = temp.match(/[0-9]+$/);
-      //increment Id
-      var str2 = Number(str ? str[0] : 0) + 1;
-      if (str2 < 10) {
-        replyId = 'RL0' + str2;
-      } else {
-        replyId = 'RL' + str2;
-      }
-    }
-
-    var objReply = {};
-    objReply._id = replyId;
-    objReply.userId = userId;
-    objReply.content = content;
-    objReply.createdDate = moment().format('YYYY-MM-DD HH:mm:ss');
-    replys.push(objReply);
-    comment.reply = replys;
-    console.log(comment);
-    await Comment.findByIdAndUpdate({ _id }, comment);
-    return {
-      msg: 'Reply to comment successfully',
-      statusCode: 200,
-      data: comment,
-    };
-  } catch (error) {
-    return {
-      msg: 'An error occurred during the reply to comment process!',
-      statusCode: 300,
-    };
-  }
-};
-
 const updateComment = async (token, body) => {
   let { userId } = token;
-  let { content, _id } = body || {};
+  let { content, commentId } = body || {};
   try {
-    const comment = await Comment.findById({ _id });
+    const comment = await Comment.findById({ _id: commentId });
     if (!comment) {
       return {
         msg: 'Comment not found!',
@@ -186,17 +196,8 @@ const updateComment = async (token, body) => {
         data: comment,
       };
     }
-
-    // if (comment.userId !== userId) {
-    //   return {
-    //     msg: 'Không được chỉnh sửa bình luận của người khác',
-    //     statusCode: 300,
-    //   };
-    // }
-
     comment.content = content;
-    comment.createdDate = moment().format('YYYY-MM-DD HH:mm:ss');
-    await Comment.findByIdAndUpdate({ _id }, comment);
+    await Comment.findByIdAndUpdate({ _id: commentId }, comment);
     return {
       msg: 'Edit Comment Successful!',
       statusCode: 200,
@@ -210,75 +211,23 @@ const updateComment = async (token, body) => {
   }
 };
 
-const updateReply = async (token, body) => {
-  let { userId } = token;
-  let { content, _id, idComment } = body || {};
-  //console.log(_id);
+const deleteComment = async (userId, req) => {
+  let { commentId } = req.params || {};
   try {
-    const comment = await Comment.findById({ _id: idComment });
+    const comment = await Comment.findById({ _id: commentId });
     if (!comment) {
       return {
         msg: 'Comment not found!',
         statusCode: 300,
-        data: comment,
       };
     }
-    var replys = comment.reply;
 
-    var temp = replys.find((x) => x._id === _id);
-    if (temp) {
-      temp.content = content;
-      temp.createdDate = moment().format('YYYY-MM-DD HH:mm:ss');
-
-      replys = replys.map((x) => (x._id === _id ? temp : x));
-
-      // for (var i in replys) {
-      //   if (replys[i]._id === _id) {
-      //     // if (replys[i].userId !== userId) {
-      //     //   return {
-      //     //     msg: 'Không được chỉnh sửa bình luận của người khác',
-      //     //     statusCode: 300,
-      //     //   };
-      //     // }
-      //     replys[i].content = content;
-      //     replys[i].createdDate = Date.now();
-      //   }
-      // }
-      console.log(replys);
-      comment.reply = replys;
-      await Comment.findByIdAndUpdate({ _id }, comment);
-      return {
-        msg: 'Edit reply successful!',
-        statusCode: 200,
-        data: comment,
-      };
-    } else {
-      return {
-        msg: 'Reply not found!',
-        statusCode: 300,
-        data: temp,
-      };
-    }
-  } catch (error) {
+    await Comment.findOneAndDelete({ _id: commentId });
     return {
-      msg: 'An error occurred during edit reply process',
-      statusCode: 300,
+      msg: 'Delete comment successful!',
+      statusCode: 200,
     };
-  }
-};
 
-const deleteComment = async (token, idComment) => {
-  let { userId } = token;
-  let id = idComment || {};
-  try {
-    const comment = await Comment.findById({ _id: id });
-    if (!comment) {
-      return {
-        msg: 'Comment not found!',
-        statusCode: 300,
-        data: comment,
-      };
-    }
     // const account = await Account.findOne({ _id: userId });
     // if (comment.userId !== userId && !account.IsAdmin) {
     //   return {
@@ -286,11 +235,6 @@ const deleteComment = async (token, idComment) => {
     //     statusCode: 300,
     //   };
     // }
-    await Comment.findOneAndDelete({ _id: id });
-    return {
-      msg: 'Delete comment successful!',
-      statusCode: 200,
-    };
   } catch (error) {
     return {
       msg: 'An error occurred during delete comment process',
@@ -299,13 +243,96 @@ const deleteComment = async (token, idComment) => {
   }
 };
 
-const deleteReply = async (token, idCmt, idRl) => {
-  let { userId } = token;
-  let idComment = idCmt || {};
-  let idReply = idRl || {};
+/**REPLY */
+const getReply = async (req) => {
+  let perPage = 3;
+  let { page } = req.query || 1;
+  let { commentID } = req.params || {};
   try {
-    const comment = await Comment.findById({ _id: idComment });
-    // const account = await Account.findOne({ _id: userId });
+    if (!commentID) {
+      return {
+        msg: "Don't have commentId!",
+        statusCode: 300,
+      };
+    }
+    const comment = await Comment.findById({ _id: commentID });
+
+    if (!comment) {
+      return {
+        msg: 'comment not found!',
+        statusCode: 300,
+      };
+    }
+
+    let countReply = await Reply.countDocuments({ commentId: commentID });
+
+    if (countReply <= 0) {
+      return {
+        msg: "Don't have any replies!",
+        statusCode: 200,
+        data: { reply: {}, countReply },
+      };
+    }
+    //get top 3 reply
+    let reply = await Reply.find({ commentId: commentID })
+      .sort({
+        createdDate: -1,
+      })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+
+    reply.reverse();
+
+    const replyId = map(reply, '_id');
+
+    const userIds = map(reply, 'userId');
+    const profile = await Profile.find({
+      _id: {
+        $in: userIds,
+      },
+    });
+
+    objProfile = keyBy(profile, '_id');
+
+    const result = reply.map((item) => {
+      const { _id, userId, content, createdDate } = item;
+      const { fullname, avatar } = objProfile[userId];
+      return {
+        replyId: _id,
+        userId,
+        fullname,
+        avatar,
+        content,
+        createdDate,
+      };
+    });
+
+    return {
+      msg: 'Get reply by commentId successful!',
+      statusCode: 200,
+      data: { result, countReply },
+    };
+  } catch (error) {
+    return {
+      msg: 'An error occurred during the get reply comment process!',
+      statusCode: 300,
+    };
+  }
+};
+
+//reply comment
+const replyComment = async (token, body) => {
+  let { userId } = token;
+  let { content, commentId } = body || {};
+  try {
+    if (!commentId) {
+      return {
+        msg: "Don't have commentId!",
+        statusCode: 300,
+      };
+    }
+
+    const comment = await Comment.findById({ _id: commentId });
     if (!comment) {
       return {
         msg: 'Comment not found!',
@@ -313,29 +340,102 @@ const deleteReply = async (token, idCmt, idRl) => {
         data: comment,
       };
     }
-    const replys = comment.reply;
-    for (var i = 0; i < replys.length; i++) {
-      if (replys[i]._id === idReply) {
-        // if (replys[i].userId !== userId && !account.IsAdmin) {
-        //   return {
-        //     msg: 'Tài khoản không có quyền xóa bình luận này',
-        //     statusCode: 300,
-        //   };
-        // }
-        replys.splice(i, 1);
-        comment.reply = replys;
-        await Comment.findByIdAndUpdate({ _id: idComment }, comment);
-        return {
-          msg: 'Delete reply successful',
-          statusCode: 200,
-          data: comment,
-        };
+
+    const replys = await Reply.find({ commentId: commentId });
+    var replyId = commentId + '_RL01';
+    if (replys.length > 0) {
+      //get lastId
+      var temp = replys[replys.length - 1]._id;
+      var str = temp.match(/[0-9]+$/);
+      //increment Id
+      var str2 = Number(str ? str[0] : 0) + 1;
+      if (str2 < 10) {
+        replyId = commentId + '_RL0' + str2;
+      } else {
+        replyId = commentId + '_RL' + str2;
       }
     }
+    const objReply = new Reply({
+      _id: replyId,
+      userId,
+      content,
+      commentId,
+    });
+
+    const res = await objReply.save();
+    if (res) {
+      comment.countReply += 1;
+      await Comment.findByIdAndUpdate({ _id: commentId }, comment);
+      return {
+        msg: 'Your reply comment submission was successful!',
+        statusCode: 200,
+        data: res,
+      };
+    }
+    res = {};
     return {
-      msg: 'Reply not found!',
+      msg: 'Reply comment failed to post',
+      statusCode: 300,
+      data: res,
+    };
+  } catch (error) {
+    return {
+      msg: 'An error occurred during the reply to comment process!',
       statusCode: 300,
     };
+  }
+};
+
+const updateReply = async (token, body) => {
+  let { userId } = token;
+  let { content, replyId } = body || {};
+  //console.log(_id);
+  try {
+    const reply = await Reply.findById({ _id: replyId });
+    if (!reply) {
+      return {
+        msg: 'reply not found!',
+        statusCode: 300,
+        data: reply,
+      };
+    }
+    reply.content = content;
+    await Reply.findByIdAndUpdate({ _id: replyId }, reply);
+    return {
+      msg: 'Edit Reply Successful!',
+      statusCode: 200,
+      data: reply,
+    };
+  } catch (error) {
+    return {
+      msg: 'An error occurred during edit reply process',
+      statusCode: 300,
+    };
+  }
+};
+
+const deleteReply = async (userId, req) => {
+  let { replyId } = req.params || {};
+  try {
+    const reply = await Reply.findById({ _id: replyId });
+    if (!reply) {
+      return {
+        msg: 'reply not found!',
+        statusCode: 300,
+      };
+    }
+
+    await Reply.findOneAndDelete({ _id: replyId });
+    return {
+      msg: 'Delete reply successful!',
+      statusCode: 200,
+    };
+    // if (replys[i].userId !== userId && !account.IsAdmin) {
+    //   return {
+    //     msg: 'Tài khoản không có quyền xóa bình luận này',
+    //     statusCode: 300,
+    //   };
+    // }
   } catch (error) {
     return {
       msg: 'An error occurred during delete reply process',
@@ -347,9 +447,10 @@ const deleteReply = async (token, idCmt, idRl) => {
 module.exports = {
   getComment,
   createComment,
-  replyComment,
   updateComment,
-  updateReply,
   deleteComment,
+  getReply,
+  replyComment,
+  updateReply,
   deleteReply,
 };

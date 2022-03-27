@@ -11,14 +11,15 @@ router.post('/', jwt.verify, commentController.createComment);
 //update
 router.put('/', jwt.verify, commentController.updateComment);
 //delete
-router.delete('/:id', jwt.verify, commentController.deleteComment);
+router.delete('/:commentId', jwt.verify, commentController.deleteComment);
 
 //CUD REPLY
 //creat reply
+router.get('/reply/:commentID', commentController.getReply);
 router.post('/reply', jwt.verify, commentController.replyComment);
 //update reply
 router.put('/reply', jwt.verify, commentController.updateReply);
 //delete reply
-router.delete('/reply/:idCmt/:idRl', jwt.verify, commentController.deleteReply);
+router.delete('/reply/:replyId', jwt.verify, commentController.deleteReply);
 
 module.exports = router;
