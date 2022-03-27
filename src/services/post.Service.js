@@ -18,6 +18,12 @@ const getPostId = (groupId, lastestPost) => {
 const createPost = async (userID, body) => {
   let { groupId, isMainGroup, isStudent } = body || {};
   try {
+    if (!groupId && !isMainGroup) {
+      return {
+        msg: "Don't have groupId or isMainGroup",
+        statusCode: 300,
+      };
+    }
     const group = await Group.find({ _id: groupId, isMain: isMainGroup });
 
     if (group.length <= 0) {
@@ -55,13 +61,15 @@ const createPost = async (userID, body) => {
           isStudent: isStudent,
         });
 
-        const lstNotify = lstUser.map((item) => {
-          return {
-            userId: item.userId,
-            postId: id,
-            groupId,
-          };
-        });
+        const lstNotify = lstUser
+          .filter((item) => item != null)
+          .map((item) => {
+            return {
+              userId: item.userId,
+              postId: id,
+              groupId,
+            };
+          });
 
         const sendNotify = (
           await groupService.sendNotifyForMainGroup(lstNotify)
@@ -104,67 +112,78 @@ const getListPostByUserId = async (userId, req) => {
   try {
     let lstNotify = [];
     const account = await Account.findById({ _id: userId });
-    if (account.role === 'admin' || account.role === 'dean') {
-      const represent = await userMainGroup.findOne({
-        groupId: groupId,
-        isStudent: isStudent,
-      });
-      if (represent) {
+    if (account) {
+      if (account.role === 'admin' || account.role === 'dean') {
+        if (groupId === 'grgv') isStudent = false;
+        const represent = await userMainGroup.findOne({
+          groupId: groupId,
+          isStudent: isStudent,
+        });
+        if (represent) {
+          lstNotify = await NotifyMainGroup.find({
+            userId: represent.userId,
+            groupId: groupId,
+          });
+        }
+      } else {
         lstNotify = await NotifyMainGroup.find({
-          userId: represent.userId,
+          userId: userId,
           groupId: groupId,
         });
       }
-    } else {
-      lstNotify = await NotifyMainGroup.find({
-        userId: userId,
-        groupId: groupId,
-      });
-    }
-    if (lstNotify.length > 0) {
-      //get top 10 post
-      const postIds = map(lstNotify, 'postId');
-      const total = await Post.countDocuments({ _id: { $in: postIds } });
+      if (lstNotify.length > 0) {
+        //get top 10 post
+        const postIds = map(lstNotify, 'postId');
+        let result = [];
+        const total = await Post.countDocuments({ _id: { $in: postIds } });
+        if (total > 0) {
+          const listPost = await Post.find({ _id: { $in: postIds } })
+            .sort({
+              createdDate: -1,
+            })
+            .skip(perPage * page - perPage)
+            .limit(perPage);
 
-      console.log(total);
-      const listPost = await Post.find({ _id: { $in: postIds } })
-        .sort({
-          createdDate: -1,
-        })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
+          //get profile author [fullname, avatar]
+          const userIds = map(listPost, 'author');
+          const profile = await Profile.find({
+            _id: {
+              $in: userIds,
+            },
+          });
 
-      //get profile author [fullname, avatar]
-      const userIds = map(listPost, 'author');
-      const profile = await Profile.find({
-        _id: {
-          $in: userIds,
-        },
-      });
+          const objProfile = keyBy(profile, '_id');
 
-      const objProfile = keyBy(profile, '_id');
+          result = listPost
+            .filter((item) => item != null)
+            .map((item) => {
+              const { _id, author, title, createdDate } = item;
+              const { fullname, avatar } = objProfile[author];
+              return {
+                _id,
+                title,
+                createdDate,
+                author,
+                fullname,
+                avatar,
+              };
+            });
+        }
 
-      const result = listPost.map((item) => {
-        const { _id, author, title, createdDate } = item;
-        const { fullname, avatar } = objProfile[author];
         return {
-          _id,
-          title,
-          createdDate,
-          author,
-          fullname,
-          avatar,
+          msg: 'Get list post successful!',
+          statusCode: 200,
+          data: { result, total },
         };
-      });
-
-      return {
-        msg: 'Get list post successful!',
-        statusCode: 200,
-        data: { result, total },
-      };
+      } else {
+        return {
+          msg: 'Not found post for group ' + groupId,
+          statusCode: 300,
+        };
+      }
     } else {
       return {
-        msg: 'Not found post for group ' + groupId,
+        msg: 'user not found!',
         statusCode: 300,
       };
     }
@@ -185,36 +204,40 @@ const getListPostByGroupId = async (req) => {
     //get top 10 list post
 
     const total = await Post.countDocuments({ groupId: groupId });
+    let result = [];
+    if (total > 0) {
+      const listPost = await Post.find({ groupId: groupId })
+        .sort({
+          createdDate: -1,
+        })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+      if (listPost.length > 0) {
+        //get profile author [fullname, avatar]
+        const userIds = map(listPost, 'author');
+        const profile = await Profile.find({
+          _id: {
+            $in: userIds,
+          },
+        });
 
-    const listPost = await Post.find({ groupId: groupId })
-      .sort({
-        createdDate: -1,
-      })
-      .skip(perPage * page - perPage)
-      .limit(perPage);
-    if (listPost.length > 0) {
-      //get profile author [fullname, avatar]
-      const userIds = map(listPost, 'author');
-      const profile = await Profile.find({
-        _id: {
-          $in: userIds,
-        },
-      });
+        const objProfile = keyBy(profile, '_id');
 
-      const objProfile = keyBy(profile, '_id');
-
-      const result = listPost.map((item) => {
-        const { _id, author, title, createdDate } = item;
-        const { fullname, avatar } = objProfile[author];
-        return {
-          _id,
-          title,
-          createdDate,
-          author,
-          fullname,
-          avatar,
-        };
-      });
+        result = listPost
+          .filter((item) => item != null)
+          .map((item) => {
+            const { _id, author, title, createdDate } = item;
+            const { fullname, avatar } = objProfile[author];
+            return {
+              _id,
+              title,
+              createdDate,
+              author,
+              fullname,
+              avatar,
+            };
+          });
+      }
 
       return {
         msg: 'Get list post successful!',
@@ -238,16 +261,17 @@ const getListPostByGroupId = async (req) => {
 //get detail post by post id
 const getDetailPost = async (postId) => {
   try {
+    if (!postId) postId = '';
     const res = await Post.findById({ _id: postId });
     if (res) {
       return {
-        msg: 'Get detail post successful!',
+        msg: 'Get detail post ' + postId + ' successful!',
         data: res,
         statusCode: 200,
       };
     } else {
       return {
-        msg: 'Post not found',
+        msg: 'Post ' + postId + ' not found',
         statusCode: 300,
       };
     }

@@ -31,7 +31,6 @@ async function verify(req, res, next) {
       return;
     }
     const token = header.split(' ')[1];
-    console.log('tokenService token : ' + token);
     jwt.verify(token, serectKey, (err, decodedFromToken) => {
       if (err) {
         console.log('err');

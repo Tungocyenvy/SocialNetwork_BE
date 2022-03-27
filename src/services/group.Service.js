@@ -20,22 +20,36 @@ const addUser = async (body) => {
   let { userId, groupId, type, role } = body || {};
   try {
     let isStudent = true;
-    if (role !== 'student') isStudent = false;
-    const data = { userId, groupId, isStudent };
-    switch (type) {
-      case 'main': {
-        await userMainGroup.create(data);
-        break;
-      }
-      default: {
-        await userSubGroup.create(data);
-        break;
-      }
+    if (role != null && role !== 'student') isStudent = false;
+    if (!userId || !groupId) {
+      return {
+        msg: 'Not have userId or groupId',
+        statusCode: 300,
+      };
     }
-    return {
-      msg: 'Add ' + userId + ' to ' + groupId + ' successful!',
-      statusCode: 200,
-    };
+    const data = { userId, groupId, isStudent };
+
+    try {
+      if (type === 'main') {
+        await userMainGroup.create(data);
+      } else {
+        await userSubGroup.create(data);
+      }
+      return {
+        msg: 'Add ' + userId + ' to ' + groupId + ' successful!',
+        statusCode: 200,
+      };
+    } catch {
+      return {
+        msg:
+          'An error occurred during add ' +
+          userId +
+          ' to group ' +
+          groupId +
+          ' process',
+        statusCode: 300,
+      };
+    }
   } catch {
     return {
       msg:
@@ -53,6 +67,12 @@ const addUser = async (body) => {
 const deleteListUser = async (body) => {
   let { userIds, groupId, type } = body || {};
   try {
+    if (!userIds || !groupId) {
+      return {
+        msg: 'Not have userIds or GroupId!',
+        statusCode: 300,
+      };
+    }
     const group = await Group.findById({ _id: groupId });
     if (!group) {
       return {
@@ -61,26 +81,28 @@ const deleteListUser = async (body) => {
       };
     }
 
-    switch (type) {
-      case 'main': {
+    try {
+      if (type === 'main') {
         await userMainGroup.deleteMany({
           userId: { $in: userIds },
           groupId: groupId,
         });
-        break;
-      }
-      default: {
+      } else {
         await userSubGroup.deleteMany({
           userId: { $in: userIds },
           groupId: groupId,
         });
-        break;
       }
+      return {
+        msg: 'delete list user ' + userIds + ' successful!',
+        statusCode: 200,
+      };
+    } catch {
+      return {
+        msg: 'An error occurred during delete list user process',
+        statusCode: 300,
+      };
     }
-    return {
-      msg: 'delete list user successful!',
-      statusCode: 200,
-    };
   } catch {
     return {
       msg: 'An error occurred during delete list user process',
@@ -93,6 +115,13 @@ const deleteListUser = async (body) => {
 const deleteUser = async (body) => {
   let { userId, groupId, type } = body || {};
   try {
+    if (!userId || !groupId) {
+      return {
+        msg: 'Not have userId or GroupId!',
+        statusCode: 300,
+      };
+    }
+
     const group = await Group.findById({ _id: groupId });
     if (!group) {
       return {
@@ -100,26 +129,33 @@ const deleteUser = async (body) => {
         statusCode: 300,
       };
     }
-    switch (type) {
-      case 'main': {
+    try {
+      if (type === 'main') {
         await userMainGroup.findOneAndDelete({
           userId: userId,
           groupId: groupId,
         });
-        break;
-      }
-      default: {
+      } else {
         await userSubGroup.findOneAndDelete({
           userId: userId,
           groupId: groupId,
         });
-        break;
       }
+      return {
+        msg: 'delete ' + userId + ' from ' + groupId + ' successful!',
+        statusCode: 200,
+      };
+    } catch {
+      return {
+        msg:
+          'An error occurred during delete ' +
+          userId +
+          ' from group ' +
+          groupId +
+          ' process',
+        statusCode: 300,
+      };
     }
-    return {
-      msg: 'delete ' + userId + ' from ' + groupId + ' successful!',
-      statusCode: 200,
-    };
   } catch {
     return {
       msg:

@@ -3,31 +3,38 @@ const conversationService = require('./conversation.service');
 
 const createMessage = async (data) => {
   try {
-    const res = await Message.create(data);
-    if (res) {
-      try {
-        const stt = (await conversationService.updateConversation(data))
-          .statusCode;
-        if (stt === 3000) {
+    if (data) {
+      const res = await Message.create(data);
+      if (res) {
+        try {
+          const stt = (await conversationService.updateConversation(data))
+            .statusCode;
+          if (stt === 3000) {
+            return {
+              msg: 'update message lastest failed',
+              statusCode: 300,
+            };
+          }
           return {
-            msg: 'update message lastest failed',
+            msg: 'add message & update message lastest successfully',
+            statusCode: 200,
+            data: res,
+          };
+        } catch (err) {
+          return {
+            msg: 'An error occurred during updating message lastest',
             statusCode: 300,
           };
         }
+      } else {
         return {
-          msg: 'add message & update message lastest successfully',
-          statusCode: 200,
-          data: res,
-        };
-      } catch (err) {
-        return {
-          msg: 'An error occurred during updating message lastest',
+          msg: 'add message failed',
           statusCode: 300,
         };
       }
     } else {
       return {
-        msg: 'add message failed',
+        msg: "Don't have data",
         statusCode: 300,
       };
     }

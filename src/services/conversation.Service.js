@@ -34,26 +34,33 @@ const getConversationId = async (userOne, userTwo) => {
 };
 const getConversation = async (userOne, userTwo) => {
   const result = await getConversationId(userOne, userTwo);
-  const conversation = await Conversation.findById(result);
-  const user = await Profile.findById(userTwo);
-  const { _id, lastestMessage, participantId } = conversation || {};
-  const data = conversation
-    ? {
-        _id,
-        lastestMessage,
-        participantId,
-        user,
-      }
-    : {
-        _id: result,
-        user,
-      };
+  if (result) {
+    const conversation = await Conversation.findById(result);
+    const user = await Profile.findById(userTwo);
+    const { _id, lastestMessage, participantId } = conversation || {};
+    const data = conversation
+      ? {
+          _id,
+          lastestMessage,
+          participantId,
+          user,
+        }
+      : {
+          _id: result,
+          user,
+        };
 
-  return {
-    msg: 'get conversationId successfully',
-    statusCode: 200,
-    data,
-  };
+    return {
+      msg: 'get conversationId successfully',
+      statusCode: 200,
+      data,
+    };
+  } else {
+    return {
+      msg: 'An error occurred during get conversation',
+      statusCode: 300,
+    };
+  }
 };
 
 const createConversation = async (body) => {
@@ -62,46 +69,53 @@ const createConversation = async (body) => {
     var userTwo = body[1];
 
     const conversationId = await getConversationId(userOne, userTwo);
-    const conversation = await Conversation.findById({
-      _id: conversationId,
-    });
-    if (!conversation) {
-      const res = await Conversation.create({
+    if (conversationId) {
+      const conversation = await Conversation.findById({
         _id: conversationId,
       });
-      if (res) {
-        const participants = body.map((participantId) => {
-          return {
-            conversationId: res._id,
-            participantId,
-          };
+      if (!conversation) {
+        const res = await Conversation.create({
+          _id: conversationId,
         });
-        const addParticipant = (
-          await participantService.addParticipant(participants)
-        ).statusCode;
-        if (addParticipant === 200) {
-          return {
-            msg: 'create a conversation & add participants successfully',
-            statusCode: 200,
-            data: res,
-          };
+        if (res) {
+          const participants = body.map((participantId) => {
+            return {
+              conversationId: res._id,
+              participantId,
+            };
+          });
+          const addParticipant = (
+            await participantService.addParticipant(participants)
+          ).statusCode;
+          if (addParticipant === 200) {
+            return {
+              msg: 'create a conversation & add participants successfully',
+              statusCode: 200,
+              data: res,
+            };
+          } else {
+            return {
+              msg: 'add participants failed',
+              statusCode: 300,
+              data: res,
+            };
+          }
         } else {
           return {
-            msg: 'add participants failed',
+            msg: 'create a converstion failed',
             statusCode: 300,
-            data: res,
           };
         }
-      } else {
-        return {
-          msg: 'create a converstion failed',
-          statusCode: 300,
-        };
       }
+      return {
+        data: conversation,
+      };
+    } else {
+      return {
+        msg: 'create a converstion failed',
+        statusCode: 300,
+      };
     }
-    return {
-      data: conversation,
-    };
   } catch (err) {
     return {
       msg: 'An error occurred during creating conversation',
@@ -112,21 +126,23 @@ const createConversation = async (body) => {
 
 const updateConversation = async (body) => {
   try {
-    const conversation = new Conversation();
-    conversation._id = body.conversationId;
-    conversation.lastestMessage = body.data;
-    conversation.updatedDate = moment().format('YYYY-MM-DD HH:mm:ss');
-    const res = await Conversation.findByIdAndUpdate(
-      {
-        _id: body.conversationId,
-      },
-      conversation,
-    );
-    return {
-      msg: 'update a conversation successfully',
-      statusCode: 200,
-      data: res,
-    };
+    if (body) {
+      const conversation = new Conversation();
+      conversation._id = body.conversationId;
+      conversation.lastestMessage = body.data;
+      conversation.updatedDate = moment().format('YYYY-MM-DD HH:mm:ss');
+      const res = await Conversation.findByIdAndUpdate(
+        {
+          _id: body.conversationId,
+        },
+        conversation,
+      );
+      return {
+        msg: 'update a conversation successfully',
+        statusCode: 200,
+        data: res,
+      };
+    }
   } catch (err) {
     return {
       msg: 'An error occurred during the update conversation process',
@@ -156,56 +172,59 @@ const getListConversation = async (userId, req) => {
         },
       });
 
-      const conversation = await Conversation.find({
-        _id: {
-          $in: conversationIds,
-        },
-      })
-        .sort({
-          updatedDate: -1,
+      if (total > 0) {
+        const conversation = await Conversation.find({
+          _id: {
+            $in: conversationIds,
+          },
         })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
+          .sort({
+            updatedDate: -1,
+          })
+          .skip(perPage * page - perPage)
+          .limit(perPage);
 
-      //get top 10 participant of user
-      let lstParticipant = await Participant.find({
-        conversationId: {
-          $in: conversationIds,
-        },
-      });
-      lstParticipant = lstParticipant.filter((x) => x.participantId != userId);
-
-      //get top 10 participantId
-      const participantIds = map(lstParticipant, 'participantId');
-
-      //get profile of lstParticipant
-      const profile = await Profile.find({
-        _id: {
-          $in: participantIds,
-        },
-      });
-
-      const objProfile = keyBy(profile, '_id');
-
-      const objConversation = keyBy(conversation, '_id');
-
-      const objParticipant = keyBy(lstParticipant, 'conversationId');
-
-      result = conversation
-        .filter((item) => item.lastestMessage !== null)
-        .map((item) => {
-          const { _id, lastestMessage } = objConversation[item._id];
-          const { participantId } = objParticipant[item._id];
-          const user = objProfile[participantId];
-          return {
-            _id,
-            lastestMessage,
-            participantId,
-            user,
-          };
+        //get top 10 participant of user
+        let lstParticipant = await Participant.find({
+          conversationId: {
+            $in: conversationIds,
+          },
         });
+        lstParticipant = lstParticipant.filter(
+          (x) => x.participantId != userId,
+        );
+
+        //get top 10 participantId
+        const participantIds = map(lstParticipant, 'participantId');
+
+        //get profile of lstParticipant
+        const profile = await Profile.find({
+          _id: {
+            $in: participantIds,
+          },
+        });
+
+        const objProfile = keyBy(profile, '_id');
+
+        const objConversation = keyBy(conversation, '_id');
+
+        const objParticipant = keyBy(lstParticipant, 'conversationId');
+
+        result = conversation
+          .filter((item) => item.lastestMessage !== null)
+          .map((item) => {
+            const { _id, lastestMessage } = objConversation[item._id];
+            const { participantId } = objParticipant[item._id];
+            const user = objProfile[participantId];
+            return {
+              _id,
+              lastestMessage,
+              participantId,
+              user,
+            };
+          });
+      }
     }
-    console.log(result);
     return {
       msg: 'get list conversation successfully',
       statusCode: 200,

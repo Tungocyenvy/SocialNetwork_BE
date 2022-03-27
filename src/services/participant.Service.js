@@ -2,25 +2,14 @@ const participant = require('../models/participant.model');
 
 const addParticipant = async (data) => {
   try {
-    // const add = data.map(async (item) => {
-    //   return participant.create(item);
-    // });
-    // await Promise.all(add);
     const res = await participant.insertMany(data, {
       ordered: true,
     });
-    // if (res) {
     return {
       msg: 'add participants successfully',
       statusCode: 200,
       data: res,
     };
-    // } else {
-    //   return {
-    //     msg: 'add participants failed',
-    //     statusCode: 300,
-    //   };
-    // }
   } catch (err) {
     return {
       msg: 'An error occurred during adding participants',

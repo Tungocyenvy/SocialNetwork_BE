@@ -51,6 +51,13 @@ const signinService = async (body) => {
         const id = data._id;
         const token = createToken(id);
         const profile = await Profile.findById({ _id: id });
+
+        if (!profile) {
+          return {
+            msg: 'Your user account does not have profile!',
+            statusCode: 300,
+          };
+        }
         //const token = data.Token;
         return {
           msg: 'Login Successfull!',
@@ -120,12 +127,19 @@ const resetPassword = async (body) => {
       if (password === confirmPassword) {
         const saltOrRound = 8;
         const HashNewPassword = await bcrypt.hash(password, saltOrRound);
-        account.password = HashNewPassword;
-        await Account.findByIdAndUpdate({ _id: userId }, account);
-        return {
-          msg: 'Reset password successful!',
-          statusCode: 200,
-        };
+        if (HashNewPassword) {
+          account.password = HashNewPassword;
+          await Account.findByIdAndUpdate({ _id: userId }, account);
+          return {
+            msg: 'Reset password successful!',
+            statusCode: 200,
+          };
+        } else {
+          return {
+            msg: 'An error occurred during the hash password process',
+            statusCode: 300,
+          };
+        }
       } else {
         return {
           msg: 'The password confirmation does not match!',
@@ -159,12 +173,19 @@ const changePassword = async (userID, body) => {
         if (newPassword === confirmPassword) {
           const saltOrRound = 8;
           const hashNewPassword = await bcrypt.hash(newPassword, saltOrRound);
-          account.password = hashNewPassword;
-          await account.save();
-          return {
-            msg: 'Change Password Successful!',
-            statusCode: 200,
-          };
+          if (hashNewPassword) {
+            account.password = hashNewPassword;
+            await account.save();
+            return {
+              msg: 'Change Password Successful!',
+              statusCode: 200,
+            };
+          } else {
+            return {
+              msg: 'The password confirmation does not match!',
+              statusCode: 300,
+            };
+          }
         } else {
           return {
             msg: 'The password confirmation does not match!',
@@ -210,13 +231,15 @@ const signup = async (body) => {
         continue;
       }
 
+      const role = data.role;
+
       data.email = data._id + '@gmail.com';
       data.dob = new Date(data.dob);
-      const newProfile = new Profile(data);
+      delete data.role;
 
       //create Profile
       try {
-        await newProfile.save();
+        await Profile.create(data);
       } catch {
         message = ' An error occurred during signup profile at ' + data._id;
         logs.push(message);
@@ -224,11 +247,17 @@ const signup = async (body) => {
       }
 
       /**CREATE ACCOUNT */
-      const role = data.role;
       const randomNum = getRandomString();
       const password = data._id + '@social' + randomNum;
       const saltOrRound = 8;
       const hassPassword = await bcrypt.hash(password, saltOrRound);
+      if (!hassPassword) {
+        await Profile.findByIdAndDelete({ _id: data._id });
+        message =
+          ' An error occurred during hash password account at ' + data._id;
+        logs.push(message);
+        continue;
+      }
       const newAccount = new Account({
         _id: data._id,
         password: hassPassword,
@@ -248,11 +277,16 @@ const signup = async (body) => {
       let groupId = 'grsv';
       if (role !== 'student') groupId = 'grgv';
       let type = 'main';
-      for (var i = 0; i < 2; i++) {
+      for (var k = 0; k < 2; k++) {
         //i=0 add grsv,grgv,
         //i=1 add gr faculity
-        if (i === 1) {
-          groupId = data.faculty;
+        if (k === 1) {
+          groupId = data.faculty ? data.faculty : {};
+        }
+        if (!groupId) {
+          message = ' Not found faculty for user ' + data._id;
+          logs.push(message);
+          continue;
         }
         try {
           const stt = (
@@ -378,7 +412,6 @@ const recoveryAccount = async (body) => {
 //get Infor User
 const getProfile = async (body) => {
   let { AccountId } = body || {};
-  console.log(AccountId);
   try {
     const data = await Profile.findById({ _id: AccountId });
     if (!data) {
@@ -403,9 +436,9 @@ const getProfile = async (body) => {
 
 const updateProfile = async (AccountId, body) => {
   try {
-    await Profile.findOneAndUpdate({ _id: AccountId }, body);
     const res = await Profile.findById({ _id: AccountId });
     if (res) {
+      await Profile.findOneAndUpdate({ _id: AccountId }, body);
       return {
         msg: 'update user profile successful',
         statusCode: 200,
