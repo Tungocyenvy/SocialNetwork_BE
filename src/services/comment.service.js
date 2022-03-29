@@ -349,7 +349,7 @@ const replyComment = async (token, body) => {
       };
     }
 
-    const comment = await Comment.findById({ _id: commentId });
+    let comment = await Comment.findById({ _id: commentId });
     if (!comment) {
       return {
         msg: 'Comment not found!',
