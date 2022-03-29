@@ -4,6 +4,52 @@ const Reply = require('../models/reply.model');
 const Post = require('../models/post.model');
 const { map, keyBy } = require('lodash');
 
+const transferComment = (comment, profile) => {
+  let reply = [];
+  reply = comment.reply ? comment.reply : reply;
+  const { _id, userId, content, postId, countReply, createdDate } = comment;
+  const { fullname, avatar } = profile[userId];
+  return {
+    commentId: _id,
+    userId,
+    fullname,
+    avatar,
+    content,
+    postId,
+    countReply,
+    reply,
+    createdDate,
+  };
+};
+
+const transferReply = (reply, profile) => {
+  const { _id, userId, content, createdDate } = reply;
+  const { fullname, avatar } = profile[userId];
+  return {
+    replyId: _id,
+    userId,
+    fullname,
+    avatar,
+    content,
+    createdDate,
+  };
+};
+
+const getId = (parentId, object, isComment) => {
+  let _id = '';
+  let code = isComment ? '_CMT' : '_RL';
+  //get lastId
+  let lastedId = object[object.length - 1]._id;
+  var str = lastedId.match(/[0-9]+$/);
+  //increment Id
+  var str2 = Number(str ? str[0] : 0) + 1;
+  if (str2 < 10) {
+    _id = parentId + code + '0' + str2;
+  } else {
+    _id = parentId + code + str2;
+  }
+  return _id;
+};
 /**COMMENT */
 //get comment by postId
 const getComment = async (req) => {
@@ -59,7 +105,7 @@ const getComment = async (req) => {
       }
 
       let objComment = {};
-      objComment.commentId = tmp._id;
+      objComment._id = tmp._id;
       objComment.userId = tmp.userId;
       objComment.content = tmp.content;
       objComment.postId = tmp.postId;
@@ -81,27 +127,7 @@ const getComment = async (req) => {
     objProfile = keyBy(profile, '_id');
 
     const result = listComment.map((item) => {
-      const {
-        commentId,
-        userId,
-        content,
-        postId,
-        countReply,
-        reply,
-        createdDate,
-      } = item;
-      const { fullname, avatar } = objProfile[userId];
-      return {
-        commentId,
-        userId,
-        fullname,
-        avatar,
-        content,
-        postId,
-        countReply,
-        reply,
-        createdDate,
-      };
+      return transferComment(item, objProfile);
     });
 
     return {
@@ -142,18 +168,9 @@ const createComment = async (token, body) => {
       _id: { $regex: postId, $options: 'is' },
       postId: postId,
     });
-    var _id = postId + '_CMT01';
+    let _id = postId + '_CMT01';
     if (comment.length > 0) {
-      //get lastId
-      let lastedCmtId = comment[comment.length - 1]._id;
-      var str = lastedCmtId.match(/[0-9]+$/);
-      //increment Id
-      var str2 = Number(str ? str[0] : 0) + 1;
-      if (str2 < 10) {
-        _id = postId + '_CMT0' + str2;
-      } else {
-        _id = postId + '_CMT' + str2;
-      }
+      _id = getId(postId, comment, true);
     }
 
     const newComment = new Comment({
@@ -162,12 +179,16 @@ const createComment = async (token, body) => {
       content,
       postId,
     });
-    const resSave = await newComment.save();
+    let resSave = await newComment.save();
     if (resSave) {
+      const profile = await Profile.findById({ _id: resSave.userId });
+      const objProfile = keyBy(profile, '_id');
+      const result = transferComment(resSave, objProfile);
+
       return {
         msg: 'Your comment submission was successful!',
         statusCode: 200,
-        data: resSave,
+        data: result,
       };
     }
     resSave = {};
@@ -295,16 +316,7 @@ const getReply = async (req) => {
     objProfile = keyBy(profile, '_id');
 
     const result = reply.map((item) => {
-      const { _id, userId, content, createdDate } = item;
-      const { fullname, avatar } = objProfile[userId];
-      return {
-        replyId: _id,
-        userId,
-        fullname,
-        avatar,
-        content,
-        createdDate,
-      };
+      return transferReply(item, objProfile);
     });
 
     return {
@@ -342,18 +354,9 @@ const replyComment = async (token, body) => {
     }
 
     const replys = await Reply.find({ commentId: commentId });
-    var replyId = commentId + '_RL01';
+    let replyId = commentId + '_RL01';
     if (replys.length > 0) {
-      //get lastId
-      var temp = replys[replys.length - 1]._id;
-      var str = temp.match(/[0-9]+$/);
-      //increment Id
-      var str2 = Number(str ? str[0] : 0) + 1;
-      if (str2 < 10) {
-        replyId = commentId + '_RL0' + str2;
-      } else {
-        replyId = commentId + '_RL' + str2;
-      }
+      replyId = getId(commentId, replys, false);
     }
     const objReply = new Reply({
       _id: replyId,
@@ -366,10 +369,15 @@ const replyComment = async (token, body) => {
     if (res) {
       comment.countReply += 1;
       await Comment.findByIdAndUpdate({ _id: commentId }, comment);
+
+      const profile = await Profile.findById({ _id: userId });
+      const objProfile = keyBy(profile, '_id');
+      const result = transferReply(res, objProfile);
+
       return {
         msg: 'Your reply comment submission was successful!',
         statusCode: 200,
-        data: res,
+        data: result,
       };
     }
     res = {};
