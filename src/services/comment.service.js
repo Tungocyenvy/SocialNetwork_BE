@@ -5,8 +5,6 @@ const Post = require('../models/post.model');
 const { map, keyBy } = require('lodash');
 
 const transferComment = (comment, profile) => {
-  let reply = [];
-  reply = comment.reply ? comment.reply : reply;
   const { _id, userId, content, postId, countReply, createdDate } = comment;
   const { fullname, avatar } = profile[userId];
   return {
@@ -17,7 +15,6 @@ const transferComment = (comment, profile) => {
     content,
     postId,
     countReply,
-    reply,
     createdDate,
   };
 };
@@ -92,32 +89,32 @@ const getComment = async (req) => {
     comment.reverse();
 
     //get reply
-    let listComment = [];
-    for (var i in comment) {
-      let reply = [];
-      let tmp = comment[i];
-      if (tmp.countReply !== 0) {
-        req.params.commentID = tmp._id;
-        const rsReply = (await getReply(req)).data;
-        if (rsReply) {
-          reply = rsReply.result;
-        }
-      }
+    // let listComment = [];
+    // for (var i in comment) {
+    //   let reply = [];
+    //   let tmp = comment[i];
+    //   if (tmp.countReply !== 0) {
+    //     req.params.commentID = tmp._id;
+    //     const rsReply = (await getReply(req)).data;
+    //     if (rsReply) {
+    //       reply = rsReply.result;
+    //     }
+    //   }
 
-      let objComment = {};
-      objComment._id = tmp._id;
-      objComment.userId = tmp.userId;
-      objComment.content = tmp.content;
-      objComment.postId = tmp.postId;
-      objComment.countReply = tmp.countReply;
-      objComment.reply = reply;
-      objComment.createdDate = tmp.createdDate;
+    //   let objComment = {};
+    //   objComment._id = tmp._id;
+    //   objComment.userId = tmp.userId;
+    //   objComment.content = tmp.content;
+    //   objComment.postId = tmp.postId;
+    //   objComment.countReply = tmp.countReply;
+    //   objComment.reply = reply;
+    //   objComment.createdDate = tmp.createdDate;
 
-      listComment.push(objComment);
-    }
+    //   listComment.push(objComment);
+    // }
 
     // get comment author avatar
-    const userIds = map(listComment, 'userId');
+    const userIds = map(comment, 'userId');
     const profile = await Profile.find({
       _id: {
         $in: userIds,
@@ -126,7 +123,7 @@ const getComment = async (req) => {
 
     objProfile = keyBy(profile, '_id');
 
-    const result = listComment.map((item) => {
+    const result = comment.map((item) => {
       return transferComment(item, objProfile);
     });
 
@@ -209,7 +206,7 @@ const updateComment = async (token, body) => {
   let { userId } = token;
   let { content, commentId } = body || {};
   try {
-    const comment = await Comment.findById({ _id: commentId });
+    let comment = await Comment.findById({ _id: commentId });
     if (!comment) {
       return {
         msg: 'Comment not found!',
@@ -219,10 +216,14 @@ const updateComment = async (token, body) => {
     }
     comment.content = content;
     await Comment.findByIdAndUpdate({ _id: commentId }, comment);
+
+    const profile = await Profile.findById({ _id: comment.userId });
+    const objProfile = keyBy(profile, '_id');
+    const result = transferComment(comment, objProfile);
     return {
       msg: 'Edit Comment Successful!',
       statusCode: 200,
-      data: comment,
+      data: result,
     };
   } catch (error) {
     return {
@@ -244,6 +245,10 @@ const deleteComment = async (userId, req) => {
     }
 
     await Comment.findOneAndDelete({ _id: commentId });
+    await Reply.deleteMany({ commentId: commentId });
+    // await Reply.deleteMany({
+    //   commentID: { $in: userIds },
+    // });
     return {
       msg: 'Delete comment successful!',
       statusCode: 200,
@@ -399,7 +404,7 @@ const updateReply = async (token, body) => {
   let { content, replyId } = body || {};
   //console.log(_id);
   try {
-    const reply = await Reply.findById({ _id: replyId });
+    let reply = await Reply.findById({ _id: replyId });
     if (!reply) {
       return {
         msg: 'reply not found!',
@@ -409,10 +414,14 @@ const updateReply = async (token, body) => {
     }
     reply.content = content;
     await Reply.findByIdAndUpdate({ _id: replyId }, reply);
+
+    const profile = await Profile.findById({ _id: reply.userId });
+    const objProfile = keyBy(profile, '_id');
+    const result = transferReply(reply, objProfile);
     return {
       msg: 'Edit Reply Successful!',
       statusCode: 200,
-      data: reply,
+      data: result,
     };
   } catch (error) {
     return {
