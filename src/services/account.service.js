@@ -4,6 +4,7 @@ const Account = require('../models/account.model');
 const Profile = require('../models/profile.model');
 const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
+const moment = require('moment');
 
 //create OTP
 const getRandomInt = (min, max) => {
@@ -345,10 +346,11 @@ const deleteAccount = async (body) => {
     let message = '';
     for (var i in body) {
       let data = body[i];
-      const account = await Account.findById({ _id: data._id });
+      let account = await Account.findById({ _id: data._id });
       //check profile && account
       if (account) {
         account.isDelete = true;
+        account.deletedDate = moment().format('YYYY-MM-DD HH:mm:ss');
         try {
           await account.save();
         } catch {

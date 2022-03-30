@@ -71,10 +71,67 @@ const getListFaculty = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const createFaculty = async (req, res, next) => {
+  const resService = await groupService.createFaculty(req.body);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const tranferFaculty = async (req, res, next) => {
+  const resService = await groupService.tranferFaculty(req.body);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const changeAdmin = async (req, res, next) => {
+  const resService = await groupService.changeAdmin(req.body);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const createSubgroup = async (req, res, next) => {
+  const userId = req.value.body.token.data;
+  const resService = await groupService.createSubGroup(userId, req.body);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
   deleteUser,
   deleteListUser,
   getListFaculty,
+  tranferFaculty,
+  createFaculty,
+  changeAdmin,
+  createSubgroup,
 };

@@ -1,8 +1,10 @@
+const mongoose = require('mongoose');
 const Notify = require('../models/notify_maingroup.model');
 const userMainGroup = require('../models/user_maingroup.model');
 const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
 const Account = require('../models/account.model');
+const Profile = require('../models/profile.model');
 
 // const checkGroup= async (body) =>{
 //     let {group}=body;
@@ -15,6 +17,7 @@ const Account = require('../models/account.model');
 //     }
 // }
 
+//USER
 //add user to group
 const addUser = async (body) => {
   let { userId, groupId, type, role } = body || {};
@@ -27,12 +30,13 @@ const addUser = async (body) => {
         statusCode: 300,
       };
     }
-    const data = { userId, groupId, isStudent };
+    let data = { userId, groupId, isStudent };
 
     try {
       if (type === 'main') {
         await userMainGroup.create(data);
       } else {
+        delete data.isStudent;
         await userSubGroup.create(data);
       }
       return {
@@ -125,7 +129,7 @@ const deleteUser = async (body) => {
     const group = await Group.findById({ _id: groupId });
     if (!group) {
       return {
-        msg: 'GroupId not found!',
+        msg: 'GroupId ' + groupId + ' not found!',
         statusCode: 300,
       };
     }
@@ -169,6 +173,7 @@ const deleteUser = async (body) => {
   }
 };
 
+//FACULTY
 //send Notify for maingroup
 const sendNotifyForMainGroup = async (body) => {
   try {
@@ -218,10 +223,159 @@ const getListFaculty = async () => {
   }
 };
 
+const createFaculty = async (body) => {
+  try {
+    if (body) {
+      const faculty = await Group.findById({ _id: body._id });
+      if (faculty) {
+        return {
+          msg: 'faculty identifier is exist!',
+          statusCode: 200,
+          data: faculty,
+        };
+      }
+      let data = body;
+      data.isMain = true;
+      await Group.create(data);
+      return {
+        msg: 'Create faculty successful!',
+        statusCode: 200,
+        data: data,
+      };
+    }
+  } catch (err) {
+    return {
+      msg: 'An error occurred during create faculty',
+      statusCode: 300,
+    };
+  }
+};
+
+const tranferFaculty = async (body) => {
+  let { facultyTo, facultyFrom, userId } = body || {};
+  try {
+    const sttDelete = (
+      await deleteUser({ userId, groupId: facultyFrom, type: 'main' })
+    ).statusCode;
+    console.log(sttDelete);
+    if (sttDelete === 300) {
+      return {
+        msg:
+          'An error occurred during delete ' +
+          userId +
+          ' from group ' +
+          facultyFrom +
+          ' process',
+        statusCode: 300,
+      };
+    }
+    const sttAdd = (await addUser({ userId, groupId: facultyTo, type: 'main' }))
+      .statusCode;
+    if (sttAdd === 300) {
+      return {
+        msg:
+          'An error occurred during add ' +
+          userId +
+          ' to group ' +
+          facultyTo +
+          ' process',
+        statusCode: 300,
+      };
+    }
+
+    let profile = await Profile.findById({ _id: userId });
+    profile.faculty = facultyTo;
+    const res = await profile.save();
+    if (res) {
+      return {
+        msg: 'Inter-Faculty Transfer successful!',
+        statusCode: 200,
+        data: profile,
+      };
+    }
+  } catch (err) {
+    return {
+      msg: 'An error occurred during tranfer faculty',
+      statusCode: 300,
+    };
+  }
+};
+
+const changeAdmin = async (body) => {
+  let { groupId, userId, type, isRemove } = body || {};
+  try {
+    let user = {};
+    if (type == 'main') {
+      user = await userMainGroup.findOne({ userId: userId, groupId: groupId });
+    } else {
+      user = await userSubGroup.find({ userId: userId, groupId: groupId });
+    }
+
+    if (!user) {
+      return {
+        msg: 'user not found in group',
+        statusCode: 300,
+      };
+    }
+
+    user.isAdmin = true;
+    if (isRemove) user.isAdmin = false;
+    await user.save();
+
+    return {
+      msg: 'change admin for group ' + groupId + ' successful!',
+      statusCode: 200,
+      data: user,
+    };
+  } catch (err) {
+    return {
+      msg: 'An error occurred during change admin for  group ' + groupId,
+      statusCode: 300,
+    };
+  }
+};
+
+//SUBGROUP
+const createSubGroup = async (userId, body) => {
+  try {
+    if (body) {
+      let data = body;
+      data._id = mongoose.Types.ObjectId();
+      data.isMain = false;
+
+      console.log(data);
+
+      const res = await Group.create(data);
+      console.log(res);
+
+      if (res) {
+        const groupId = res._id;
+        const isAdmin = true;
+        let dataUser = { userId, groupId, isAdmin };
+        await userSubGroup.create(dataUser);
+        return {
+          msg: 'Create faculty successful!',
+          statusCode: 200,
+          data: data,
+        };
+      }
+    }
+  } catch (err) {
+    return {
+      msg: 'An error occurred during create faculty',
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
   deleteUser,
   deleteListUser,
   getListFaculty,
+  tranferFaculty,
+  createFaculty,
+  changeAdmin,
+  createSubGroup,
 };
