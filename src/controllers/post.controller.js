@@ -58,9 +58,37 @@ const getListPostByGroupId = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const deletPost = async (req, res, next) => {
+  const resService = await postService.deletePost(req);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const updatePost = async (req, res, next) => {
+  const resService = await postService.updatePost(req.body);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   createPost,
   getDetailPost,
   getListPostByUserId,
   getListPostByGroupId,
+  deletPost,
+  updatePost,
 };

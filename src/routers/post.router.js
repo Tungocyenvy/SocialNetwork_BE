@@ -15,5 +15,7 @@ router.get('/main/:groupId', jwt.verify, postController.getListPostByUserId);
 //FOR SUB GROUP
 //getListPostbygroupid
 router.get('/sub/:groupId', postController.getListPostByGroupId);
+router.delete('/sub/:postId', postController.deletPost);
+router.put('/sub/', postController.updatePost);
 
 module.exports = router;

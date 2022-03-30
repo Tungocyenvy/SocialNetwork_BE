@@ -190,15 +190,21 @@ const sendNotifyForMainGroup = async (body) => {
   }
 };
 
-const getListFaculty = async () => {
+const getListFaculty = async (req) => {
+  let perPage = 10;
+  let { isAll = true, page = 1 } = req.query || {};
   try {
-    const listGroupMain = await Group.find({ isMain: true });
-    if (listGroupMain.length <= 0) {
+    const total = await Group.countDocuments({ isMain: true });
+    if (total <= 0) {
       return {
         msg: "Don't have main group",
         statusCode: 300,
       };
     }
+    if (isAll) perPage = total;
+    const listGroupMain = await Group.find({ isMain: true })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
 
     const result = listGroupMain.filter(
       (x) => x._id !== 'grsv' && x._id != 'grgv',
@@ -246,6 +252,27 @@ const createFaculty = async (body) => {
   } catch (err) {
     return {
       msg: 'An error occurred during create faculty',
+      statusCode: 300,
+    };
+  }
+};
+
+const updateFaculty = async (body) => {
+  try {
+    if (body) {
+      const res = await Group.findByIdAndUpdate({ _id: body._id }, body);
+      if (res) {
+        const result = await Group.findById({ _id: body._id });
+        return {
+          msg: 'Update faculty successful!',
+          statusCode: 200,
+          data: result,
+        };
+      }
+    }
+  } catch (err) {
+    return {
+      msg: 'An error occurred during update faculty',
       statusCode: 300,
     };
   }
@@ -368,6 +395,102 @@ const createSubGroup = async (userId, body) => {
   }
 };
 
+const getAllGroup = async (req) => {
+  let perPage = 10;
+  let { page } = req.query || 1;
+  try {
+    let total = await Group.countDocuments({ isMain: false });
+    if (total <= 0) {
+      return {
+        msg: "Don't have any group",
+        statusCode: 300,
+      };
+    }
+
+    const result = await Group.find({ isMain: false })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+
+    return {
+      msg: 'Get all Group successful!',
+      statusCode: 200,
+      data: { total, result },
+    };
+  } catch {
+    return {
+      msg: 'An error occurred during the get all group process',
+      statusCode: 300,
+    };
+  }
+};
+
+const getRelativeGroup = async (req) => {
+  let { groupId } = req.params || {};
+  let perPage = 2;
+  let { page } = req.query || 1;
+  try {
+    const group = await Group.findById({ _id: groupId });
+    if (!group) {
+      return {
+        msg: 'GroupId not found!',
+        statusCode: 300,
+      };
+    }
+    const cateId = group.cateId;
+
+    let total = await Group.countDocuments({
+      isMain: false,
+      cateId: cateId,
+      _id: { $nin: groupId },
+    });
+    if (total > 0) {
+      console.log(total);
+      const result = await Group.find({
+        isMain: false,
+        cateId: cateId,
+        _id: { $nin: groupId },
+      })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+
+      return {
+        msg: 'Get Ralative Group successful!',
+        statusCode: 200,
+        data: { total, result },
+      };
+    } else {
+      return {
+        msg: "Don't have any relative group",
+        statusCode: 300,
+      };
+    }
+  } catch {
+    return {
+      msg: 'An error occurred during the get relative group process',
+      statusCode: 300,
+    };
+  }
+};
+
+const updateGroup = async (body) => {
+  try {
+    const res = await Group.findByIdAndUpdate({ _id: body._id }, body);
+    if (res) {
+      const result = await Group.findById({ _id: body._id });
+      return {
+        msg: 'update group successfull',
+        statusCode: 200,
+        data: result,
+      };
+    }
+  } catch {
+    return {
+      msg: 'An error occurred during the update group process',
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -378,4 +501,8 @@ module.exports = {
   createFaculty,
   changeAdmin,
   createSubGroup,
+  getRelativeGroup,
+  getAllGroup,
+  updateGroup,
+  updateFaculty,
 };

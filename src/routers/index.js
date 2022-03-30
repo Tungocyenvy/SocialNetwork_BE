@@ -9,6 +9,7 @@ const conversation = require('./conversation.router');
 const message = require('./message.router');
 const participant = require('./participant.router');
 const post = require('./post.router');
+const category = require('./category.router');
 
 function router(app) {
   app.use('/account', account);
@@ -20,6 +21,7 @@ function router(app) {
   app.use('/message', message);
   app.use('/participant', participant);
   app.use('/post', post);
+  app.use('/category', category);
 }
 
 module.exports = router;

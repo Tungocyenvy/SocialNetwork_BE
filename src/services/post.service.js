@@ -88,6 +88,7 @@ const createPost = async (userID, body) => {
       return {
         msg: 'Create post and send notify to group successful!',
         statusCode: 200,
+        data: res,
       };
     } else {
       return {
@@ -283,9 +284,59 @@ const getDetailPost = async (postId) => {
   }
 };
 
+const deletePost = async (req) => {
+  let { postId = '' } = req.params || {};
+  try {
+    const res = await Post.findByIdAndDelete({ _id: postId });
+    if (res) {
+      //pending delete notify
+      return {
+        msg: 'Delete ' + postId + ' successful!',
+        statusCode: 200,
+      };
+    } else {
+      return {
+        msg: postId + ' not found!',
+        statusCode: 300,
+      };
+    }
+  } catch {
+    return {
+      msg: 'An error occurred during the delete post process',
+      statusCode: 300,
+    };
+  }
+};
+
+const updatePost = async (body) => {
+  try {
+    const res = await Post.findByIdAndUpdate({ _id: body._id }, body);
+    if (res) {
+      const result = await Post.findById({ _id: body._id });
+      return {
+        msg: 'Update post successful!',
+        statusCode: 200,
+        data: result,
+      };
+    } else {
+      return {
+        msg: postId + ' not found!',
+        statusCode: 300,
+      };
+    }
+  } catch {
+    return {
+      msg: 'An error occurred during the update post process',
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   createPost,
   getDetailPost,
   getListPostByUserId,
   getListPostByGroupId,
+  deletePost,
+  updatePost,
 };

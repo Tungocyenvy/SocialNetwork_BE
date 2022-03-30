@@ -14,7 +14,7 @@ const GroupSchema = new schema({
     required: true,
     default: moment().format('YYYY-MM-DD HH:mm:ss'),
   },
-  cateId: { type: String, required: true },
+  cateId: { type: String, required: true, default: 'none' },
   image: { type: String, required: true, default: imageDefault },
 });
 
