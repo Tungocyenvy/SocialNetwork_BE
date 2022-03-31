@@ -223,18 +223,20 @@ const signup = async (body) => {
     for (var i in body) {
       let objAccount = {};
       let data = body[i];
-      const profile = await Profile.findById({ _id: data._id });
-      const account = await Account.findById({ _id: data._id });
+      let userId = String(data._id);
+      console.log(userId);
+      const profile = await Profile.findById({ _id: userId });
+      const account = await Account.findById({ _id: userId });
       //check profile && account
       if (profile || account) {
-        message = data._id + ' already exists';
+        message = userId + ' already exists';
         logs.push(message);
         continue;
       }
 
       const role = data.role;
 
-      data.email = data._id + '@gmail.com';
+      data.email = userId + '@gmail.com';
       data.dob = new Date(data.dob);
       delete data.role;
 
@@ -242,25 +244,25 @@ const signup = async (body) => {
       try {
         await Profile.create(data);
       } catch {
-        message = ' An error occurred during signup profile at ' + data._id;
+        message = ' An error occurred during signup profile at ' + userId;
         logs.push(message);
         continue;
       }
 
       /**CREATE ACCOUNT */
       const randomNum = getRandomString();
-      const password = data._id + '@social' + randomNum;
+      const password = userId + '@social' + randomNum;
       const saltOrRound = 8;
       const hassPassword = await bcrypt.hash(password, saltOrRound);
       if (!hassPassword) {
-        await Profile.findByIdAndDelete({ _id: data._id });
+        await Profile.findByIdAndDelete({ _id: userId });
         message =
-          ' An error occurred during hash password account at ' + data._id;
+          ' An error occurred during hash password account at ' + userId;
         logs.push(message);
         continue;
       }
       const newAccount = new Account({
-        _id: data._id,
+        _id: userId,
         password: hassPassword,
         role,
       });
@@ -268,8 +270,8 @@ const signup = async (body) => {
       try {
         await newAccount.save();
       } catch {
-        await Profile.findByIdAndDelete({ _id: data._id });
-        message = ' An error occurred during signup account at ' + data._id;
+        await Profile.findByIdAndDelete({ _id: userId });
+        message = ' An error occurred during signup account at ' + userId;
         logs.push(message);
         continue;
       }
@@ -285,14 +287,14 @@ const signup = async (body) => {
           groupId = data.faculty ? data.faculty : {};
         }
         if (!groupId) {
-          message = ' Not found faculty for user ' + data._id;
+          message = ' Not found faculty for user ' + userId;
           logs.push(message);
           continue;
         }
         try {
           const stt = (
             await groupService.addUser({
-              userId: data._id,
+              userId,
               groupId,
               type,
               role,
@@ -301,7 +303,7 @@ const signup = async (body) => {
           if (stt === 300) {
             message =
               'An error occurred during add ' +
-              data._id +
+              userId +
               ' to group ' +
               groupId +
               ' process';
@@ -311,7 +313,7 @@ const signup = async (body) => {
         } catch {
           message =
             'An error occurred during add ' +
-            data._id +
+            userId +
             ' to group ' +
             groupId +
             ' process';
@@ -320,7 +322,7 @@ const signup = async (body) => {
         }
       }
 
-      objAccount._id = data._id;
+      objAccount._id = userId;
       objAccount.password = password;
       accountData[i] = objAccount;
     }
