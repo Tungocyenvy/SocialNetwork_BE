@@ -3,8 +3,14 @@ const router = express.Router();
 const jwt = require('../services/jwt.service');
 const categoryController = require('../controllers/category.controller');
 
-router.get('/:isDelete', categoryController.getCategory);
-router.put('/', categoryController.updateCategory);
-router.post('/', categoryController.createCategory);
+//GROUP
+router.get('/group/:isDelete', categoryController.getCategoryGroup);
+router.put('/group', categoryController.updateCategoryGroup);
+router.post('/group', categoryController.createCategoryGroup);
+
+//REPORT
+router.get('/report', categoryController.getCategoryReport);
+router.put('/report', categoryController.updateCategoryReport);
+router.post('/report', categoryController.createCategoryGroup);
 
 module.exports = router;

@@ -6,5 +6,5 @@ const CategorySchema = new schema({
   isDelete: { type: String, required: true, default: false },
 });
 
-const category = mongoose.model('category', CategorySchema);
-module.exports = category;
+const category_group = mongoose.model('category_group', CategorySchema);
+module.exports = category_group;
