@@ -6,9 +6,13 @@ const Role = require('../models/role.model');
 const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
 const moment = require('moment');
-
 const I18n = require('../config/i18n');
 
+const getMsg = (req) => {
+  let lang = req.headers['accept-language'] || 'en';
+  I18n.setLocale(lang);
+  return (msg = I18n.__('account'));
+};
 //create OTP
 const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -38,14 +42,14 @@ const getRandomString = () => {
 // Sign in
 const signinService = async (req) => {
   let { _id, password } = req.body || {};
-  let lang = req.headers['accept-language'] || 'en';
-  I18n.setLocale(lang);
+  const msg = getMsg(req);
+
   // kiểm tra tài khoản tồn tại trong Account chưa
   var data = await Account.findOne({ _id });
   if (data != null) {
     if (data.isDelete) {
       return {
-        msg: I18n.__('account').disabled,
+        msg: msg.disabled,
         statusCode: 300,
       };
     }
@@ -60,13 +64,13 @@ const signinService = async (req) => {
 
         if (!profile) {
           return {
-            msg: I18n.__('account').notProfile,
+            msg: msg.notProfile,
             statusCode: 300,
           };
         }
         //const token = data.Token;
         return {
-          msg: I18n.__('account').login,
+          msg: msg.login,
           statusCode: 200,
           data: {
             token,
@@ -77,27 +81,28 @@ const signinService = async (req) => {
         };
       } else {
         return {
-          msg: 'Your username or password is incorrect. please try again!',
+          msg: msg.incorrect,
           statusCode: 300,
         };
       }
     } catch {
       return {
-        msg: 'An error occurred during the login process',
+        msg: msg.err,
         statusCode: 300,
       };
     }
   } else {
     return {
-      msg: 'Account does not exist',
+      msg: msg.notFound.replace('%s', _id),
       statusCode: 300,
     };
   }
 };
 
 //forgotPassword
-const forgotPassword = async (body) => {
-  let { _id } = body || {};
+const forgotPassword = async (req) => {
+  let { _id } = req.body || {};
+  const msg = getMsg(req);
   // check account
   var data = await Profile.findById({ _id });
   if (data != null) {
@@ -106,27 +111,28 @@ const forgotPassword = async (body) => {
       var content = getOTP() + ' is your OTP. Only valid for 3 min!';
       const sendsms = sendSMS(toPhone, content);
       return {
-        msg: 'Please check your sms for a six-digital security code and enter below.',
+        msg: msg.sms,
         statusCode: 200,
         data: { content },
       };
     } catch {
       return {
-        msg: 'An error occurred during the forgot password process!',
+        msg: msg.err,
         statusCode: 300,
       };
     }
   } else {
     return {
-      msg: 'Account does not exist. Please check the username and try again!',
+      msg: msg.notFound.replace('%s', _id),
       statusCode: 300,
     };
   }
 };
 
 // Reset Password
-const resetPassword = async (body) => {
-  let { userId, password, confirmPassword } = body || {};
+const resetPassword = async (req) => {
+  let { userId, password, confirmPassword } = req.body || {};
+  const msg = getMsg(req);
 
   try {
     const account = await Account.findById({ _id: userId });
@@ -138,38 +144,39 @@ const resetPassword = async (body) => {
           account.password = HashNewPassword;
           await Account.findByIdAndUpdate({ _id: userId }, account);
           return {
-            msg: 'Reset password successful!',
+            msg: msg.resetPass,
             statusCode: 200,
           };
         } else {
           return {
-            msg: 'An error occurred during the hash password process',
+            msg: msg.err,
             statusCode: 300,
           };
         }
       } else {
         return {
-          msg: 'The password confirmation does not match!',
+          msg: msg.incorrectConfirm,
           statusCode: 300,
         };
       }
     } else {
       return {
-        msg: 'Account does not exist!',
+        msg: msg.notFound.replace('%s', userId),
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the reset password process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 // Change Password
-const changePassword = async (userID, body) => {
-  let { password, newPassword, confirmPassword } = body || {};
+const changePassword = async (userID, req) => {
+  let { password, newPassword, confirmPassword } = req.body || {};
+  const msg = getMsg(req);
 
   try {
     const account = await Account.findById({ _id: userID });
@@ -184,43 +191,45 @@ const changePassword = async (userID, body) => {
             account.password = hashNewPassword;
             await account.save();
             return {
-              msg: 'Change Password Successful!',
+              msg: msg.changePass,
               statusCode: 200,
             };
           } else {
             return {
-              msg: 'The password confirmation does not match!',
+              msg: msg.incorrectConfirm,
               statusCode: 300,
             };
           }
         } else {
           return {
-            msg: 'The password confirmation does not match!',
+            msg: msg.incorrectConfirm,
             statusCode: 300,
           };
         }
       } else {
         return {
-          msg: 'Password incorrect',
+          msg: msg.incorrectPass,
           statusCode: 300,
         };
       }
     } else {
       return {
-        msg: 'Account does not exist!',
+        msg: msg.notFound.replace('%s', userID),
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the change password process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 // Sign up both excel and handle
-const signup = async (body) => {
+const signup = async (req) => {
+  let body = req.body || {};
+  const msg = getMsg(req);
   try {
     // console.log(body[0]);
     let logs = [];
@@ -235,7 +244,7 @@ const signup = async (body) => {
       const account = await Account.findById({ _id: userId });
       //check profile && account
       if (profile || account) {
-        message = userId + ' already exists';
+        message = msg.notFound.replace('%s', userId);
         logs.push(message);
         continue;
       }
@@ -250,7 +259,7 @@ const signup = async (body) => {
       try {
         await Profile.create(data);
       } catch {
-        message = ' An error occurred during signup profile at ' + userId;
+        message = msg.errAddProfile.replace('%s', userId);
         logs.push(message);
         continue;
       }
@@ -262,8 +271,7 @@ const signup = async (body) => {
       const hassPassword = await bcrypt.hash(password, saltOrRound);
       if (!hassPassword) {
         await Profile.findByIdAndDelete({ _id: userId });
-        message =
-          ' An error occurred during hash password account at ' + userId;
+        message = msg.errHashPass.replace('%s', userId);
         logs.push(message);
         continue;
       }
@@ -277,7 +285,7 @@ const signup = async (body) => {
         await newAccount.save();
       } catch {
         await Profile.findByIdAndDelete({ _id: userId });
-        message = ' An error occurred during signup account at ' + userId;
+        message = msg.arrAddAccount.replace('%s', userId);
         logs.push(message);
         continue;
       }
@@ -293,7 +301,7 @@ const signup = async (body) => {
           groupId = data.faculty ? data.faculty : {};
         }
         if (!groupId) {
-          message = ' Not found faculty for user ' + userId;
+          message = msg.faculty.replace('%s', userId);
           logs.push(message);
           continue;
         }
@@ -307,22 +315,12 @@ const signup = async (body) => {
             })
           ).statusCode;
           if (stt === 300) {
-            message =
-              'An error occurred during add ' +
-              userId +
-              ' to group ' +
-              groupId +
-              ' process';
+            message = msg.group.replace('%s', userId).replace('%s', groupId);
             logs.push(message);
             continue;
           }
         } catch {
-          message =
-            'An error occurred during add ' +
-            userId +
-            ' to group ' +
-            groupId +
-            ' process';
+          message = msg.group.replace('%s', userId).replace('%s', groupId);
           logs.push(message);
           continue;
         }
@@ -333,21 +331,23 @@ const signup = async (body) => {
       accountData[i] = objAccount;
     }
     return {
-      msg: 'signup account successful',
+      msg: msg.signup,
       statusCode: 200,
       data: { logs, accountData },
     };
   } catch (err) {
     console.log(err);
     return {
-      msg: 'An error occurred during signup proccess',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 // delete Account (change isDelete: false->true)
-const deleteAccount = async (body) => {
+const deleteAccount = async (req) => {
+  let body = req.body || {};
+  const msg = getMsg(req);
   try {
     // console.log(body[0]);
     let logs = [];
@@ -362,33 +362,34 @@ const deleteAccount = async (body) => {
         try {
           await account.save();
         } catch {
-          message = 'An error occurred during delete account at ' + data._id;
+          message = msg.errDelete.replace('%s', data._id);
           logs.push(message);
           continue;
         }
       } else {
-        message = data._id + ' does not exists';
+        message = msg.notFound.replace('%s', data._id);
         logs.push(message);
         continue;
       }
     }
     return {
-      msg: 'delete account successful',
+      msg: msg.delete,
       statusCode: 200,
       data: { logs },
     };
   } catch (err) {
     console.log(err);
     return {
-      msg: 'An error occurred during delete account proccess',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 // recovery Account (change isDelete: true->false)
-const recoveryAccount = async (body) => {
-  let { _id } = body || {};
+const recoveryAccount = async (req) => {
+  let { _id } = req.body || {};
+  const msg = getMsg(req);
   try {
     const account = await Account.findById(_id);
     //check profile && account
@@ -396,13 +397,13 @@ const recoveryAccount = async (body) => {
       account.isDelete = false;
       await account.save();
       return {
-        msg: 'recovery account successful',
+        msg: msg.recovery,
         statusCode: 200,
         data: account,
       };
     } else {
       return {
-        msg: 'account does not exists',
+        msg: msg.notFound.replace('%s', _id),
         statusCode: 200,
         data: account,
       };
@@ -410,7 +411,7 @@ const recoveryAccount = async (body) => {
   } catch (err) {
     console.log(err);
     return {
-      msg: 'An error occurred during recovery account proccess',
+      msg: msg.err,
       statusCode: 300,
     };
   }
@@ -418,49 +419,51 @@ const recoveryAccount = async (body) => {
 
 //**PROFILE */
 //get Infor User
-const getProfile = async (body) => {
-  let { AccountId } = body || {};
+const getProfile = async (AccountId, req) => {
+  const msg = getMsg(req);
   try {
     const data = await Profile.findById({ _id: AccountId });
     if (!data) {
       return {
-        msg: 'user not found',
+        msg: msg.notFound.replace('%s', AccountId),
         statusCode: 300,
       };
     } else {
       return {
-        msg: 'get user  profile successful! ',
+        msg: msg.getProfile,
         statusCode: 200,
         data: data,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the get  user profile  process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const updateProfile = async (AccountId, body) => {
+const updateProfile = async (AccountId, req) => {
+  let body = req.body || {};
+  const msg = getMsg(req);
   try {
     const res = await Profile.findById({ _id: AccountId });
     if (res) {
       await Profile.findOneAndUpdate({ _id: AccountId }, body);
       return {
-        msg: 'update user profile successful',
+        msg: msg.updateProfile,
         statusCode: 200,
         data: res,
       };
     } else {
       return {
-        msg: 'user not found!',
+        msg: msg.notFound.replace('%s', AccountId),
         statusCode: 300,
       };
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during the get  update user profile  process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
@@ -471,6 +474,7 @@ const searchUser = async (req) => {
   let keyword = req.query.keyword;
   let perPage = 10;
   let { page } = req.query || 1;
+  const msg = getMsg(req);
   try {
     const sub = 'admin';
 
@@ -502,13 +506,13 @@ const searchUser = async (req) => {
       }
     }
     return {
-      msg: 'search successful',
+      msg: msg.searchUser,
       data: { result, total },
       statusCode: 200,
     };
   } catch {
     return {
-      msg: 'An error occurred during the search user profile  process',
+      msg: msg.err,
       statusCode: 300,
     };
   }

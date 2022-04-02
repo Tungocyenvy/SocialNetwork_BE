@@ -3,7 +3,8 @@ const postService = require('../services/post.service');
 
 const createPost = async (req, res, next) => {
   const userID = req.value.body.token.data;
-  const resService = await postService.createPost(userID, req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await postService.createPost(userID, req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -16,8 +17,9 @@ const createPost = async (req, res, next) => {
 };
 
 const getDetailPost = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
   const postId = req.params.postId;
-  const resService = await postService.getDetailPost(postId);
+  const resService = await postService.getDetailPost(postId, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -31,8 +33,9 @@ const getDetailPost = async (req, res, next) => {
 
 //for maingroup
 const getListPostByUserId = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
   const userID = req.value.body.token.data;
-  const resService = await postService.getListPostByUserId(userID, req);
+  const resService = await postService.getListPostByUserId(userID, req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -46,7 +49,8 @@ const getListPostByUserId = async (req, res, next) => {
 
 //for subgroup
 const getListPostByGroupId = async (req, res, next) => {
-  const resService = await postService.getListPostByGroupId(req);
+  const lang = req.headers['accept-language'];
+  const resService = await postService.getListPostByGroupId(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -59,7 +63,8 @@ const getListPostByGroupId = async (req, res, next) => {
 };
 
 const deletPost = async (req, res, next) => {
-  const resService = await postService.deletePost(req);
+  const lang = req.headers['accept-language'];
+  const resService = await postService.deletePost(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -72,7 +77,8 @@ const deletPost = async (req, res, next) => {
 };
 
 const updatePost = async (req, res, next) => {
-  const resService = await postService.updatePost(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await postService.updatePost(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,

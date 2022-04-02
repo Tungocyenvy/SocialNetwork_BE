@@ -1,7 +1,15 @@
 const Message = require('../models/message.model');
 const conversationService = require('./conversation.service');
+const I18n = require('../config/i18n');
 
-const createMessage = async (data) => {
+const getMsg = (req) => {
+  let lang = req || 'en';
+  I18n.setLocale(lang);
+  return (msg = I18n.__('message'));
+};
+
+const createMessage = async (data, lang) => {
+  const msg = getMsg(lang);
   try {
     if (data) {
       const res = await Message.create(data);
@@ -11,45 +19,46 @@ const createMessage = async (data) => {
             .statusCode;
           if (stt === 3000) {
             return {
-              msg: 'update message lastest failed',
+              msg: msg.messageLastest,
               statusCode: 300,
             };
           }
           return {
-            msg: 'add message & update message lastest successfully',
+            msg: msg.createMessage,
             statusCode: 200,
             data: res,
           };
         } catch (err) {
           return {
-            msg: 'An error occurred during updating message lastest',
+            msg: msg.messageLastest,
             statusCode: 300,
           };
         }
       } else {
         return {
-          msg: 'add message failed',
+          msg: msg.addFailed,
           statusCode: 300,
         };
       }
     } else {
       return {
-        msg: "Don't have data",
+        msg: msg.validator,
         statusCode: 300,
       };
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during creating message participants',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const getMessage = async (req, userId) => {
+const getMessage = async (req, userId, lang) => {
   let { conversationId } = req.query || {};
   let perPage = 15;
   let { page } = req.query || 1;
+  const msg = getMsg(lang);
   try {
     let lstMessage = [];
     //get top 7 lastest message
@@ -76,7 +85,7 @@ const getMessage = async (req, userId) => {
     }
 
     return {
-      msg: 'get message successfully',
+      msg: msg.getMessage,
       statusCode: 200,
       data: {
         lstMessage,
@@ -85,7 +94,7 @@ const getMessage = async (req, userId) => {
     };
   } catch (err) {
     return {
-      msg: 'An error occurred during the get message process',
+      msg: msg.err,
       statusCode: 300,
     };
   }

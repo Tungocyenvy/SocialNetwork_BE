@@ -15,7 +15,7 @@ const signin = async (req, res, next) => {
 };
 
 const forgotPass = async (req, res, next) => {
-  const resService = await accountService.forgotPassword(req.body);
+  const resService = await accountService.forgotPassword(req);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -27,7 +27,7 @@ const forgotPass = async (req, res, next) => {
 };
 
 const resetPassword = async (req, res, next) => {
-  const resService = await accountService.resetPassword(req.body);
+  const resService = await accountService.resetPassword(req);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -40,8 +40,8 @@ const resetPassword = async (req, res, next) => {
 };
 
 const changePassword = async (req, res, next) => {
-  const tokenID = req.value.body.token.data;
-  const resService = await accountService.changePassword(tokenID, req.body);
+  const userID = req.value.body.token.data;
+  const resService = await accountService.changePassword(userID, req);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -54,9 +54,10 @@ const changePassword = async (req, res, next) => {
 };
 
 const getProfile = async (req, res, next) => {
-  const token = req.value.body.token.data;
+  const AccountId = req.value.body.token.data;
   const resService = await accountService.getProfile({
-    AccountId: token,
+    AccountId,
+    req,
   });
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
@@ -70,11 +71,8 @@ const getProfile = async (req, res, next) => {
 };
 
 const updateProfile = async (req, res, next) => {
-  // const TokenID = req.value.body.token?.data;
-  // const { token, ...data } = req.value.body;
-  const token = req.value.body.token.data;
-  console.log(req.body);
-  const resService = await accountService.updateProfile(token, req.body);
+  const AccountId = req.value.body.token.data;
+  const resService = await accountService.updateProfile(AccountId, req);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -87,7 +85,7 @@ const updateProfile = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
-  const resService = await accountService.signup(req.body);
+  const resService = await accountService.signup(req);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -99,7 +97,7 @@ const signup = async (req, res, next) => {
 };
 
 const deleteAccount = async (req, res, next) => {
-  const resService = await accountService.deleteAccount(req.body);
+  const resService = await accountService.deleteAccount(req);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,
@@ -111,7 +109,7 @@ const deleteAccount = async (req, res, next) => {
 };
 
 const recoveryAccount = async (req, res, next) => {
-  const resService = await accountService.recoveryAccount(req.body);
+  const resService = await accountService.recoveryAccount(req);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,

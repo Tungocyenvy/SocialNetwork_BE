@@ -1,18 +1,26 @@
 const participant = require('../models/participant.model');
+const I18n = require('../config/i18n');
 
-const addParticipant = async (data) => {
+const getMsg = (req) => {
+  let lang = req || 'en';
+  I18n.setLocale(lang);
+  return (msg = I18n.__('participant'));
+};
+
+const addParticipant = async (data, lang) => {
+  const msg = getMsg(lang);
   try {
     const res = await participant.insertMany(data, {
       ordered: true,
     });
     return {
-      msg: 'add participants successfully',
+      msg: msg.addParticipant,
       statusCode: 200,
       data: res,
     };
   } catch (err) {
     return {
-      msg: 'An error occurred during adding participants',
+      msg: msg.err,
       statusCode: 300,
     };
   }

@@ -2,7 +2,8 @@ const controller = require('./index');
 const participantService = require('../services/participant.service');
 
 const addParticipant = async (req, res, next) => {
-  const resService = await participantService.addParticipant(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await participantService.addParticipant(req.body, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(

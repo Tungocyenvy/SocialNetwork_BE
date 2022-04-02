@@ -3,7 +3,8 @@ const categoryService = require('../services/category.service');
 
 //GROUP
 const getCategoryGroup = async (req, res, next) => {
-  const resService = await categoryService.getCategoryGroup(req);
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.getCategoryGroup(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -16,7 +17,8 @@ const getCategoryGroup = async (req, res, next) => {
 };
 
 const updateCategoryGroup = async (req, res, next) => {
-  const resService = await categoryService.updateCategoryGroup(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.updateCategoryGroup(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -29,7 +31,8 @@ const updateCategoryGroup = async (req, res, next) => {
 };
 
 const createCategoryGroup = async (req, res, next) => {
-  const resService = await categoryService.createCategoryGroup(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.createCategoryGroup(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -43,7 +46,8 @@ const createCategoryGroup = async (req, res, next) => {
 
 //REPORT
 const getCategoryReport = async (req, res, next) => {
-  const resService = await categoryService.getCategoryReport(req);
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.getCategoryReport(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -56,7 +60,8 @@ const getCategoryReport = async (req, res, next) => {
 };
 
 const updateCategoryReport = async (req, res, next) => {
-  const resService = await categoryService.updateCategoryReport(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.updateCategoryReport(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -69,7 +74,8 @@ const updateCategoryReport = async (req, res, next) => {
 };
 
 const createCategoryReport = async (req, res, next) => {
-  const resService = await categoryService.createCategoryReport(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.createCategoryReport(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,

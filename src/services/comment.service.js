@@ -3,6 +3,23 @@ const Profile = require('../models/profile.model');
 const Reply = require('../models/reply.model');
 const Post = require('../models/post.model');
 const { map, keyBy } = require('lodash');
+const I18n = require('../config/i18n');
+const { acceptsLanguage } = require('express/lib/request');
+const {
+  CredentialListMappingContext,
+} = require('twilio/lib/rest/api/v2010/account/sip/domain/credentialListMapping');
+const {
+  SyncListPermissionPage,
+} = require('twilio/lib/rest/preview/sync/service/syncList/syncListPermission');
+const {
+  IpAccessControlListMappingContext,
+} = require('twilio/lib/rest/api/v2010/account/sip/domain/ipAccessControlListMapping');
+
+const getMsg = (req) => {
+  let lang = req || 'en';
+  I18n.setLocale(lang);
+  return (msg = I18n.__('comment'));
+};
 
 const transferComment = (comment, profile) => {
   const { _id, userId, content, postId, countReply, createdDate } = comment;
@@ -49,14 +66,15 @@ const getId = (parentId, object, isComment) => {
 };
 /**COMMENT */
 //get comment by postId
-const getComment = async (req) => {
+const getComment = async (req, lang) => {
   let perPage = 5;
   let { page } = req.query || 1;
   let { postId } = req.params || {};
+  const msg = getMsg(lang);
   try {
     if (!postId) {
       return {
-        msg: "Don't have postId!",
+        msg: msg.validatePostId,
         statusCode: 300,
       };
     }
@@ -64,7 +82,7 @@ const getComment = async (req) => {
 
     if (!post) {
       return {
-        msg: 'PostId not found!',
+        msg: msg.notFoundPost,
         statusCode: 300,
       };
     }
@@ -73,7 +91,7 @@ const getComment = async (req) => {
 
     if (countCmt <= 0) {
       return {
-        msg: "Don't have any comments!",
+        msg: msg.notHaveCmt,
         statusCode: 200,
         data: { comment: {}, countCmt },
       };
@@ -128,26 +146,25 @@ const getComment = async (req) => {
     });
 
     return {
-      msg: 'Get comment by postId successful!',
+      msg: msg.getComment,
       statusCode: 200,
       data: { result, countCmt },
     };
   } catch (error) {
     return {
-      msg: 'An error occurred during the get comment process!',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 //create comment
-const createComment = async (token, body) => {
-  let { userId } = token;
-  let { content, postId } = body || {};
+const createComment = async (userId, body, lang) => {
+  const msg = getMsg(lang);
   try {
     if (!postId) {
       return {
-        msg: "Don't have postId!",
+        msg: msg.validatePostId,
         statusCode: 300,
       };
     }
@@ -156,7 +173,7 @@ const createComment = async (token, body) => {
 
     if (!post) {
       return {
-        msg: 'PostId not found!',
+        msg: msg.notFoundPost,
         statusCode: 300,
       };
     }
@@ -183,33 +200,26 @@ const createComment = async (token, body) => {
       const result = transferComment(resSave, objProfile);
 
       return {
-        msg: 'Your comment submission was successful!',
+        msg: msg.createComment,
         statusCode: 200,
         data: result,
       };
     }
-    resSave = {};
-    return {
-      msg: 'Comment failed to post',
-      statusCode: 300,
-      data: resSave,
-    };
   } catch (error) {
     return {
-      msg: 'An error occurred during the submiss comment process!',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const updateComment = async (token, body) => {
-  let { userId } = token;
-  let { content, commentId } = body || {};
+const updateComment = async (userId, body, lang) => {
+  const msg = getMsg(lang);
   try {
     let comment = await Comment.findById({ _id: commentId });
     if (!comment) {
       return {
-        msg: 'Comment not found!',
+        msg: msg.notFoundCmt,
         statusCode: 300,
         data: comment,
       };
@@ -221,25 +231,26 @@ const updateComment = async (token, body) => {
     const objProfile = keyBy(profile, '_id');
     const result = transferComment(comment, objProfile);
     return {
-      msg: 'Edit Comment Successful!',
+      msg: msg.updateComment,
       statusCode: 200,
       data: result,
     };
   } catch (error) {
     return {
-      msg: 'An error occurred during edit comment process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const deleteComment = async (userId, req) => {
+const deleteComment = async (userId, req, lang) => {
   let { commentId } = req.params || {};
+  const msg = getMsg(lang);
   try {
     const comment = await Comment.findById({ _id: commentId });
     if (!comment) {
       return {
-        msg: 'Comment not found!',
+        msg: msg.notFoundCmt,
         statusCode: 300,
       };
     }
@@ -250,7 +261,7 @@ const deleteComment = async (userId, req) => {
     //   commentID: { $in: userIds },
     // });
     return {
-      msg: 'Delete comment successful!',
+      msg: msg.deleteComment,
       statusCode: 200,
     };
 
@@ -263,21 +274,22 @@ const deleteComment = async (userId, req) => {
     // }
   } catch (error) {
     return {
-      msg: 'An error occurred during delete comment process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 /**REPLY */
-const getReply = async (req) => {
+const getReply = async (req, lang) => {
   let perPage = 3;
   let { page } = req.query || 1;
   let { commentID } = req.params || {};
+  const msg = getMsg(lang);
   try {
     if (!commentID) {
       return {
-        msg: "Don't have commentId!",
+        msg: msg.validateCommentId,
         statusCode: 300,
       };
     }
@@ -285,7 +297,7 @@ const getReply = async (req) => {
 
     if (!comment) {
       return {
-        msg: 'comment not found!',
+        msg: msg.notFoundCmt,
         statusCode: 300,
       };
     }
@@ -294,7 +306,7 @@ const getReply = async (req) => {
 
     if (countReply <= 0) {
       return {
-        msg: "Don't have any replies!",
+        msg: msg.notHaveReply,
         statusCode: 200,
         data: { reply: {}, countReply },
       };
@@ -325,26 +337,25 @@ const getReply = async (req) => {
     });
 
     return {
-      msg: 'Get reply by commentId successful!',
+      msg: msg.getReply,
       statusCode: 200,
       data: { result, countReply },
     };
   } catch (error) {
     return {
-      msg: 'An error occurred during the get reply comment process!',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 //reply comment
-const replyComment = async (token, body) => {
-  let { userId } = token;
-  let { content, commentId } = body || {};
+const replyComment = async (userId, body, lang) => {
+  const msg = getMsg(lang);
   try {
     if (!commentId) {
       return {
-        msg: "Don't have commentId!",
+        msg: msg.validateCommentId,
         statusCode: 300,
       };
     }
@@ -352,7 +363,7 @@ const replyComment = async (token, body) => {
     let comment = await Comment.findById({ _id: commentId });
     if (!comment) {
       return {
-        msg: 'Comment not found!',
+        msg: msg.notFoundCmt,
         statusCode: 300,
         data: comment,
       };
@@ -380,34 +391,28 @@ const replyComment = async (token, body) => {
       const result = transferReply(res, objProfile);
 
       return {
-        msg: 'Your reply comment submission was successful!',
+        msg: msg.createReply,
         statusCode: 200,
         data: result,
       };
     }
-    res = {};
-    return {
-      msg: 'Reply comment failed to post',
-      statusCode: 300,
-      data: res,
-    };
   } catch (error) {
     return {
-      msg: 'An error occurred during the reply to comment process!',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const updateReply = async (token, body) => {
-  let { userId } = token;
+const updateReply = async (userId, body, lang) => {
   let { content, replyId } = body || {};
+  const msg = getMsg(lang);
   //console.log(_id);
   try {
     let reply = await Reply.findById({ _id: replyId });
     if (!reply) {
       return {
-        msg: 'reply not found!',
+        msg: msg.notFoundReply,
         statusCode: 300,
         data: reply,
       };
@@ -419,32 +424,33 @@ const updateReply = async (token, body) => {
     const objProfile = keyBy(profile, '_id');
     const result = transferReply(reply, objProfile);
     return {
-      msg: 'Edit Reply Successful!',
+      msg: msg.updateReply,
       statusCode: 200,
       data: result,
     };
   } catch (error) {
     return {
-      msg: 'An error occurred during edit reply process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const deleteReply = async (userId, req) => {
+const deleteReply = async (userId, req, lang) => {
   let { replyId } = req.params || {};
+  const msg = getMsg(lang);
   try {
     const reply = await Reply.findById({ _id: replyId });
     if (!reply) {
       return {
-        msg: 'reply not found!',
+        msg: msg.notFoundReply,
         statusCode: 300,
       };
     }
 
     await Reply.findOneAndDelete({ _id: replyId });
     return {
-      msg: 'Delete reply successful!',
+      msg: msg.deleteReply,
       statusCode: 200,
     };
     // if (replys[i].userId !== userId && !account.IsAdmin) {
@@ -455,7 +461,7 @@ const deleteReply = async (userId, req) => {
     // }
   } catch (error) {
     return {
-      msg: 'An error occurred during delete reply process',
+      msg: msg.err,
       statusCode: 300,
     };
   }

@@ -3,8 +3,9 @@ const commentService = require('../services/comment.service');
 
 //get comment by postId
 const getComment = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
   // const postId = req.params.postId;
-  const resService = await commentService.getComment(req);
+  const resService = await commentService.getComment(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -17,11 +18,9 @@ const getComment = async (req, res, next) => {
 };
 
 const createComment = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const resService = await commentService.createComment(
-    { userId: token },
-    req.body,
-  );
+  const userId = req.value.body.token.data;
+  const lang = req.headers['accept-language'];
+  const resService = await commentService.createComment(userId, req.body, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
@@ -34,11 +33,9 @@ const createComment = async (req, res, next) => {
 };
 
 const updateComment = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const resService = await commentService.updateComment(
-    { userId: token },
-    req.body,
-  );
+  const userId = req.value.body.token.data;
+  const lang = req.headers['accept-language'];
+  const resService = await commentService.updateComment(userId, req.body, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
@@ -52,8 +49,8 @@ const updateComment = async (req, res, next) => {
 
 const deleteComment = async (req, res, next) => {
   const userId = req.value.body.token.data;
-  const idComment = req.params.id;
-  const resService = await commentService.deleteComment(userId, req);
+  const lang = req.headers['accept-language'];
+  const resService = await commentService.deleteComment(userId, req, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
@@ -66,7 +63,8 @@ const deleteComment = async (req, res, next) => {
 };
 
 const getReply = async (req, res, next) => {
-  const resService = await commentService.getReply(req);
+  const lang = req.headers['accept-language'];
+  const resService = await commentService.getReply(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -79,11 +77,9 @@ const getReply = async (req, res, next) => {
 };
 
 const updateReply = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const resService = await commentService.updateReply(
-    { userId: token },
-    req.body,
-  );
+  const userId = req.value.body.token.data;
+  const lang = req.headers['accept-language'];
+  const resService = await commentService.updateReply(userId, req.body, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
@@ -96,11 +92,9 @@ const updateReply = async (req, res, next) => {
 };
 
 const replyComment = async (req, res, next) => {
-  const token = req.value.body.token.data;
-  const resService = await commentService.replyComment(
-    { userId: token },
-    req.body,
-  );
+  const userId = req.value.body.token.data;
+  const lang = req.headers['accept-language'];
+  const resService = await commentService.replyComment(userId, req.body, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
@@ -114,7 +108,8 @@ const replyComment = async (req, res, next) => {
 
 const deleteReply = async (req, res, next) => {
   const userId = req.value.body.token.data;
-  const resService = await commentService.deleteReply(userId, req);
+  const lang = req.headers['accept-language'];
+  const resService = await commentService.deleteReply(userId, req, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(

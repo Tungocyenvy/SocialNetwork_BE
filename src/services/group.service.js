@@ -5,6 +5,13 @@ const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
 const Account = require('../models/account.model');
 const Profile = require('../models/profile.model');
+const I18n = require('../config/i18n');
+
+const getMsg = (req) => {
+  let lang = req || 'en';
+  I18n.setLocale(lang);
+  return (msg = I18n.__('group'));
+};
 
 // const checkGroup= async (body) =>{
 //     let {group}=body;
@@ -19,14 +26,15 @@ const Profile = require('../models/profile.model');
 
 //USER
 //add user to group
-const addUser = async (body) => {
+const addUser = async (body, lang) => {
   let { userId, groupId, type, roleId } = body || {};
+  const msg = getMsg(lang);
   try {
     let isStudent = true;
     if (roleId != null && roleId !== 4) isStudent = false;
     if (!userId || !groupId) {
       return {
-        msg: "Don't have userId or groupId",
+        msg: msg.validator,
         statusCode: 300,
       };
     }
@@ -40,47 +48,38 @@ const addUser = async (body) => {
         await userSubGroup.create(data);
       }
       return {
-        msg: 'Add ' + userId + ' to ' + groupId + ' successful!',
+        msg: msg.group.replace('%s', userId).replace('%s', groupId),
         statusCode: 200,
       };
     } catch {
       return {
-        msg:
-          'An error occurred during add ' +
-          userId +
-          ' to group ' +
-          groupId +
-          ' process',
+        msg: msg.errGroup.replace('%s', userId).replace('%s', groupId),
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg:
-        'An error occurred during add ' +
-        userId +
-        ' to group ' +
-        groupId +
-        ' process',
+      msg: msg.errGroup.replace('%s', userId).replace('%s', groupId),
       statusCode: 300,
     };
   }
 };
 
 //delete user from MainGroup
-const deleteListUser = async (body) => {
+const deleteListUser = async (body, lang) => {
   let { userIds, groupId, type } = body || {};
+  const msg = getMsg(lang);
   try {
     if (!userIds || !groupId) {
       return {
-        msg: "Don't have userIds or groupId",
+        msg: msg.validator,
         statusCode: 300,
       };
     }
     const group = await Group.findById({ _id: groupId });
     if (!group) {
       return {
-        msg: 'GroupId not found!',
+        msg: msg.notFoundGroup,
         statusCode: 300,
       };
     }
@@ -98,30 +97,31 @@ const deleteListUser = async (body) => {
         });
       }
       return {
-        msg: 'delete list user ' + userIds + ' successful!',
+        msg: msg.deleteListUser,
         statusCode: 200,
       };
     } catch {
       return {
-        msg: 'An error occurred during delete list user process',
+        msg: msg.err,
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during delete list user process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 //Detele user
-const deleteUser = async (body) => {
+const deleteUser = async (body, lang) => {
   let { userId, groupId, type } = body || {};
+  const msg = getMsg(lang);
   try {
     if (!userId || !groupId) {
       return {
-        msg: "Don't have userId or groupId",
+        msg: msg.validator,
         statusCode: 300,
       };
     }
@@ -129,7 +129,7 @@ const deleteUser = async (body) => {
     const group = await Group.findById({ _id: groupId });
     if (!group) {
       return {
-        msg: 'GroupId ' + groupId + ' not found!',
+        msg: msg.notFoundGroup,
         statusCode: 300,
       };
     }
@@ -146,28 +146,18 @@ const deleteUser = async (body) => {
         });
       }
       return {
-        msg: 'delete ' + userId + ' from ' + groupId + ' successful!',
+        msg: msg.deleteUser.replace('%s', userId).replace('%s', groupId),
         statusCode: 200,
       };
     } catch {
       return {
-        msg:
-          'An error occurred during delete ' +
-          userId +
-          ' from group ' +
-          groupId +
-          ' process',
+        msg: msg.errDelete.replace('%s', userId).replace('%s', groupId),
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg:
-        'An error occurred during delete ' +
-        userId +
-        ' from group ' +
-        groupId +
-        ' process',
+      msg: msg.errDelete.replace('%s', userId).replace('%s', groupId),
       statusCode: 300,
     };
   }
@@ -175,29 +165,31 @@ const deleteUser = async (body) => {
 
 //FACULTY
 //send Notify for maingroup
-const sendNotifyForMainGroup = async (body) => {
+const sendNotifyForMainGroup = async (body, lang) => {
+  const msg = getMsg(lang);
   try {
     await Notify.insertMany(body);
     return {
-      msg: 'send notify susscessful',
+      msg: msg.sendNotify,
       statusCode: 200,
     };
   } catch (err) {
     return {
-      msg: 'An error occurred during send notify to user ',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const getListFaculty = async (req) => {
+const getListFaculty = async (req, lang) => {
   let perPage = 10;
   let { isAll = true, page = 1 } = req.query || {};
+  const msg = getMsg(lang);
   try {
     const total = await Group.countDocuments({ isMain: true });
     if (total <= 0) {
       return {
-        msg: "Don't have main group",
+        msg: msg.notHaveMainGr,
         statusCode: 300,
       };
     }
@@ -211,31 +203,32 @@ const getListFaculty = async (req) => {
     );
     if (result.length > 0) {
       return {
-        msg: 'get list faculty susscessful',
+        msg: msg.getListFaculty,
         statusCode: 200,
         data: result,
       };
     } else {
       return {
-        msg: "Don't have any faculty",
+        msg: msg.notHaveFaculty,
         statusCode: 300,
       };
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during get list faculty',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const createFaculty = async (body) => {
+const createFaculty = async (body, lang) => {
+  const msg = getMsg(lang);
   try {
     if (body) {
       const faculty = await Group.findById({ _id: body._id });
       if (faculty) {
         return {
-          msg: 'faculty identifier is exist!',
+          msg: msg.existFac,
           statusCode: 200,
           data: faculty,
         };
@@ -244,27 +237,28 @@ const createFaculty = async (body) => {
       data.isMain = true;
       await Group.create(data);
       return {
-        msg: 'Create faculty successful!',
+        msg: msg.createFaculty,
         statusCode: 200,
         data: data,
       };
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during create faculty',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const updateFaculty = async (body) => {
+const updateFaculty = async (body, lang) => {
+  const msg = getMsg(lang);
   try {
     if (body) {
       const res = await Group.findByIdAndUpdate({ _id: body._id }, body);
       if (res) {
         const result = await Group.findById({ _id: body._id });
         return {
-          msg: 'Update faculty successful!',
+          msg: msg.updateFaculty,
           statusCode: 200,
           data: result,
         };
@@ -272,14 +266,15 @@ const updateFaculty = async (body) => {
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during update faculty',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const tranferFaculty = async (body) => {
+const tranferFaculty = async (body, lang) => {
   let { facultyTo, facultyFrom, userId } = body || {};
+  const msg = getMsg(lang);
   try {
     const sttDelete = (
       await deleteUser({ userId, groupId: facultyFrom, type: 'main' })
@@ -287,12 +282,7 @@ const tranferFaculty = async (body) => {
     console.log(sttDelete);
     if (sttDelete === 300) {
       return {
-        msg:
-          'An error occurred during delete ' +
-          userId +
-          ' from group ' +
-          facultyFrom +
-          ' process',
+        msg: msg.errDelete.replace('%s', userId).replace('%s', facultyFrom),
         statusCode: 300,
       };
     }
@@ -300,12 +290,7 @@ const tranferFaculty = async (body) => {
       .statusCode;
     if (sttAdd === 300) {
       return {
-        msg:
-          'An error occurred during add ' +
-          userId +
-          ' to group ' +
-          facultyTo +
-          ' process',
+        msg: msg.errGroup.replace('%s', userId).replace('%s', facultyTo),
         statusCode: 300,
       };
     }
@@ -315,21 +300,22 @@ const tranferFaculty = async (body) => {
     const res = await profile.save();
     if (res) {
       return {
-        msg: 'Inter-Faculty Transfer successful!',
+        msg: msg.tranferFaculty,
         statusCode: 200,
         data: profile,
       };
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during tranfer faculty',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const changeAdmin = async (body) => {
+const changeAdmin = async (body, lang) => {
   let { groupId, userId, type, isRemove } = body || {};
+  const msg = getMsg(lang);
   try {
     let user = {};
     if (type == 'main') {
@@ -340,7 +326,7 @@ const changeAdmin = async (body) => {
 
     if (!user) {
       return {
-        msg: 'user not found in group',
+        msg: msg.notFound,
         statusCode: 300,
       };
     }
@@ -351,30 +337,28 @@ const changeAdmin = async (body) => {
     if (type != 'main')
       await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
     return {
-      msg: 'change admin for group ' + groupId + ' successful!',
+      msg: msg.changeAdmin.replace('%s', groupId),
       statusCode: 200,
       data: user,
     };
   } catch (err) {
     return {
-      msg: 'An error occurred during change admin for  group ' + groupId,
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 //SUBGROUP
-const createSubGroup = async (userId, body) => {
+const createSubGroup = async (userId, body, lang) => {
+  const msg = getMsg(lang);
   try {
     if (body) {
       let data = body;
       data._id = mongoose.Types.ObjectId();
       data.isMain = false;
 
-      console.log(data);
-
       const res = await Group.create(data);
-      console.log(res);
 
       if (res) {
         const groupId = res._id;
@@ -383,7 +367,7 @@ const createSubGroup = async (userId, body) => {
         await userSubGroup.create(dataUser);
         await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
         return {
-          msg: 'Create faculty successful!',
+          msg: msg.createSub,
           statusCode: 200,
           data: data,
         };
@@ -391,20 +375,21 @@ const createSubGroup = async (userId, body) => {
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during create faculty',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const getAllGroup = async (req) => {
+const getAllGroup = async (req, lang) => {
   let perPage = 10;
   let { page } = req.query || 1;
+  const msg = getMsg(lang);
   try {
     let total = await Group.countDocuments({ isMain: false });
     if (total <= 0) {
       return {
-        msg: "Don't have any group",
+        msg: msg.notHaveSubGr,
         statusCode: 300,
       };
     }
@@ -414,27 +399,28 @@ const getAllGroup = async (req) => {
       .limit(perPage);
 
     return {
-      msg: 'Get all Group successful!',
+      msg: msg.getSub,
       statusCode: 200,
       data: { total, result },
     };
   } catch {
     return {
-      msg: 'An error occurred during the get all group process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const getRelativeGroup = async (req) => {
+const getRelativeGroup = async (req, lang) => {
   let { groupId } = req.params || {};
   let perPage = 2;
   let { page } = req.query || 1;
+  const msg = getMsg(lang);
   try {
     const group = await Group.findById({ _id: groupId });
     if (!group) {
       return {
-        msg: 'GroupId not found!',
+        msg: msg.notFoundGroup,
         statusCode: 300,
       };
     }
@@ -456,38 +442,39 @@ const getRelativeGroup = async (req) => {
         .limit(perPage);
 
       return {
-        msg: 'Get Ralative Group successful!',
+        msg: msg.getRalative,
         statusCode: 200,
         data: { total, result },
       };
     } else {
       return {
-        msg: "Don't have any relative group",
+        msg: msg.getRalative,
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the get relative group process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const updateGroup = async (body) => {
+const updateGroup = async (body, lang) => {
+  const msg = getMsg(lang);
   try {
     const res = await Group.findByIdAndUpdate({ _id: body._id }, body);
     if (res) {
       const result = await Group.findById({ _id: body._id });
       return {
-        msg: 'update group successfull',
+        msg: msg.updateSub,
         statusCode: 200,
         data: result,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the update group process',
+      msg: msg.err,
       statusCode: 300,
     };
   }

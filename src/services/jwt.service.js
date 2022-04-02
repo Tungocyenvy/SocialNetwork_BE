@@ -1,7 +1,13 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const serectKey = process.env.ACCESS_TOKEN_SERECT;
-console.log(serectKey);
+const I18n = require('../config/i18n');
+
+const getMsg = (req) => {
+  let lang = req.headers['accept-language'] || 'en';
+  I18n.setLocale(lang);
+  return (msg = I18n.__('jwt'));
+};
 
 function createToken(data) {
   return jwt.sign(
@@ -18,13 +24,14 @@ function createToken(data) {
 async function verify(req, res, next) {
   try {
     const header = req.headers.authorization;
+    const msg = getMsg(req);
 
     if (!header) {
       res.json({
         data: {
           tokenVerificationData: {
             access: false,
-            message: 'No token provided',
+            message: msg.noProvided,
           },
         },
       });
@@ -38,7 +45,7 @@ async function verify(req, res, next) {
           data: {
             tokenVerificationData: {
               access: false,
-              message: 'Failed to verify token',
+              message: msg.failed,
             },
           },
         });
@@ -57,7 +64,7 @@ async function verify(req, res, next) {
       data: {
         tokenVerificationData: {
           access: false,
-          message: 'Failed to verify token',
+          message: msg.failed,
         },
       },
     });

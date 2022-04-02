@@ -4,6 +4,13 @@ const Profile = require('../models/profile.model');
 const participantService = require('./participant.service');
 const moment = require('moment');
 const { map, keyBy } = require('lodash');
+const I18n = require('../config/i18n');
+
+const getMsg = (req) => {
+  let lang = req || 'en';
+  I18n.setLocale(lang);
+  return (msg = I18n.__('conversation'));
+};
 
 const getConversationId = async (userOne, userTwo) => {
   const sub = 'admin';
@@ -32,8 +39,9 @@ const getConversationId = async (userOne, userTwo) => {
   }
   return result;
 };
-const getConversation = async (userOne, userTwo) => {
-  const result = await getConversationId(userOne, userTwo);
+const getConversation = async (userOne, userTwo, lang) => {
+  const msg = getMsg(lang);
+  const result = await getConversationId(userOne, userOne);
   if (result) {
     const conversation = await Conversation.findById(result);
     const user = await Profile.findById(userTwo);
@@ -51,22 +59,23 @@ const getConversation = async (userOne, userTwo) => {
         };
 
     return {
-      msg: 'get conversationId successfully',
+      msg: msg.getConversation,
       statusCode: 200,
       data,
     };
   } else {
     return {
-      msg: 'An error occurred during get conversation',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const createConversation = async (body) => {
+const createConversation = async (body, lang) => {
   try {
     var userOne = body[0];
     var userTwo = body[1];
+    const msg = getMsg(lang);
 
     const conversationId = await getConversationId(userOne, userTwo);
     if (conversationId) {
@@ -89,20 +98,20 @@ const createConversation = async (body) => {
           ).statusCode;
           if (addParticipant === 200) {
             return {
-              msg: 'create a conversation & add participants successfully',
+              msg: msg.createConversation,
               statusCode: 200,
               data: res,
             };
           } else {
             return {
-              msg: 'add participants failed',
+              msg: msg.errParticipant,
               statusCode: 300,
               data: res,
             };
           }
         } else {
           return {
-            msg: 'create a converstion failed',
+            msg: msg.errCreateConver,
             statusCode: 300,
           };
         }
@@ -112,19 +121,20 @@ const createConversation = async (body) => {
       };
     } else {
       return {
-        msg: 'create a converstion failed',
+        msg: msg.errCreateConver,
         statusCode: 300,
       };
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during creating conversation',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const updateConversation = async (body) => {
+const updateConversation = async (body, lang) => {
+  const msg = getMsg(lang);
   try {
     if (body) {
       const conversation = new Conversation();
@@ -138,22 +148,23 @@ const updateConversation = async (body) => {
         conversation,
       );
       return {
-        msg: 'update a conversation successfully',
+        msg: msg.updateConversation,
         statusCode: 200,
         data: res,
       };
     }
   } catch (err) {
     return {
-      msg: 'An error occurred during the update conversation process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const getListConversation = async (userId, req) => {
+const getListConversation = async (userId, req, lang) => {
   let perPage = 10;
   let { page } = req.query || 1;
+  const msg = getMsg(lang);
   try {
     let result = [];
     let total = 0;
@@ -226,7 +237,7 @@ const getListConversation = async (userId, req) => {
       }
     }
     return {
-      msg: 'get list conversation successfully',
+      msg: msg.getListConver,
       statusCode: 200,
       data: {
         result,
@@ -235,7 +246,7 @@ const getListConversation = async (userId, req) => {
     };
   } catch (err) {
     return {
-      msg: 'An error occurred during the get list conversation process',
+      msg: msg.err,
       statusCode: 300,
     };
   }

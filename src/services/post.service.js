@@ -7,6 +7,13 @@ const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
 const Account = require('../models/account.model');
 const { map, keyBy } = require('lodash');
+const I18n = require('../config/i18n');
+
+const getMsg = (req) => {
+  let lang = req || 'en';
+  I18n.setLocale(lang);
+  return (msg = I18n.__('conversation'));
+};
 
 const getPostId = (groupId, lastestPost) => {
   let Id = Number(lastestPost.match(/[0-9]+$/)[0]) + 1;
@@ -15,12 +22,13 @@ const getPostId = (groupId, lastestPost) => {
 };
 
 //create post and send notify
-const createPost = async (userID, body) => {
+const createPost = async (userID, body, lang) => {
   let { groupId, isMainGroup, isStudent } = body || {};
+  const msg = getMsg(lang);
   try {
     if (!groupId && !isMainGroup) {
       return {
-        msg: "Don't have groupId or isMainGroup",
+        msg: msg.validator,
         statusCode: 300,
       };
     }
@@ -28,7 +36,7 @@ const createPost = async (userID, body) => {
 
     if (group.length <= 0) {
       return {
-        msg: 'GroupId not found!',
+        msg: msg.notFoundGroup,
         statusCode: 300,
       };
     }
@@ -77,7 +85,7 @@ const createPost = async (userID, body) => {
 
         if (sendNotify != 200) {
           return {
-            msg: 'send notify falied!',
+            msg: msg.errSendNotify,
             statusCode: 300,
           };
         }
@@ -86,30 +94,31 @@ const createPost = async (userID, body) => {
       }
 
       return {
-        msg: 'Create post and send notify to group successful!',
+        msg: msg.createPost,
         statusCode: 200,
         data: res,
       };
     } else {
       return {
-        msg: 'create post failed!',
+        msg: msg.createPostFail,
         statusCode: 300,
       };
     }
   } catch (err) {
     console.log(err);
     return {
-      msg: 'An error occurred during the create post process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 //get post by userId for main group
-const getListPostByUserId = async (userId, req) => {
+const getListPostByUserId = async (userId, req, lang) => {
   let { groupId } = req.params || {};
   let perPage = 10;
   let { isStudent = true, page = 1 } = req.query || {};
+  const msg = getMsg(lang);
   try {
     let lstNotify = [];
     const account = await Account.findById({ _id: userId });
@@ -173,35 +182,36 @@ const getListPostByUserId = async (userId, req) => {
         }
 
         return {
-          msg: 'Get list post successful!',
+          msg: msg.getListPost,
           statusCode: 200,
           data: { result, total },
         };
       } else {
         return {
-          msg: 'Not found post for group ' + groupId,
+          msg: msg.notHavePost,
           statusCode: 300,
         };
       }
     } else {
       return {
-        msg: 'user not found!',
+        msg: msg.notFoundUser,
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the get list post process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 //get post by userId for sub group
-const getListPostByGroupId = async (req) => {
+const getListPostByGroupId = async (req, lang) => {
   let { groupId } = req.params || {};
   let perPage = 10;
   let { page } = req.query || 1;
+  const msg = getMsg(lang);
   try {
     //get top 10 list post
 
@@ -242,92 +252,95 @@ const getListPostByGroupId = async (req) => {
       }
 
       return {
-        msg: 'Get list post successful!',
+        msg: msg.getListPost,
         statusCode: 200,
         data: { result, total },
       };
     } else {
       return {
-        msg: 'Not found post for group ' + groupId,
+        msg: msg.notHavePost,
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the get list post process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
 //get detail post by post id
-const getDetailPost = async (postId) => {
+const getDetailPost = async (postId, lang) => {
+  const msg = getMsg(lang);
   try {
     if (!postId) postId = '';
     const res = await Post.findById({ _id: postId });
     if (res) {
       return {
-        msg: 'Get detail post ' + postId + ' successful!',
+        msg: msg.getDetail,
         data: res,
         statusCode: 200,
       };
     } else {
       return {
-        msg: 'Post ' + postId + ' not found',
+        msg: msg.notFoundPost,
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the get detail post process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const deletePost = async (req) => {
+const deletePost = async (req, lang) => {
   let { postId = '' } = req.params || {};
+  const msg = getMsg(lang);
   try {
     const res = await Post.findByIdAndDelete({ _id: postId });
     if (res) {
       //pending delete notify
       return {
-        msg: 'Delete ' + postId + ' successful!',
+        msg: msg.deletePost,
         statusCode: 200,
       };
     } else {
       return {
-        msg: postId + ' not found!',
+        msg: msg.notFoundPost,
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the delete post process',
+      msg: msg.err,
       statusCode: 300,
     };
   }
 };
 
-const updatePost = async (body) => {
+const updatePost = async (body, lang) => {
+  const msg = getMsg(lang);
   try {
     const res = await Post.findByIdAndUpdate({ _id: body._id }, body);
     if (res) {
       const result = await Post.findById({ _id: body._id });
       return {
-        msg: 'Update post successful!',
+        msg: msg.updatePost,
         statusCode: 200,
         data: result,
       };
     } else {
       return {
-        msg: postId + ' not found!',
+        msg: msg.notFoundPost,
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: 'An error occurred during the update post process',
+      msg: msg.err,
       statusCode: 300,
     };
   }

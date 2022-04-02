@@ -3,7 +3,8 @@ const groupService = require('../services/group.service');
 
 //get comment by postId
 const addUser = async (req, res, next) => {
-  const resService = await groupService.addUser(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.addUser(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -17,7 +18,8 @@ const addUser = async (req, res, next) => {
 
 //sendNotifyForMaingroup
 const sendNotifyForMainGroup = async (req, res, next) => {
-  const resService = await groupService.sendNotifyForMainGroup(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.sendNotifyForMainGroup(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -31,7 +33,8 @@ const sendNotifyForMainGroup = async (req, res, next) => {
 
 //deleteUser
 const deleteUser = async (req, res, next) => {
-  const resService = await groupService.deleteUser(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.deleteUser(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -45,7 +48,8 @@ const deleteUser = async (req, res, next) => {
 
 //deleteUser
 const deleteListUser = async (req, res, next) => {
-  const resService = await groupService.deleteListUser(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.deleteListUser(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -59,7 +63,8 @@ const deleteListUser = async (req, res, next) => {
 
 //getListFaculty
 const getListFaculty = async (req, res, next) => {
-  const resService = await groupService.getListFaculty(req);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.getListFaculty(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -72,7 +77,8 @@ const getListFaculty = async (req, res, next) => {
 };
 
 const createFaculty = async (req, res, next) => {
-  const resService = await groupService.createFaculty(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.createFaculty(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -85,7 +91,8 @@ const createFaculty = async (req, res, next) => {
 };
 
 const updateFaculty = async (req, res, next) => {
-  const resService = await groupService.updateFaculty(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.updateFaculty(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -98,7 +105,8 @@ const updateFaculty = async (req, res, next) => {
 };
 
 const tranferFaculty = async (req, res, next) => {
-  const resService = await groupService.tranferFaculty(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.tranferFaculty(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -111,7 +119,8 @@ const tranferFaculty = async (req, res, next) => {
 };
 
 const changeAdmin = async (req, res, next) => {
-  const resService = await groupService.changeAdmin(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.changeAdmin(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -124,8 +133,9 @@ const changeAdmin = async (req, res, next) => {
 };
 
 const createSubgroup = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
   const userId = req.value.body.token.data;
-  const resService = await groupService.createSubGroup(userId, req.body);
+  const resService = await groupService.createSubGroup(userId, req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -138,7 +148,8 @@ const createSubgroup = async (req, res, next) => {
 };
 
 const getRelativeGroup = async (req, res, next) => {
-  const resService = await groupService.getRelativeGroup(req);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.getRelativeGroup(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -151,7 +162,8 @@ const getRelativeGroup = async (req, res, next) => {
 };
 
 const getAllGroup = async (req, res, next) => {
-  const resService = await groupService.getAllGroup(req);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.getAllGroup(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -164,7 +176,8 @@ const getAllGroup = async (req, res, next) => {
 };
 
 const updateGroup = async (req, res, next) => {
-  const resService = await groupService.updateGroup(req.body);
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.updateGroup(req.body, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
