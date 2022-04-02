@@ -7,6 +7,8 @@ const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
 const moment = require('moment');
 
+const I18n = require('../config/i18n');
+
 //create OTP
 const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -34,15 +36,16 @@ const getRandomString = () => {
 };
 
 // Sign in
-const signinService = async (body) => {
-  let { _id, password } = body || {};
-
+const signinService = async (req) => {
+  let { _id, password } = req.body || {};
+  let lang = req.headers['accept-language'] || 'en';
+  I18n.setLocale(lang);
   // kiểm tra tài khoản tồn tại trong Account chưa
   var data = await Account.findOne({ _id });
   if (data != null) {
     if (data.isDelete) {
       return {
-        msg: 'Your user account has been disabled!',
+        msg: I18n.__('account').disabled,
         statusCode: 300,
       };
     }
@@ -57,13 +60,13 @@ const signinService = async (body) => {
 
         if (!profile) {
           return {
-            msg: 'Your user account does not have profile!',
+            msg: I18n.__('account').notProfile,
             statusCode: 300,
           };
         }
         //const token = data.Token;
         return {
-          msg: 'Login Successfull!',
+          msg: I18n.__('account').login,
           statusCode: 200,
           data: {
             token,

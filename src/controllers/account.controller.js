@@ -3,7 +3,7 @@ const accountService = require('../services/account.service');
 
 //ACCOUNT
 const signin = async (req, res, next) => {
-  const resService = await accountService.signinService(req.body);
+  const resService = await accountService.signinService(req);
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
       res,

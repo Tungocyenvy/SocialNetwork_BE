@@ -1,0 +1,28 @@
+{
+  "account": {
+    "notProfile": "Your user account does not have profile",
+    "notFound": "user %s not found!",
+    "exists": "%s already exists",
+    "disabled": "Your user account has been disabled!",
+    "login": "Login Successfull!",
+    "incorrect": "Your username or password is incorrect. please try again!",
+    "err": "An error occurred during the process",
+    "sms": "Please check your sms for a six-digital security code and enter below.",
+    "resetPass": "Reset password successful!",
+    "changePass": "Change Password Successful!",
+    "incorrectPass": "Password incorrect",
+    "incorrectConfirm": "The password confirmation does not match!",
+    "errAddProfile": "An error occurred during signup profile at %s",
+    "errHashPass": "An error occurred during hash password account at %s",
+    "arrAddAccount": "An error occurred during signup account at %s",
+    "faculty": "Not found faculty for user %s",
+    "group": "'An error occurred during add %s to group %s process ",
+    "signup": "signup account successful",
+    "errDelete": "An error occurred during delete account at %s",
+    "delete": "delete account successful",
+    "recovery": "recovery account successful",
+    "getProfile": "get user  profile successful!",
+    "updateProfile": "update user profile successful!",
+    "search": "search successful"
+  }
+}

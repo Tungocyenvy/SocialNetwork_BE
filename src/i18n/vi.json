@@ -1,0 +1,29 @@
+{
+  "account": {
+    "notProfile": "Tài khoản của bạn chưa có thông tin!",
+    "notFound": "Không tìm thấy người dùng %s!",
+    "exists": "%s đã tồn tại",
+    "disabled": "Tài khoản của bạn đã bị khóa!",
+    "login": "Đăng nhập thành công!",
+    "incorrect": "Tên đăng nhập hoặc mật khẩu của bạn không đúng. Vui lòng thử lại!",
+    "err": "Xảy ra lỗi trong quá trình xử lý",
+    "sms": "Vui lòng kiểm tra tin nhắn để lấy mã OTP và nhập vào ô bên dưới",
+    "resetPass": "Lấy lại mật khẩu thành công!",
+    "changePass": "Đổi mật khẩu thành công!",
+    "incorrectPass": "Mật khẩu không chính xác",
+    "incorrectConfirm": "Mật khẩu xác nhận không chính xác!",
+    "errAddProfile": "Lỗi trong quá trình tạo thông tin cho người dùng %s",
+    "errHashPass": "Lỗi trong quá trình hash mật khẩu cho người dùng %s",
+    "arrAddAccount": "Lỗi trong quá trình tạo account cho người dùng %s",
+    "faculty": "Không tìm thấy khoa của người dùng %s",
+    "group": "Lỗi trong quá trình thêm người dùng %s vào nhóm %s ",
+    "signup": "Đăng ký tài khoản thành công",
+    "errDelete": "Lỗi trong quá trình xóa người dùng %s",
+    "delete": "Xóa tài khoản thành công!",
+    "recovery": "Khôi phục tài khoản thành công!",
+    "getProfile": "Lấy thông tin người dùng thành công",
+    "updateProfile": "Cập nhập thông tin thành công",
+    "search": "tìm kiếm thành công"
+  },
+  "account.disabled": "account.disabled"
+}
