@@ -66,6 +66,7 @@ const signinService = async (body) => {
           data: {
             token,
             role: data.role,
+            isAdminSG: data.isAdminSG,
             profile,
           },
         };

@@ -335,7 +335,7 @@ const changeAdmin = async (body) => {
     if (type == 'main') {
       user = await userMainGroup.findOne({ userId: userId, groupId: groupId });
     } else {
-      user = await userSubGroup.find({ userId: userId, groupId: groupId });
+      user = await userSubGroup.findOne({ userId: userId, groupId: groupId });
     }
 
     if (!user) {
@@ -348,7 +348,8 @@ const changeAdmin = async (body) => {
     user.isAdmin = true;
     if (isRemove) user.isAdmin = false;
     await user.save();
-
+    if (type != 'main')
+      await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
     return {
       msg: 'change admin for group ' + groupId + ' successful!',
       statusCode: 200,
@@ -380,6 +381,7 @@ const createSubGroup = async (userId, body) => {
         const isAdmin = true;
         let dataUser = { userId, groupId, isAdmin };
         await userSubGroup.create(dataUser);
+        await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
         return {
           msg: 'Create faculty successful!',
           statusCode: 200,
