@@ -114,7 +114,7 @@ const getListPostByUserId = async (userId, req) => {
     let lstNotify = [];
     const account = await Account.findById({ _id: userId });
     if (account) {
-      if (account.role === 'admin' || account.role === 'dean') {
+      if (account.roleId === 1 || account.roleId === 2) {
         if (groupId === 'grgv') isStudent = false;
         const represent = await userMainGroup.findOne({
           groupId: groupId,
@@ -135,6 +135,7 @@ const getListPostByUserId = async (userId, req) => {
       if (lstNotify.length > 0) {
         //get top 10 post
         const postIds = map(lstNotify, 'postId');
+
         let result = [];
         const total = await Post.countDocuments({ _id: { $in: postIds } });
         if (total > 0) {

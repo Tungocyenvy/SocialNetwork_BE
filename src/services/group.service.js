@@ -20,10 +20,10 @@ const Profile = require('../models/profile.model');
 //USER
 //add user to group
 const addUser = async (body) => {
-  let { userId, groupId, type, role } = body || {};
+  let { userId, groupId, type, roleId } = body || {};
   try {
     let isStudent = true;
-    if (role != null && role !== 'student') isStudent = false;
+    if (roleId != null && roleId !== 4) isStudent = false;
     if (!userId || !groupId) {
       return {
         msg: "Don't have userId or groupId",

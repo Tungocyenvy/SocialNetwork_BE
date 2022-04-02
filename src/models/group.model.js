@@ -7,7 +7,8 @@ const imageDefault =
 
 const GroupSchema = new schema({
   _id: { type: String, required: true },
-  name: { type: String, required: true },
+  nameEn: { type: String, required: true },
+  nameVn: { type: String, required: true },
   isMain: { type: Boolean, default: false },
   createdDate: {
     type: Date,

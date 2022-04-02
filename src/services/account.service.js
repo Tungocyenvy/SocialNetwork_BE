@@ -2,6 +2,7 @@ const { createToken } = require('./jwt.service');
 const bcrypt = require('bcrypt');
 const Account = require('../models/account.model');
 const Profile = require('../models/profile.model');
+const Role = require('../models/role.model');
 const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
 const moment = require('moment');
@@ -52,6 +53,7 @@ const signinService = async (body) => {
         const id = data._id;
         const token = createToken(id);
         const profile = await Profile.findById({ _id: id });
+        const role = await Role.findById({ _id: data.roleId });
 
         if (!profile) {
           return {
@@ -65,7 +67,7 @@ const signinService = async (body) => {
           statusCode: 200,
           data: {
             token,
-            role: data.role,
+            role: role.nameEn,
             isAdminSG: data.isAdminSG,
             profile,
           },
@@ -235,11 +237,11 @@ const signup = async (body) => {
         continue;
       }
 
-      const role = data.role;
+      const roleId = Number(data.roleId);
 
       data.email = userId + '@gmail.com';
       data.dob = new Date(data.dob);
-      delete data.role;
+      delete data.roleId;
 
       //create Profile
       try {
@@ -265,7 +267,7 @@ const signup = async (body) => {
       const newAccount = new Account({
         _id: userId,
         password: hassPassword,
-        role,
+        roleId,
       });
 
       try {
@@ -279,7 +281,7 @@ const signup = async (body) => {
 
       /**ADD MAIN GROUP */
       let groupId = 'grsv';
-      if (role !== 'student') groupId = 'grgv';
+      if (roleId !== 4) groupId = 'grgv';
       let type = 'main';
       for (var k = 0; k < 2; k++) {
         //i=0 add grsv,grgv,
@@ -298,7 +300,7 @@ const signup = async (body) => {
               userId,
               groupId,
               type,
-              role,
+              roleId,
             })
           ).statusCode;
           if (stt === 300) {
@@ -359,13 +361,11 @@ const deleteAccount = async (body) => {
         } catch {
           message = 'An error occurred during delete account at ' + data._id;
           logs.push(message);
-          console.log(logs);
           continue;
         }
       } else {
         message = data._id + ' does not exists';
         logs.push(message);
-        console.log(logs);
         continue;
       }
     }

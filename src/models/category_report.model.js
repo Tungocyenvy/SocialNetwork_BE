@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const schema = mongoose.Schema;
 
 const CategorySchema = new schema({
-  name: { type: String, required: true },
+  nameEn: { type: String, required: true },
+  nameVn: { type: String, required: true },
   isDelete: { type: Boolean, required: true, default: false },
 });
 
