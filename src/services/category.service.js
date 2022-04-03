@@ -20,7 +20,8 @@ const getCategoryGroup = async (req, lang) => {
     if (total <= 0) {
       return {
         msg: msg.notFound,
-        statusCode: 300,
+        statusCode: 200,
+        data: {},
       };
     }
 
@@ -109,6 +110,7 @@ const getCategoryReport = async (req, lang) => {
       return {
         msg: msg.notFound,
         statusCode: 200,
+        data: {},
       };
     }
     return {
