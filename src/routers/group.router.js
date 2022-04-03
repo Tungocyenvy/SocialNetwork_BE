@@ -20,7 +20,7 @@ router.post('/user/admin', groupController.changeAdmin);
 router.post('/user/tranfer', groupController.tranferFaculty);
 
 //Sub group
-router.get('/relative/:groupId', groupController.getRelativeGroup);
+router.get('/relative', groupController.getRelativeGroup);
 
 router.get('/sub', groupController.getAllGroup);
 router.post('/sub', jwt.verify, groupController.createSubgroup);

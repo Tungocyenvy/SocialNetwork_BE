@@ -412,19 +412,18 @@ const getAllGroup = async (req, lang) => {
 };
 
 const getRelativeGroup = async (req, lang) => {
-  let { groupId } = req.params || {};
+  let { groupId, page = 1 } = req.query || {};
   let perPage = 2;
-  let { page } = req.query || 1;
   const msg = getMsg(lang);
   try {
-    const group = await Group.findById({ _id: groupId });
-    if (!group) {
-      return {
-        msg: msg.notFoundGroup,
-        statusCode: 300,
-      };
-    }
-    const cateId = group.cateId;
+    const group = groupId ? await Group.findById({ _id: groupId }) : {};
+    // if (!group) {
+    //   return {
+    //     msg: msg.notFoundGroup,
+    //     statusCode: 300,
+    //   };
+    // }
+    const cateId = group.cateId || '6247e027aafeb586cb35c956';
 
     let total = await Group.countDocuments({
       isMain: false,
