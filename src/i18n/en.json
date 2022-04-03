@@ -125,6 +125,6 @@
     "createReportFail": "Create report failed!",
     "notHaveGroup": "Don't have any group!",
     "errGetReport": "An error occurred during the get report process!",
-    "notHavePost": "Don't have any post!"
+    "notHavePost": "Don't have any post"
   }
 }

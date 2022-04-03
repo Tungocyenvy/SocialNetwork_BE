@@ -4,7 +4,7 @@ const ReportCategory = require('../models/category_report.model');
 const Group = require('../models/group.model');
 const Post = require('../models/post.model');
 const Comment = require('../models/comment.model');
-const { groupBy, map, keyBy } = require('lodash');
+const { groupBy, map, keyBy, sum } = require('lodash');
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {
@@ -226,19 +226,25 @@ const getReportAllGroup = async (req, lang) => {
 
 const getReportAllPost = async (req, lang) => {
   let perPage = 10;
-  let { page } = req.query || 1;
+  let { groupId, page } = req.query || 1;
   const msg = getMsg(lang);
   try {
-    const total = await Post.countDocuments({ isMainGroup: false });
+    const total = groupId
+      ? await Post.countDocuments({ isMainGroup: false, groupId: groupId })
+      : await Post.countDocuments({ isMainGroup: false });
     if (total <= 0) {
       return {
         msg: msg.notHavePost,
         statusCode: 300,
       };
     }
-    const listPost = await Post.find({ isMain: false })
-      .skip(perPage * page - perPage)
-      .limit(perPage);
+    const listPost = groupId
+      ? await Post.find({ isMainGroup: false, groupId: groupId })
+          .skip(perPage * page - perPage)
+          .limit(perPage)
+      : await Post.find({ isMainGroup: false })
+          .skip(perPage * page - perPage)
+          .limit(perPage);
 
     const postIds = map(listPost, '_id');
     const objPost = keyBy(listPost, '_id');
@@ -249,23 +255,36 @@ const getReportAllPost = async (req, lang) => {
       },
     });
 
-    let countComment = [];
+    let countComment = 0;
 
+    let objReply = {};
     if (listComment.length > 0) {
-      const commentIds = map(listComment, '_id');
-      const objComment = groupBy(listComment, 'postId');
-      countComment = commentIds.map((x) => {});
+      const reply = listComment.map((x) => {
+        return { postId: x.postId, countReply: x.countReply };
+      });
+      objReply = groupBy(reply, 'postId');
     }
     let log = {};
-    const result = postIds.map((item) => {
-      return {
-        groupId: _id,
-        nameEn,
-        nameVi,
-        countPost,
-        report,
-      };
-    });
+    const result = await Promise.all(
+      postIds.map(async (item) => {
+        const rs = await getReportPost(item, lang);
+        if (rs.statusCode === 300) {
+          log = rs;
+          return;
+        }
+        const report = rs.data;
+        const { _id, content } = objPost[item];
+        countComment = objReply[item] ? objReply[item].length : 0;
+        if (countComment != 0)
+          countComment += sum(map(objReply[item], 'countReply'));
+        return {
+          postId: _id,
+          content,
+          countComment,
+          report,
+        };
+      }),
+    );
 
     if (log.statusCode === 300) return log;
 
@@ -286,4 +305,5 @@ module.exports = {
   createReportGroup,
   createReportPost,
   getReportAllGroup,
+  getReportAllPost,
 };

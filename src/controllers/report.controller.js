@@ -44,8 +44,24 @@ const getReportAllGroup = async (req, res, next) => {
   }
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
+
+const getReportAllPost = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
+  const resService = await reportService.getReportAllPost(req, lang);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   createReportGroup,
   createReportPost,
   getReportAllGroup,
+  getReportAllPost,
 };

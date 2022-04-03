@@ -19,5 +19,6 @@ router.get('/sub/:groupId', postController.getListPostByGroupId);
 router.delete('/sub/:postId', postController.deletPost);
 router.put('/sub/', postController.updatePost);
 router.post('/sub/report', reportController.createReportPost);
+router.get('/sub/report/all', reportController.getReportAllPost);
 
 module.exports = router;
