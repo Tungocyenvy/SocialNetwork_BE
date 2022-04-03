@@ -101,12 +101,10 @@ const createCategoryGroup = async (body, lang) => {
 
 //CATEGORY FOR REPORT
 const getCategoryReport = async (req, lang) => {
-  let { isAll = false } = req.query || {};
+  let { isDelete = false } = req.params || {};
   const msg = getMsg(lang);
   try {
-    const result = isAll
-      ? await CategoryReport.find()
-      : await CategoryReport.find({ isDelete: false });
+    const result = await CategoryReport.find({ isDelete: isDelete });
     if (result.length <= 0) {
       return {
         msg: msg.notFound,

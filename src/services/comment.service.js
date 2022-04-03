@@ -443,6 +443,11 @@ const deleteReply = async (userId, req, lang) => {
     }
 
     await Reply.findOneAndDelete({ _id: replyId });
+    const comment = Comment.findById({ _id: reply.commmentId });
+    if (comment) {
+      comment.countReply -= 1;
+      await comment.save();
+    }
     return {
       msg: msg.deleteReply,
       statusCode: 200,

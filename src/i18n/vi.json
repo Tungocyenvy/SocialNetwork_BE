@@ -124,6 +124,7 @@
     "createReport": "Tạo báo cáo thành công!",
     "createReportFail": "Tạo báo cáo thất bại!",
     "notHaveGroup": "Không có nhóm nào!",
-    "errGetReport": "Xảy ra lỗi trong quá trình lấy báo cáo!"
+    "errGetReport": "Xảy ra lỗi trong quá trình lấy báo cáo!",
+    "notHavePost": "Không có bài viết nào!"
   }
 }
