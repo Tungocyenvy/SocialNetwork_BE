@@ -4,16 +4,6 @@ const Reply = require('../models/reply.model');
 const Post = require('../models/post.model');
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
-const { acceptsLanguage } = require('express/lib/request');
-const {
-  CredentialListMappingContext,
-} = require('twilio/lib/rest/api/v2010/account/sip/domain/credentialListMapping');
-const {
-  SyncListPermissionPage,
-} = require('twilio/lib/rest/preview/sync/service/syncList/syncListPermission');
-const {
-  IpAccessControlListMappingContext,
-} = require('twilio/lib/rest/api/v2010/account/sip/domain/ipAccessControlListMapping');
 
 const getMsg = (req) => {
   let lang = req || 'en';

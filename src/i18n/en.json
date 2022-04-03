@@ -122,6 +122,8 @@
     "getReport": "Get report successful!",
     "err": "An error occurred during the process!",
     "createReport": "Create report successful!",
-    "createReportFail": "Create report failed!"
+    "createReportFail": "Create report failed!",
+    "notHaveGroup": "Don't have any group!",
+    "errGetReport": "An error occurred during the get report process!"
   }
 }

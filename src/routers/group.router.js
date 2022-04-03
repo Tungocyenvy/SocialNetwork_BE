@@ -25,8 +25,9 @@ router.get('/relative', groupController.getRelativeGroup);
 router.get('/sub', groupController.getAllGroup);
 router.post('/sub', jwt.verify, groupController.createSubgroup);
 router.put('/sub', groupController.updateGroup);
-
-router.get('/sub/report/:groupId', reportController.getReportGroup);
 router.post('/sub/report', reportController.createReportGroup);
+
+//get for admin
+router.get('/sub/report', reportController.getReportAllGroup);
 
 module.exports = router;

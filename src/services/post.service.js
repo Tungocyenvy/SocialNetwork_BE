@@ -12,7 +12,7 @@ const I18n = require('../config/i18n');
 const getMsg = (req) => {
   let lang = req || 'en';
   I18n.setLocale(lang);
-  return (msg = I18n.__('conversation'));
+  return (msg = I18n.__('post'));
 };
 
 const getPostId = (groupId, lastestPost) => {

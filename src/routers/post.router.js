@@ -18,7 +18,6 @@ router.get('/main/:groupId', jwt.verify, postController.getListPostByUserId);
 router.get('/sub/:groupId', postController.getListPostByGroupId);
 router.delete('/sub/:postId', postController.deletPost);
 router.put('/sub/', postController.updatePost);
-router.get('/sub/report/:postId', reportController.getReportPost);
 router.post('/sub/report', reportController.createReportPost);
 
 module.exports = router;
