@@ -22,8 +22,7 @@
     "delete": "Xóa tài khoản thành công!",
     "recovery": "Khôi phục tài khoản thành công!",
     "getProfile": "Lấy thông tin người dùng thành công!",
-    "updateProfile": "Cập nhập thông tin thành công!",
-    "searchUser": "tìm kiếm thành công!"
+    "updateProfile": "Cập nhập thông tin thành công!"
   },
   "category": {
     "notFound": "Không có danh mục!",
@@ -126,5 +125,10 @@
     "notHaveGroup": "Không có nhóm nào!",
     "errGetReport": "Xảy ra lỗi trong quá trình lấy báo cáo!",
     "notHavePost": "Không có bài viết nào!"
+  },
+  "search": {
+    "searchUser": "tìm kiếm thành công!",
+    "err": "Xảy ra lỗi trong quá trình xử lý!",
+    "notHaveUser": "Không có người dùng nào !"
   }
 }

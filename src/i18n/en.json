@@ -22,8 +22,7 @@
     "delete": "Delete account successful!",
     "recovery": "Recovery account successful!",
     "getProfile": "Get user profile successful!",
-    "updateProfile": "Update user profile successful!",
-    "searchUser": "Search successful!"
+    "updateProfile": "Update user profile successful!"
   },
   "category": {
     "notFound": "Don't have any category!",
@@ -126,5 +125,10 @@
     "notHaveGroup": "Don't have any group!",
     "errGetReport": "An error occurred during the get report process!",
     "notHavePost": "Don't have any post"
+  },
+  "search": {
+    "searchUser": "Search successful!",
+    "err": "An error occurred during the process!",
+    "notHaveUser": "Don't have user!"
   }
 }

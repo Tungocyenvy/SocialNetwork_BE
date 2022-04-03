@@ -11,6 +11,6 @@ router.post('/group', categoryController.createCategoryGroup);
 //REPORT
 router.get('/report/:isDelete', categoryController.getCategoryReport);
 router.put('/report', categoryController.updateCategoryReport);
-router.post('/report', categoryController.createCategoryGroup);
+router.post('/report', categoryController.createCategoryReport);
 
 module.exports = router;

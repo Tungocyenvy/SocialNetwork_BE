@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('../services/jwt.service');
 const groupController = require('../controllers/group.controller');
 const reportController = require('../controllers/report.controller');
+const searchController = require('../controllers/search.controller');
 
 //group faculty
 router.get('/main/fac', groupController.getListFaculty);
@@ -29,5 +30,7 @@ router.post('/sub/report', reportController.createReportGroup);
 
 //get for admin
 router.get('/sub/report', reportController.getReportAllGroup);
+
+router.get('/sub/search', searchController.searchGroup);
 
 module.exports = router;
