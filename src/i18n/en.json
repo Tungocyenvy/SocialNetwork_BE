@@ -118,6 +118,10 @@
     "updatePost": "Update post successful!"
   },
   "report": {
-    "notHave": "Don't have any report!"
+    "notHave": "Don't have any report!",
+    "getReport": "Get report successful!",
+    "err": "An error occurred during the process!",
+    "createReport": "Create report successful!",
+    "createReportFail": "Create report failed!"
   }
 }

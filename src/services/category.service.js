@@ -45,7 +45,9 @@ const getCategoryGroup = async (req, lang) => {
 const updateCategoryGroup = async (body, lang) => {
   const msg = getMsg(lang);
   try {
-    const checkName = await CategoryGroup.find({ name: body.name });
+    const checkName = await CategoryGroup.find({
+      $or: [{ nameEn: body.nameEn }, { nameVi: body.nameVi }],
+    });
     if (checkName.length > 0) {
       return {
         msg: msg.exists,
@@ -72,7 +74,9 @@ const updateCategoryGroup = async (body, lang) => {
 const createCategoryGroup = async (body, lang) => {
   const msg = getMsg(lang);
   try {
-    const checkName = await CategoryGroup.find({ name: body.name });
+    const checkName = await CategoryGroup.find({
+      $or: [{ nameEn: body.nameEn }, { nameVi: body.nameVi }],
+    });
     if (checkName.length > 0) {
       return {
         msg: msg.exists,

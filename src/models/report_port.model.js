@@ -5,11 +5,7 @@ const schema = mongoose.Schema;
 const reportReportSchema = new schema({
   reportId: { type: String, required: true },
   postId: { type: String, required: true },
-  createdDate: {
-    type: Date,
-    required: true,
-    default: moment().format('YYYY-MM-DD HH:mm:ss'),
-  },
+  count: { type: Number, required: true, default: 1 },
 });
 
 const report = mongoose.model('report_post', reportReportSchema);
