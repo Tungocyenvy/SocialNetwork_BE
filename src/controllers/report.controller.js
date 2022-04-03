@@ -33,7 +33,7 @@ const createReportPost = async (req, res, next) => {
 /**GET FOR MANAGER */
 const getReportAllGroup = async (req, res, next) => {
   const lang = req.headers['accept-language'];
-  const resService = await reportService.createReportPost(req, lang);
+  const resService = await reportService.getReportAllGroup(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,

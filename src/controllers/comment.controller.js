@@ -64,7 +64,7 @@ const deleteComment = async (req, res, next) => {
 
 const getReply = async (req, res, next) => {
   const lang = req.headers['accept-language'];
-  const resService = await commentService.getReply(req.body, lang);
+  const resService = await commentService.getReply(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,

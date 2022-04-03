@@ -275,6 +275,10 @@ const getReply = async (req, lang) => {
   let perPage = 3;
   let { page } = req.query || 1;
   let { commentID } = req.params || {};
+  console.log(
+    '🚀 ~ file: comment.service.js ~ line 278 ~ getReply ~ commentID',
+    commentID,
+  );
   const msg = getMsg(lang);
   try {
     if (!commentID) {

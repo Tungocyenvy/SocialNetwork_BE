@@ -96,25 +96,25 @@ const createReportPost = async (body, lang) => {
 const getReportGroup = async (groupId, lang) => {
   const msg = getMsg(lang);
   try {
-    const listReport = await ReportGroup.find({ groupId: groupId });
-    if (listReport.length <= 0) {
-      return {
-        msg: msg.notHave,
-        statusCode: 200,
-        data: {},
-      };
-    }
-
-    const reportIds = map(listReport, 'reportId');
-    const reportCate = await ReportCategory.find({ _id: { $in: reportIds } });
-
-    const objReport = keyBy(listReport, 'reportId');
+    const reportCate = await ReportCategory.find();
+    const reportIds = map(reportCate, '_id');
     const objReportCate = keyBy(reportCate, '_id');
-    const result = reportIds.map((item) => {
-      const { reportId, count } = objReport[item];
-      const { nameEn, nameVi } = objReportCate[reportId];
-      return { nameEn, nameVi, count };
-    });
+    const listReport = await ReportGroup.find({ groupId: groupId });
+    let result = [];
+    if (listReport.length <= 0) {
+      result = reportIds.map((item) => {
+        const count = 0;
+        const { _id, nameEn, nameVi } = objReportCate[item];
+        return { reportId: _id, nameEn, nameVi, count };
+      });
+    } else {
+      const objReport = keyBy(listReport, 'reportId');
+      result = reportIds.map((item) => {
+        const count = objReport[item] ? objReport[item].count : 0;
+        const { _id, nameEn, nameVi } = objReportCate[item];
+        return { reportId: _id, nameEn, nameVi, count };
+      });
+    }
 
     return {
       msg: msg.getReport,
@@ -172,61 +172,50 @@ const getReportAllGroup = async (req, lang) => {
   let { page } = req.query || 1;
   const msg = getMsg(lang);
   try {
-    console.log(1);
     const total = await Group.countDocuments({ isMain: false });
-    console.log(
-      '🚀 ~ file: report.service.js ~ line 177 ~ getReportAllGroup ~ total',
-      total,
-    );
     if (total <= 0) {
       return {
         msg: msg.notHaveGroup,
         statusCode: 300,
       };
     }
-    const listGroup = await Group.find({ isMain: false });
-    console
-      .log(
-        '🚀 ~ file: report.service.js ~ line 186 ~ getReportAllGroup ~ listGroup',
-        listGroup,
-      )
+    const listGroup = await Group.find({ isMain: false })
       .skip(perPage * page - perPage)
       .limit(perPage);
 
     const groupIds = map(listGroup, '_id');
-    console.log(
-      '🚀 ~ file: report.service.js ~ line 191 ~ getReportAllGroup ~ groupIds',
-      groupIds,
-    );
     const objGroup = keyBy(listGroup, '_id');
-    console.log(
-      '🚀 ~ file: report.service.js ~ line 193 ~ getReportAllGroup ~ objGroup',
-      objGroup,
-    );
-    const report = {};
+    let report = {};
     let log = {};
-    const result = groupIds.map(async (item) => {
-      //get report
-      const rs = await getReportGroup(item, lang);
-      console.log('🚀 ~ file: report.service.js ~ line 199 ~ result ~ rs', rs);
-      if (rs.statusCode === 200) {
-        report = rs.data;
-      } else {
-        log = rs;
-        return;
-      }
+    const result = async () => {
+      return await Promise.all(
+        groupIds.map(async (item) => {
+          //get report
+          const rs = await getReportGroup(item, lang);
+          if (rs.statusCode === 200) {
+            report = rs.data;
+            console.log(
+              '🚀 ~ file: report.service.js ~ line 200 ~ result ~ report',
+              report,
+            );
+          } else {
+            log = rs;
+            return;
+          }
 
-      //get post
-      const countPost = await Post.countDocuments({ groupId: item });
-      const { _id, nameEn, nameVi } = objGroup[item];
-      return {
-        groupId: _id,
-        nameEn,
-        nameVi,
-        countPost,
-        report,
-      };
-    });
+          //get post
+          const { _id, nameEn, nameVi } = objGroup[item];
+          const countPost = await Post.countDocuments({ groupId: item });
+          return {
+            groupId: _id,
+            nameEn,
+            nameVi,
+            countPost,
+            report,
+          };
+        }),
+      );
+    };
 
     if (log.statusCode === 300) return log;
 
