@@ -527,7 +527,7 @@ const getListUser = async (req, lang) => {
       return {
         msg: msg.notHaveUser,
         statusCode: 200,
-        data: result,
+        data: [],
       };
     }
 
@@ -537,10 +537,6 @@ const getListUser = async (req, lang) => {
         $in: userIds,
       },
     });
-    console.log(
-      '🚀 ~ file: group.service.js ~ line 529 ~ getListUser ~ profile',
-      profile,
-    );
 
     objProfile = keyBy(profile, '_id');
 

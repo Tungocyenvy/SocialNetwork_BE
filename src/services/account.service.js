@@ -467,46 +467,71 @@ const updateProfile = async (AccountId, req) => {
   }
 };
 
-//search by name or identify
-const searchUser = async (req) => {
-  let keyword = req.query.keyword;
+const getListUser = async (req, lang) => {
   let perPage = 10;
   let { page } = req.query || 1;
-  const msg = getMsg(req);
+  const msg = getMsg(lang);
+  let { type, groupId } = req.params || {};
+
   try {
-    const sub = 'admin';
+    let listUser = [];
+    let total = 0;
+    if (type === 'main') {
+      total = await userMainGroup.countDocuments({ groupId: groupId });
+      listUser = await userMainGroup
+        .find({ groupId: groupId })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+    } else {
+      total = await userSubGroup.countDocuments({ groupId: groupId });
+      listUser = await userSubGroup
+        .find({ groupId: groupId })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+    }
 
-    let result;
+    if (total == 0) {
+      return {
+        msg: msg.notHaveUser,
+        statusCode: 200,
+        data: result,
+      };
+    }
 
-    //filter special characters and uppercase, lowercase
-    let key = new RegExp(
-      keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
-      'i',
+    const userIds = map(listUser, 'userId');
+    const profile = await Profile.find({
+      _id: {
+        $in: userIds,
+      },
+    });
+    console.log(
+      '🚀 ~ file: group.service.js ~ line 529 ~ getListUser ~ profile',
+      profile,
     );
 
-    let total = 0;
+    objProfile = keyBy(profile, '_id');
 
-    //check key is identify (number or admin)
-    if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
-      total = await Profile.countDocuments({ _id: keyword });
-      if (total > 0) {
-        result = await Profile.findById({ _id: keyword })
-          .skip(perPage * page - perPage)
-          .limit(perPage);
-      }
-    } else {
-      //search by name
-      total = await Profile.countDocuments({ fullname: key });
-      if (total > 0) {
-        result = await Profile.find({ fullname: key })
-          .skip(perPage * page - perPage)
-          .limit(perPage);
-      }
-    }
+    const result = listUser.map((item) => {
+      const { userId, isAdmin } = item;
+      const { fullname, avatar, dob, address, phone, email, year, faculty } =
+        objProfile[userId];
+      return {
+        userId,
+        isAdmin,
+        fullname,
+        avatar,
+        dob,
+        address,
+        phone,
+        email,
+        year,
+        faculty,
+      };
+    });
     return {
-      msg: msg.searchUser,
-      data: { result, total },
+      msg: msg.getUser,
       statusCode: 200,
+      data: result,
     };
   } catch {
     return {
@@ -525,6 +550,5 @@ module.exports = {
   recoveryAccount,
   getProfile,
   updateProfile,
-  searchUser,
   changePassword,
 };
