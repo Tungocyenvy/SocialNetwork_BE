@@ -546,12 +546,19 @@ const getListUser = async (req, lang) => {
 
     const result = listUser.map((item) => {
       const { userId, isAdmin } = item;
-      const { fullname, avatar } = objProfile[userId];
+      const { fullname, avatar, dob, address, phone, email, year, faculty } =
+        objProfile[userId];
       return {
         userId,
         isAdmin,
         fullname,
         avatar,
+        dob,
+        address,
+        phone,
+        email,
+        year,
+        faculty,
       };
     });
     return {

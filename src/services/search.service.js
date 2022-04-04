@@ -1,6 +1,7 @@
 const Profile = require('../models/profile.model');
 const Group = require('../models/group.model');
 const userSubGroup = require('../models/user_subgroup.model');
+const { map, keyBy } = require('lodash');
 const moment = require('moment');
 const I18n = require('../config/i18n');
 
@@ -60,7 +61,8 @@ const searchUser = async (req, lang) => {
 };
 
 //search by name or identify
-const searchUserByGroupId = async (req, lang) => {
+//forSubGroup
+const searchUserForSubGroup = async (req, lang) => {
   let perPage = 10;
   let { keyword, groupId, page = 1 } = req.query || {};
   const msg = getMsg(lang);
@@ -85,11 +87,15 @@ const searchUserByGroupId = async (req, lang) => {
       };
     }
 
+    const userIds = map(listUser, 'userId');
     //check key is identify (number or admin)
     if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
-      total = await Profile.countDocuments({ _id: keyword });
+      total = await userSubGroup.countDocuments({
+        userId: keyword,
+        groupId: groupId,
+      });
       if (total > 0) {
-        result = await Profile.findById({ _id: keyword })
+        result = await Profile.findById({ userId: keyword, groupId: groupId })
           .skip(perPage * page - perPage)
           .limit(perPage);
       }
