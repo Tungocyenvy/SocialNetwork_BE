@@ -30,7 +30,9 @@
     "err": "Xảy ra lỗi trong quá trình xử lý!",
     "exists": "Tên danh mục này đã tồn tại!",
     "updateCate": "Chỉnh sửa danh mục thành công!",
-    "createCate": "Tạo danh mục thành công!"
+    "createCate": "Tạo danh mục thành công!",
+    "deleteCate": "Xóa danh mục thành công!",
+    "recoveryCate": "Khôi phục danh mục thành công!"
   },
   "comment": {
     "validatePostId": "Vui lòng truyền postId!",

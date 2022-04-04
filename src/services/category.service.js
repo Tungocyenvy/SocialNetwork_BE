@@ -58,9 +58,17 @@ const updateCategoryGroup = async (body, lang) => {
     }
     const res = await CategoryGroup.findByIdAndUpdate({ _id: body._id }, body);
     if (res) {
+      let rsMsg = msg.updateCate;
+      if (body.isDelete != null) {
+        if (body.isDelete == true) {
+          rsMsg = msg.deleteCate;
+        } else {
+          rsMsg = msg.recoveryCate;
+        }
+      }
       const result = await CategoryGroup.findById({ _id: body._id });
       return {
-        msg: msg.updateCate,
+        msg: rsMsg,
         statusCode: 200,
         data: result,
       };
@@ -142,9 +150,17 @@ const updateCategoryReport = async (body, lang) => {
     }
     const res = await CategoryReport.findByIdAndUpdate({ _id: body._id }, body);
     if (res) {
+      let rsMsg = msg.updateCate;
+      if (body.isDelete != null) {
+        if (body.isDelete == true) {
+          rsMsg = msg.deleteCate;
+        } else {
+          rsMsg = msg.recoveryCate;
+        }
+      }
       const result = await CategoryReport.findById({ _id: body._id });
       return {
-        msg: msg.updateCate,
+        msg: rsMsg,
         statusCode: 200,
         data: result,
       };

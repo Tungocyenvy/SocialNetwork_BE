@@ -30,7 +30,9 @@
     "err": "An error occurred during the process!",
     "exists": "Category name already exists!",
     "updateCate": "Update category successfull!",
-    "createCate": "Create category susccessful!"
+    "createCate": "Create category susccessful!",
+    "deleteCate": "Delete category successful!",
+    "recoveryCate": "Recovery category successful!"
   },
   "comment": {
     "validatePostId": "Don't have postId!",

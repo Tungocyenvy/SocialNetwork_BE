@@ -6,7 +6,7 @@ const Notify_maingroupSchema = new schema({
   userId: { type: String, required: true },
   postId: { type: String, required: true },
   groupId: { type: String, required: true },
-  isRead: { type: String, required: true, default: false },
+  isRead: { type: Boolean, required: true, default: false },
   createdDate: { type: Date, default: moment().format('YYYY-MM-DD HH:mm:ss') },
 });
 

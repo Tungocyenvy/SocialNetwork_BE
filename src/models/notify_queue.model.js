@@ -5,7 +5,7 @@ const schema = mongoose.Schema;
 const Notify_queueSchema = new schema({
   userId: { type: String, required: true },
   notifyId: { type: String },
-  isRead: { type: String, required: true, default: false },
+  isRead: { type: Boolean, required: true, default: false },
   createdDate: { type: Date, default: moment().format('YYYY-MM-DD HH:mm:ss') },
 });
 
