@@ -1,6 +1,7 @@
 const Profile = require('../models/profile.model');
 const Group = require('../models/group.model');
 const userSubGroup = require('../models/user_subgroup.model');
+const userMainGroup = require('../models/user_maingroup.model');
 const { map, keyBy } = require('lodash');
 const moment = require('moment');
 const I18n = require('../config/i18n');
@@ -79,31 +80,113 @@ const searchUserForSubGroup = async (req, lang) => {
 
     let total = 0;
 
-    const listUser = await userSubGroup.find({ groupId: groupId });
-    if (listUser.length <= 0) {
-      return {
-        msg: msg.notHaveUser,
-        statusCode: 300,
-      };
-    }
-
-    const userIds = map(listUser, 'userId');
     //check key is identify (number or admin)
     if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
+      //check in group
       total = await userSubGroup.countDocuments({
         userId: keyword,
         groupId: groupId,
       });
       if (total > 0) {
-        result = await Profile.findById({ userId: keyword, groupId: groupId })
+        result = await Profile.findById({ _id: keyword })
           .skip(perPage * page - perPage)
           .limit(perPage);
       }
     } else {
       //search by name
-      total = await Profile.countDocuments({ fullname: key });
+      const listUser = await userSubGroup.find({ groupId: groupId });
+      if (listUser.length <= 0) {
+        return {
+          msg: msg.notHaveUser,
+          statusCode: 300,
+        };
+      }
+
+      const userIds = map(listUser, 'userId');
+      total = await Profile.countDocuments({
+        _id: {
+          $in: userIds,
+        },
+        fullname: key,
+      });
       if (total > 0) {
-        result = await Profile.find({ fullname: key })
+        result = await Profile.find({
+          _id: {
+            $in: userIds,
+          },
+          fullname: key,
+        })
+          .skip(perPage * page - perPage)
+          .limit(perPage);
+      }
+    }
+    return {
+      msg: msg.searchUser,
+      data: { result, total },
+      statusCode: 200,
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+//forMainGroup
+const searchUserForMainGroup = async (req, lang) => {
+  let perPage = 10;
+  let { keyword, groupId, page = 1 } = req.query || {};
+  const msg = getMsg(lang);
+  try {
+    const sub = 'admin';
+
+    let result;
+
+    //filter special characters and uppercase, lowercase
+    let key = new RegExp(
+      keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      'i',
+    );
+
+    let total = 0;
+
+    //check key is identify (number or admin)
+    if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
+      //check in group
+      total = await userMainGroup.countDocuments({
+        userId: keyword,
+        groupId: groupId,
+      });
+      if (total > 0) {
+        result = await Profile.findById({ _id: keyword })
+          .skip(perPage * page - perPage)
+          .limit(perPage);
+      }
+    } else {
+      //search by name
+      const listUser = await userMainGroup.find({ groupId: groupId });
+      if (listUser.length <= 0) {
+        return {
+          msg: msg.notHaveUser,
+          statusCode: 300,
+        };
+      }
+
+      const userIds = map(listUser, 'userId');
+      total = await Profile.countDocuments({
+        _id: {
+          $in: userIds,
+        },
+        fullname: key,
+      });
+      if (total > 0) {
+        result = await Profile.find({
+          _id: {
+            $in: userIds,
+          },
+          fullname: key,
+        })
           .skip(perPage * page - perPage)
           .limit(perPage);
       }
@@ -165,4 +248,6 @@ const searchGroup = async (req, lang) => {
 module.exports = {
   searchUser,
   searchGroup,
+  searchUserForSubGroup,
+  searchUserForMainGroup,
 };

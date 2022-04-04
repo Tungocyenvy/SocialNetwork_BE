@@ -34,4 +34,7 @@ router.get('/sub/report', reportController.getReportAllGroup);
 
 router.get('/sub/search', searchController.searchGroup);
 
+router.get('/sub/search/user', searchController.searchUserForSubGroup);
+router.get('/main/search/user', searchController.searchUserForMainGroup);
+
 module.exports = router;
