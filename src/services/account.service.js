@@ -6,6 +6,7 @@ const Role = require('../models/role.model');
 const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
 const moment = require('moment');
+const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {
@@ -467,71 +468,73 @@ const updateProfile = async (AccountId, req) => {
   }
 };
 
-const getListUser = async (req, lang) => {
+const getListAccount = async (req) => {
   let perPage = 10;
-  let { page } = req.query || 1;
-  const msg = getMsg(lang);
-  let { type, groupId } = req.params || {};
+  const msg = getMsg(req);
+  let {
+    roleId = 4,
+    faculty = 'grsv',
+    page = 1,
+    isDelete = false,
+  } = req.query || {};
 
   try {
-    let listUser = [];
-    let total = 0;
-    if (type === 'main') {
-      total = await userMainGroup.countDocuments({ groupId: groupId });
-      listUser = await userMainGroup
-        .find({ groupId: groupId })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
-    } else {
-      total = await userSubGroup.countDocuments({ groupId: groupId });
-      listUser = await userSubGroup
-        .find({ groupId: groupId })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
-    }
+    // const total = await Account.countDocuments({roleId:roleId, faculty:faculty});
 
-    if (total == 0) {
+    // if(total<=0)
+    // {
+    //   return {
+    //     msg: msg.notHaveAccount,
+    //     statusCode: 200,
+    //     data: [],
+    //   };
+    // }
+
+    const listAccount = await Account.find({
+      roleId: roleId,
+      isDelete: isDelete,
+    });
+    if (listAccount <= 0) {
       return {
-        msg: msg.notHaveUser,
+        msg: msg.notHaveAccount,
         statusCode: 200,
-        data: result,
+        data: [],
       };
     }
-
-    const userIds = map(listUser, 'userId');
+    const userIds = map(listAccount, '_id');
     const profile = await Profile.find({
       _id: {
         $in: userIds,
       },
-    });
-    console.log(
-      '🚀 ~ file: group.service.js ~ line 529 ~ getListUser ~ profile',
-      profile,
-    );
+      faculty: faculty,
+    })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
 
-    objProfile = keyBy(profile, '_id');
-
-    const result = listUser.map((item) => {
-      const { userId, isAdmin } = item;
-      const { fullname, avatar, dob, address, phone, email, year, faculty } =
-        objProfile[userId];
+    if (profile.length <= 0) {
       return {
-        userId,
-        isAdmin,
-        fullname,
-        avatar,
-        dob,
-        address,
-        phone,
-        email,
-        year,
-        faculty,
+        msg: msg.notHaveAccount,
+        statusCode: 200,
+        data: [],
       };
-    });
+    }
+    // objProfile = keyBy(profile, '_id');
+
+    // const result = objProfile.map((item) => {
+    //   const { _id,fullname, dob, phone, year, faculty } =item;
+    //   return {
+    //     userId:_id,
+    //     fullname,
+    //     dob,
+    //     phone,
+    //     year,
+    //     faculty,
+    //   };
+    // });
     return {
-      msg: msg.getUser,
+      msg: msg.getListAccount,
       statusCode: 200,
-      data: result,
+      data: profile,
     };
   } catch {
     return {
@@ -551,4 +554,5 @@ module.exports = {
   getProfile,
   updateProfile,
   changePassword,
+  getListAccount,
 };

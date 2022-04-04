@@ -120,6 +120,18 @@ const recoveryAccount = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const getListAccount = async (req, res, next) => {
+  const resService = await accountService.getListAccount(req);
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   signin,
   forgotPass,
@@ -130,4 +142,5 @@ module.exports = {
   deleteAccount,
   recoveryAccount,
   changePassword,
+  getListAccount,
 };

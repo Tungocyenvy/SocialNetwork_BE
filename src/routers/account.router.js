@@ -12,6 +12,7 @@ router.post('/changePass', jwt.verify, accountController.changePassword);
 router.post('/signup', accountController.signup); //both excel, handle
 router.delete('/delete', accountController.deleteAccount); //both excel, handle
 router.put('/recovery', accountController.recoveryAccount);
+router.get('/', accountController.getListAccount);
 
 //profile
 router.get('/profile', jwt.verify, accountController.getProfile);

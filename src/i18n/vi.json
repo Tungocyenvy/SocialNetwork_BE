@@ -22,7 +22,9 @@
     "delete": "Xóa tài khoản thành công!",
     "recovery": "Khôi phục tài khoản thành công!",
     "getProfile": "Lấy thông tin người dùng thành công!",
-    "updateProfile": "Cập nhập thông tin thành công!"
+    "updateProfile": "Cập nhập thông tin thành công!",
+    "notHaveAccount": "Không có tài khoản nào trong nhóm này!",
+    "getListAccount": "Lấy danh sách tài khoản thành công!"
   },
   "category": {
     "notFound": "Không có danh mục!",
