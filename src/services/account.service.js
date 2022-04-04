@@ -479,17 +479,6 @@ const getListAccount = async (req) => {
   } = req.query || {};
 
   try {
-    // const total = await Account.countDocuments({roleId:roleId, faculty:faculty});
-
-    // if(total<=0)
-    // {
-    //   return {
-    //     msg: msg.notHaveAccount,
-    //     statusCode: 200,
-    //     data: [],
-    //   };
-    // }
-
     const listAccount = await Account.find({
       roleId: roleId,
       isDelete: isDelete,
@@ -502,6 +491,17 @@ const getListAccount = async (req) => {
       };
     }
     const userIds = map(listAccount, '_id');
+    const total = await Profile.countDocuments({
+      _id: { $in: userIds },
+      faculty: faculty,
+    });
+    if (total <= 0) {
+      return {
+        msg: msg.notHaveAccount,
+        statusCode: 200,
+        data: [],
+      };
+    }
     const profile = await Profile.find({
       _id: {
         $in: userIds,
@@ -511,30 +511,10 @@ const getListAccount = async (req) => {
       .skip(perPage * page - perPage)
       .limit(perPage);
 
-    if (profile.length <= 0) {
-      return {
-        msg: msg.notHaveAccount,
-        statusCode: 200,
-        data: [],
-      };
-    }
-    // objProfile = keyBy(profile, '_id');
-
-    // const result = objProfile.map((item) => {
-    //   const { _id,fullname, dob, phone, year, faculty } =item;
-    //   return {
-    //     userId:_id,
-    //     fullname,
-    //     dob,
-    //     phone,
-    //     year,
-    //     faculty,
-    //   };
-    // });
     return {
       msg: msg.getListAccount,
       statusCode: 200,
-      data: profile,
+      data: { profile, total },
     };
   } catch {
     return {
