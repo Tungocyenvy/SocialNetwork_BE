@@ -85,7 +85,10 @@
     "getSub": "Lấy danh sách nhóm thành công!",
     "getRalative": "Lấy các nhóm tương tự thành công!",
     "notHaveRelative": "Không có bất kỳ nhóm tương tự nào!",
-    "updateSub": "Chỉnh sửa nhóm thành công!"
+    "updateSub": "Chỉnh sửa nhóm thành công!",
+    "notHaveUser": "Không có người dùng nào trong nhóm!",
+    "getUser": "Lấy danh sách thành viên thành công!",
+    "existsUser": "%s đã có trong nhóm %s!"
   },
   "jwt": {
     "noProvided": "Vui lòng truyền token!",

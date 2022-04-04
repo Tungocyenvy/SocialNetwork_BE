@@ -14,6 +14,7 @@ router.put('/main/fac', groupController.updateFaculty);
 router.post('/main/notify', groupController.sendNotifyForMainGroup);
 
 //User
+router.get('/user/:type/:groupId', groupController.getListUser);
 router.post('/user', groupController.addUser);
 router.delete('/user', groupController.deleteUser); //delete one user
 router.delete('/listuser', groupController.deleteListUser); //delete listUser

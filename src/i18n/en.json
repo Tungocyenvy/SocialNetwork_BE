@@ -85,7 +85,10 @@
     "getSub": "Get all Group successful!",
     "getRalative": "Get Ralative Group successful!",
     "notHaveRelative": "Don't have any relative group",
-    "updateSub": "Update group successfull!"
+    "updateSub": "Update group successfull!",
+    "notHaveUser": "Don't have any user!",
+    "getUser": "Get list user successful!",
+    "existsUser": "%s already exists in group %s!"
   },
   "jwt": {
     "noProvided": "No token provided!",

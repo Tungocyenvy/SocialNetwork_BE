@@ -244,7 +244,7 @@ const signup = async (req) => {
       const account = await Account.findById({ _id: userId });
       //check profile && account
       if (profile || account) {
-        message = msg.notFound.replace('%s', userId);
+        message = msg.exists.replace('%s', userId);
         logs.push(message);
         continue;
       }
@@ -306,16 +306,14 @@ const signup = async (req) => {
           continue;
         }
         try {
-          const stt = (
-            await groupService.addUser({
-              userId,
-              groupId,
-              type,
-              roleId,
-            })
-          ).statusCode;
-          if (stt === 300) {
-            message = msg.group.replace('%s', userId).replace('%s', groupId);
+          const stt = await groupService.addUser({
+            userId,
+            groupId,
+            type,
+            roleId,
+          });
+          if (stt.statusCode === 300) {
+            message = stt.msg; //msg.group.replace('%s', userId).replace('%s', groupId);
             logs.push(message);
             continue;
           }

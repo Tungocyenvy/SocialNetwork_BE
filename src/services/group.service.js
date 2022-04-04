@@ -5,6 +5,7 @@ const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
 const Account = require('../models/account.model');
 const Profile = require('../models/profile.model');
+const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {
@@ -39,11 +40,31 @@ const addUser = async (body, lang) => {
       };
     }
     let data = { userId, groupId, isStudent };
-
+    let countUser = 0;
     try {
       if (type === 'main') {
+        countUser = await userMainGroup.countDocuments({
+          groupId: groupId,
+          userId: userId,
+        });
+        if (countUser > 0) {
+          return {
+            msg: msg.existsUser.replace('%s', userId).replace('%s', groupId),
+            statusCode: 300,
+          };
+        }
         await userMainGroup.create(data);
       } else {
+        countUser = await userSubGroup.countDocuments({
+          groupId: groupId,
+          userId: userId,
+        });
+        if (countUser > 0) {
+          return {
+            msg: msg.existsUser.replace('%s', userId).replace('%s', groupId),
+            statusCode: 300,
+          };
+        }
         delete data.isStudent;
         await userSubGroup.create(data);
       }
@@ -479,6 +500,73 @@ const updateGroup = async (body, lang) => {
   }
 };
 
+const getListUser = async (req, lang) => {
+  let perPage = 10;
+  let { page } = req.query || 1;
+  const msg = getMsg(lang);
+  let { type, groupId } = req.params || {};
+
+  try {
+    let listUser = [];
+    let total = 0;
+    if (type === 'main') {
+      total = await userMainGroup.countDocuments({ groupId: groupId });
+      listUser = await userMainGroup
+        .find({ groupId: groupId })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+    } else {
+      total = await userSubGroup.countDocuments({ groupId: groupId });
+      listUser = await userSubGroup
+        .find({ groupId: groupId })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+    }
+
+    if (total == 0) {
+      return {
+        msg: msg.notHaveUser,
+        statusCode: 200,
+        data: result,
+      };
+    }
+
+    const userIds = map(listUser, 'userId');
+    const profile = await Profile.find({
+      _id: {
+        $in: userIds,
+      },
+    });
+    console.log(
+      '🚀 ~ file: group.service.js ~ line 529 ~ getListUser ~ profile',
+      profile,
+    );
+
+    objProfile = keyBy(profile, '_id');
+
+    const result = listUser.map((item) => {
+      const { userId, isAdmin } = item;
+      const { fullname, avatar } = objProfile[userId];
+      return {
+        userId,
+        isAdmin,
+        fullname,
+        avatar,
+      };
+    });
+    return {
+      msg: msg.getUser,
+      statusCode: 200,
+      data: result,
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -493,4 +581,5 @@ module.exports = {
   getAllGroup,
   updateGroup,
   updateFaculty,
+  getListUser,
 };
