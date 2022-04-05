@@ -12,6 +12,22 @@ const getMsg = (req) => {
   return (msg = I18n.__('search'));
 };
 
+const transferProfile = (profile) => {
+  const { _id, fullname, avatar, dob, address, email, phone, year, faculty } =
+    profile;
+  return {
+    userId: _id,
+    fullname,
+    avatar,
+    dob,
+    address,
+    email,
+    phone,
+    year,
+    faculty,
+  };
+};
+
 //search by name or identify
 const searchUser = async (req, lang) => {
   let keyword = req.query.keyword;
@@ -70,7 +86,7 @@ const searchUserForSubGroup = async (req, lang) => {
   try {
     const sub = 'admin';
 
-    let result;
+    let profile;
 
     //filter special characters and uppercase, lowercase
     let key = new RegExp(
@@ -87,11 +103,17 @@ const searchUserForSubGroup = async (req, lang) => {
         userId: keyword,
         groupId: groupId,
       });
-      if (total > 0) {
-        result = await Profile.findById({ _id: keyword })
-          .skip(perPage * page - perPage)
-          .limit(perPage);
+
+      if (total <= 0) {
+        return {
+          msg: msg.notHaveUser,
+          statusCode: 300,
+        };
       }
+
+      profile = await Profile.find({ _id: keyword })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
     } else {
       //search by name
       const listUser = await userSubGroup.find({ groupId: groupId });
@@ -109,17 +131,27 @@ const searchUserForSubGroup = async (req, lang) => {
         },
         fullname: key,
       });
-      if (total > 0) {
-        result = await Profile.find({
-          _id: {
-            $in: userIds,
-          },
-          fullname: key,
-        })
-          .skip(perPage * page - perPage)
-          .limit(perPage);
+
+      if (total <= 0) {
+        return {
+          msg: msg.notHaveUser,
+          statusCode: 300,
+        };
       }
+      profile = await Profile.find({
+        _id: {
+          $in: userIds,
+        },
+        fullname: key,
+      })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
     }
+
+    const result = profile.map((item) => {
+      return transferProfile(item);
+    });
+
     return {
       msg: msg.searchUser,
       data: { result, total },
@@ -136,12 +168,12 @@ const searchUserForSubGroup = async (req, lang) => {
 //forMainGroup
 const searchUserForMainGroup = async (req, lang) => {
   let perPage = 10;
-  let { keyword, groupId, page = 1 } = req.query || {};
+  let { keyword, groupId, page = 1, isStudent = null } = req.query || {};
   const msg = getMsg(lang);
   try {
     const sub = 'admin';
 
-    let result;
+    let profile;
 
     //filter special characters and uppercase, lowercase
     let key = new RegExp(
@@ -154,18 +186,35 @@ const searchUserForMainGroup = async (req, lang) => {
     //check key is identify (number or admin)
     if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
       //check in group
-      total = await userMainGroup.countDocuments({
-        userId: keyword,
-        groupId: groupId,
-      });
-      if (total > 0) {
-        result = await Profile.findById({ _id: keyword })
-          .skip(perPage * page - perPage)
-          .limit(perPage);
+      total =
+        isStudent === null
+          ? await userMainGroup.countDocuments({
+              userId: keyword,
+              groupId: groupId,
+            })
+          : await userMainGroup.countDocuments({
+              userId: keyword,
+              groupId: groupId,
+              isStudent: isStudent,
+            });
+      if (total <= 0) {
+        return {
+          msg: msg.notHaveUser,
+          statusCode: 300,
+        };
       }
+      profile = await Profile.find({ _id: keyword })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
     } else {
       //search by name
-      const listUser = await userMainGroup.find({ groupId: groupId });
+      const listUser =
+        isStudent === null
+          ? await userMainGroup.find({ groupId: groupId })
+          : await userMainGroup.find({
+              groupId: groupId,
+              isStudent: isStudent,
+            });
       if (listUser.length <= 0) {
         return {
           msg: msg.notHaveUser,
@@ -180,17 +229,27 @@ const searchUserForMainGroup = async (req, lang) => {
         },
         fullname: key,
       });
-      if (total > 0) {
-        result = await Profile.find({
-          _id: {
-            $in: userIds,
-          },
-          fullname: key,
-        })
-          .skip(perPage * page - perPage)
-          .limit(perPage);
+
+      if (total <= 0) {
+        return {
+          msg: msg.notHaveUser,
+          statusCode: 300,
+        };
       }
+      profile = await Profile.find({
+        _id: {
+          $in: userIds,
+        },
+        fullname: key,
+      })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
     }
+
+    const result = profile.map((item) => {
+      return transferProfile(item);
+    });
+
     return {
       msg: msg.searchUser,
       data: { result, total },
