@@ -146,6 +146,8 @@
     "notHaveTemplate": "Không có mẫu thông báo nào!",
     "getTemplate": "Lấy mẫu thông báo thành công!",
     "deleteTemplate": "Xóa mẫu thông báo thành công!",
-    "updateTemplate": "Chỉnh sửa mẫu thông báo thành công!"
+    "updateTemplate": "Chỉnh sửa mẫu thông báo thành công!",
+    "createQueue": "Thêm thông báo vào danh sách đợi thành công!",
+    "createNotify": "Tạo thông báo thành công!"
   }
 }

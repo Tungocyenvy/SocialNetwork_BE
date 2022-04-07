@@ -9,4 +9,6 @@ router.get('/template', notificationService.getTemplate);
 router.put('/template', notificationService.updateTemplate);
 router.delete('/template', notificationService.deleteTemplate);
 
+router.post('/', notificationService.createNotify);
+
 module.exports = router;

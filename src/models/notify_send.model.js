@@ -3,7 +3,6 @@ const moment = require('moment');
 const schema = mongoose.Schema;
 
 const Notify_sendSchema = new schema({
-  _id: { type: String },
   postId: { type: String, required: true },
   templateId: { type: String, required: true },
   senderId: { type: String, required: true },

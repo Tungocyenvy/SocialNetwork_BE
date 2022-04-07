@@ -146,6 +146,8 @@
     "notHaveTemplate": "Don't have any notification template!",
     "getTemplate": "Get notification template successful!",
     "deleteTemplate": "Delete notification template successful!",
-    "updateTemplate": "Update notification template successful!"
+    "updateTemplate": "Update notification template successful!",
+    "createQueue": "Create notification queue successful!",
+    "createNotify": "Create notification successful!"
   }
 }

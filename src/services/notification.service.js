@@ -1,6 +1,8 @@
 const notifyQueue = require('../models/notify_queue.model');
 const notifyTemplate = require('../models/notify_template.model');
 const notifySend = require('../models/notify_send.model');
+const userSubGroup = require('../models/user_subgroup.model');
+const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {
@@ -9,7 +11,7 @@ const getMsg = (req) => {
   return (msg = I18n.__('notify'));
 };
 
-const getId = (object) => {
+const getId = (code, object) => {
   let _id = '';
   //get lastId
   let lastedId = object[object.length - 1]._id;
@@ -17,18 +19,15 @@ const getId = (object) => {
   //increment Id
   var str2 = Number(str ? str[0] : 0) + 1;
   if (str2 < 10) {
-    _id = 'TL0' + str2;
+    _id = code + str2;
   } else {
-    _id = 'TL' + str2;
+    _id = code + str2;
   }
   return _id;
 };
 
 /*TEMPLATE*/
-//create template
-/*QUEUE*/
-/*SEND*/
-
+//CRUD
 const createTemplate = async (body, lang) => {
   const msg = getMsg(lang);
   try {
@@ -46,7 +45,7 @@ const createTemplate = async (body, lang) => {
       const template = await notifyTemplate.find({});
       data._id = 'TL01';
       if (template.length > 0) {
-        data._id = getId(template);
+        data._id = getId('TL', template);
       }
       const res = await notifyTemplate.create(data);
       if (res) {
@@ -142,9 +141,79 @@ const deleteTemplate = async (req, lang) => {
     };
   }
 };
+
+const createNotifyQueue = async (body, lang) => {
+  const msg = getMsg(lang);
+  try {
+    const result = await notifyQueue.create(body);
+    return {
+      msg: msg.createQueue,
+      statusCode: 200,
+      data: result,
+    };
+  } catch (err) {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+/**1:add friend
+ * 2:comment
+ * 3: reply
+ * 4: createPost
+ */
+const createNotify = async (body, lang) => {
+  const msg = getMsg(lang);
+  try {
+    let data = body;
+    const type = body.type;
+    const templateId = await notifyTemplate.findOne({ type: type });
+    data.templateId = templateId;
+    delete data.type;
+    const result = await notifySend.create(data);
+    if (result) {
+      let userIds = [];
+      if (type === 'createPost') {
+        const listUser = await userSubGroup.find({
+          groupId: body.receiverId,
+          userId: { $nin: body.senderId },
+        });
+        if (listUser.length > 0) {
+          userIds = map(listUser, 'userId');
+        }
+      } else {
+        userIds = body.receiverId;
+      }
+      const queue = userIds.map((id) => {
+        const userId = id;
+        const notifyId = result._id;
+        return { userId, notifyId };
+      });
+
+      const res = await notifyQueue.insertMany(queue);
+      if (res) {
+        return {
+          msg: msg.createNotify,
+          statusCode: 200,
+          data: result,
+        };
+      }
+    }
+  } catch (err) {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   createTemplate,
   getTemplate,
   updateTemplate,
   deleteTemplate,
+  createNotifyQueue,
+  createNotify,
 };

@@ -57,9 +57,24 @@ const deleteTemplate = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const createNotify = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
+  const resService = await notificationService.createNotify(req.body, lang);
+
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   createTemplate,
   getTemplate,
   updateTemplate,
   deleteTemplate,
+  createNotify,
 };

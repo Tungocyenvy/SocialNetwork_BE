@@ -6,6 +6,7 @@ const userMainGroup = require('../models/user_maingroup.model');
 const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
 const Account = require('../models/account.model');
+const notificationService = require('./notification.service');
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -63,6 +64,7 @@ const createPost = async (userID, body, lang) => {
     const res = await newPost.save();
     //send notify to listUser
     if (res) {
+      let sendNotify = 200;
       if (isMainGroup) {
         const lstUser = await userMainGroup.find({
           groupId: groupId,
@@ -79,20 +81,23 @@ const createPost = async (userID, body, lang) => {
             };
           });
 
-        const sendNotify = (
-          await groupService.sendNotifyForMainGroup(lstNotify)
-        ).statusCode;
-
-        if (sendNotify != 200) {
-          return {
-            msg: msg.errSendNotify,
-            statusCode: 300,
-          };
-        }
+        sendNotify = (await groupService.sendNotifyForMainGroup(lstNotify))
+          .statusCode;
       } else {
-        //gửi thông báo cho subgroup tạm thời xử lý sau
-      }
+        let data = {};
+        data.postId = newPost._id;
+        data.type = 'createPost';
+        data.senderId = userID;
+        data.receiverId = groupId;
 
+        sendNotify = (await notificationService.createNotify(data)).statusCode;
+      }
+      if (sendNotify != 200) {
+        return {
+          msg: msg.errSendNotify,
+          statusCode: 300,
+        };
+      }
       return {
         msg: msg.createPost,
         statusCode: 200,
