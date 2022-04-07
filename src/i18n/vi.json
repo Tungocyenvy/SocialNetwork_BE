@@ -137,5 +137,15 @@
     "searchUser": "tìm kiếm thành công!",
     "err": "Xảy ra lỗi trong quá trình xử lý!",
     "notHaveUser": "Không có người dùng nào !"
+  },
+  "notify": {
+    "validator": "Không có dữ liệu đầu vào!",
+    "err": "Xảy ra lỗi trong quá trình xử lý!",
+    "createTemplate": "Tạo mẫu thông báo thành công!",
+    "existsTemplate": "Mẫu thông báo này đã tồn tại!",
+    "notHaveTemplate": "Không có mẫu thông báo nào!",
+    "getTemplate": "Lấy mẫu thông báo thành công!",
+    "deleteTemplate": "Xóa mẫu thông báo thành công!",
+    "updateTemplate": "Chỉnh sửa mẫu thông báo thành công!"
   }
 }

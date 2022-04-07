@@ -4,7 +4,8 @@ const schema = mongoose.Schema;
 const Notify_templateSchema = new schema({
   _id: { type: String },
   type: { type: String, required: true },
-  content: { type: String, required: true },
+  nameEn: { type: String, required: true },
+  nameVi: { type: String, required: true },
 });
 
 const notify_template = mongoose.model(

@@ -137,5 +137,15 @@
     "searchUser": "Search successful!",
     "err": "An error occurred during the process!",
     "notHaveUser": "Don't have user!"
+  },
+  "notify": {
+    "validator": "Don't have data input!",
+    "err": "An error occurred during the process!",
+    "createTemplate": "Create notification templates successful!",
+    "existsTemplate": "Notification templates name already exists!",
+    "notHaveTemplate": "Don't have any notification template!",
+    "getTemplate": "Get notification template successful!",
+    "deleteTemplate": "Delete notification template successful!",
+    "updateTemplate": "Update notification template successful!"
   }
 }
