@@ -7,6 +7,9 @@ const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
 const Account = require('../models/account.model');
 const notificationService = require('./notification.service');
+const NotifySend = require('../models/notify_send.model');
+const notifyQueue = require('../models/notify_queue.model');
+
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -307,6 +310,12 @@ const deletePost = async (req, lang) => {
   try {
     const res = await Post.findByIdAndDelete({ _id: postId });
     if (res) {
+      const notify = await NotifySend.find({ postId: postId });
+      if (notify.length > 0) {
+        const notifyIds = map(notify, '_id');
+        await NotifySend.deleteMany({ postId: postId });
+        await notifyQueue.deleteMany({ notifyId: { $in: notifyIds } });
+      }
       //pending delete notify
       return {
         msg: msg.deletePost,

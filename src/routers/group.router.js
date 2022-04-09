@@ -24,6 +24,7 @@ router.get('/user', jwt.verify, groupController.getGroupByUserId);
 
 //Sub group
 router.get('/relative', jwt.verify, groupController.getRelativeGroup);
+router.get('/:groupId', groupController.getDetailGroup);
 
 router.get('/sub', groupController.getAllGroup);
 router.post('/sub', jwt.verify, groupController.createSubgroup);

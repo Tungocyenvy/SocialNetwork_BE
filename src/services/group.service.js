@@ -5,6 +5,7 @@ const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
 const Account = require('../models/account.model');
 const Profile = require('../models/profile.model');
+const Post = require('../models/post.model');
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -639,6 +640,32 @@ const getGroupByUserId = async (UserID, req, lang) => {
   }
 };
 
+const getDetailGroup = async (req, lang) => {
+  let { groupId } = req.params || {};
+  const msg = getMsg(lang);
+  try {
+    const group = await Group.findById({ _id: groupId });
+    if (!group) {
+      return {
+        msg: msg.notFoundGroup,
+        statusCode: 300,
+      };
+    }
+    const numMember = await userSubGroup.countDocuments({ groupId: groupId });
+    const numPost = await Post.countDocuments({ groupId: groupId });
+    return {
+      msg: msg.getDetailGr,
+      statusCode: 200,
+      data: { group, numMember, numPost },
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -655,4 +682,5 @@ module.exports = {
   updateFaculty,
   getListUser,
   getGroupByUserId,
+  getDetailGroup,
 };

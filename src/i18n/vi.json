@@ -90,7 +90,8 @@
     "updateSub": "Chỉnh sửa nhóm thành công!",
     "notHaveUser": "Không có người dùng nào trong nhóm!",
     "getUser": "Lấy danh sách thành viên thành công!",
-    "existsUser": "%s đã có trong nhóm %s!"
+    "existsUser": "%s đã có trong nhóm %s!",
+    "getDetailGr": "Lấy chi tiết nhóm thành công!"
   },
   "jwt": {
     "noProvided": "Vui lòng truyền token!",
@@ -148,6 +149,9 @@
     "deleteTemplate": "Xóa mẫu thông báo thành công!",
     "updateTemplate": "Chỉnh sửa mẫu thông báo thành công!",
     "createQueue": "Thêm thông báo vào danh sách đợi thành công!",
-    "createNotify": "Tạo thông báo thành công!"
+    "createNotify": "Tạo thông báo thành công!",
+    "notHaveNotify": "Không có thông báo nào!",
+    "getNotify": "Lấy thông báo thành công!",
+    "readNotify": "Đổi trạng thái đã đọc thông báo thành công!"
   }
 }

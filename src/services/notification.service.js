@@ -2,6 +2,8 @@ const notifyQueue = require('../models/notify_queue.model');
 const notifyTemplate = require('../models/notify_template.model');
 const notifySend = require('../models/notify_send.model');
 const userSubGroup = require('../models/user_subgroup.model');
+const Profile = require('../models/profile.model');
+const Group = require('../models/group.model');
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -209,6 +211,95 @@ const createNotify = async (body, lang) => {
   }
 };
 
+const getNotify = async (userID, req, lang) => {
+  let perPage = 10;
+  let { page = 1 } = req.query || {};
+  const msg = getMsg(lang);
+  try {
+    const total = await notifyQueue.countDocuments({ userId: userID });
+    if (total <= 0) {
+      return {
+        msg: msg.notHaveNotify,
+        statusCode: 200,
+        data: [],
+      };
+    }
+
+    const queue = await notifyQueue
+      .find({ userId: userID })
+      .sort({
+        createdDate: -1,
+      })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+    const objQueue = keyBy(queue, 'notifyId');
+
+    const notifyIds = map(queue, 'notifyId');
+    const notify = await notifySend.find({ _id: { $in: notifyIds } });
+    objNotify = keyBy(notify, '_id');
+
+    const templateIds = map(notify, 'templateId');
+    const template = await notifyTemplate.find({ _id: { $in: templateIds } });
+    const objTemplate = keyBy(template, '_id');
+
+    const senderIds = map(notify, 'senderId');
+    const profile = await Profile.find({ _id: { $in: senderIds } });
+    const objProfile = keyBy(profile, '_id');
+
+    const receiverIds = map(notify, 'receiverId');
+    const group = await Group.find({ _id: receiverIds });
+    let objgroup = group.length > 0 ? keyBy(group, '_id') : [];
+    const result = notifyIds.map((item) => {
+      const { notifyId, isRead } = objQueue[item];
+      const { templateId, senderId, receiverId } = objNotify[item];
+      const { nameEn, nameVi } = objTemplate[templateId];
+      const { fullname, avatar } = objProfile[senderId];
+      let groupName = '';
+      if (receiverId != userID) {
+        //create post in group
+        groupName = objgroup[receiverId].nameEn; //sub group nameEn same nameVi
+      }
+      const contentEn = fullname + ' ' + nameEn + ' ' + groupName;
+      const contentVi = fullname + ' ' + nameVi + ' ' + groupName;
+
+      return { notifyId, contentEn, contentVi, avatar, isRead };
+    });
+    return {
+      msg: msg.getNotify,
+      statusCode: 200,
+      data: result,
+    };
+  } catch (err) {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+const readNotify = async (userID, req, lang) => {
+  let { notifyId } = req.query || {};
+  const msg = getMsg(lang);
+  try {
+    const res = await notifyQueue.findOneAndUpdate(
+      { notifyId: notifyId, userId: userID },
+      { isRead: true },
+    );
+    if (res) {
+      return {
+        msg: msg.readNotify,
+        statusCode: 200,
+        data: [],
+      };
+    }
+  } catch (err) {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   createTemplate,
   getTemplate,
@@ -216,4 +307,6 @@ module.exports = {
   deleteTemplate,
   createNotifyQueue,
   createNotify,
+  getNotify,
+  readNotify,
 };

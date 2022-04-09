@@ -90,7 +90,8 @@
     "updateSub": "Update group successfull!",
     "notHaveUser": "Don't have any user!",
     "getUser": "Get list user successful!",
-    "existsUser": "%s already exists in group %s!"
+    "existsUser": "%s already exists in group %s!",
+    "getDetailGr": "Get detail group successful!"
   },
   "jwt": {
     "noProvided": "No token provided!",
@@ -148,6 +149,9 @@
     "deleteTemplate": "Delete notification template successful!",
     "updateTemplate": "Update notification template successful!",
     "createQueue": "Create notification queue successful!",
-    "createNotify": "Create notification successful!"
+    "createNotify": "Create notification successful!",
+    "notHaveNotify": "Don't have any notification!",
+    "getNotify": "Get Notify successful!",
+    "readNotify": "Change read notify successful!"
   }
 }
