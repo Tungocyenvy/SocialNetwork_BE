@@ -12,7 +12,6 @@ const GroupSchema = new schema({
   isMain: { type: Boolean, default: false },
   createdDate: {
     type: Date,
-    required: true,
     default: moment().format('YYYY-MM-DD HH:mm:ss'),
   },
   cateId: { type: String, required: true, default: 'none' },

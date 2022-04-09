@@ -20,9 +20,10 @@ router.delete('/user', groupController.deleteUser); //delete one user
 router.delete('/listuser', groupController.deleteListUser); //delete listUser
 router.post('/user/admin', groupController.changeAdmin);
 router.post('/user/tranfer', groupController.tranferFaculty);
+router.get('/user', jwt.verify, groupController.getGroupByUserId);
 
 //Sub group
-router.get('/relative', groupController.getRelativeGroup);
+router.get('/relative', jwt.verify, groupController.getRelativeGroup);
 
 router.get('/sub', groupController.getAllGroup);
 router.post('/sub', jwt.verify, groupController.createSubgroup);

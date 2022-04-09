@@ -375,11 +375,17 @@ const createSubGroup = async (userId, body, lang) => {
   const msg = getMsg(lang);
   try {
     if (body) {
-      let data = body;
-      data._id = mongoose.Types.ObjectId();
-      data.isMain = false;
+      const imageDefault =
+        'https://res.cloudinary.com/blogreview/image/upload/v1648876903/j0pbzmmrgsomqoywdqde.jpg';
 
-      const res = await Group.create(data);
+      const data = new Group({
+        _id: mongoose.Types.ObjectId(),
+        nameEn: body.name,
+        nameVi: body.name,
+        cateId: body.cateId ? body.cateId : 'none',
+        image: body.image ? body.image : imageDefault,
+      });
+      const res = await data.save();
 
       if (res) {
         const groupId = res._id;
@@ -432,31 +438,38 @@ const getAllGroup = async (req, lang) => {
   }
 };
 
-const getRelativeGroup = async (req, lang) => {
-  let { groupId, page = 1 } = req.query || {};
+const getRelativeGroup = async (UserID, req, lang) => {
+  let { page = 1 } = req.query || {};
   let perPage = 2;
   const msg = getMsg(lang);
   try {
-    const group = groupId ? await Group.findById({ _id: groupId }) : {};
+    req.query.isAll = true;
+    const data = (await getGroupByUserId(UserID, req, lang)).data;
+    const count = data.total;
+    const listGroup = data.result;
+    let groupIds = [];
+    if (count > 0) {
+      groupIds = map(listGroup, 'groupId');
+    }
+    const group = count > 0 ? await Group.find({ _id: { $in: groupIds } }) : [];
     // if (!group) {
     //   return {
     //     msg: msg.notFoundGroup,
     //     statusCode: 300,
     //   };
     // }
-    const cateId = group.cateId || '6247e027aafeb586cb35c956';
+    const cateIds = map(group, 'cateId') || '6247e027aafeb586cb35c956';
 
     let total = await Group.countDocuments({
       isMain: false,
-      cateId: cateId,
-      _id: { $nin: groupId },
+      cateId: { $in: cateIds },
+      _id: { $nin: groupIds },
     });
     if (total > 0) {
-      console.log(total);
       const result = await Group.find({
         isMain: false,
-        cateId: cateId,
-        _id: { $nin: groupId },
+        cateId: { $in: cateIds },
+        _id: { $nin: groupIds },
       })
         .skip(perPage * page - perPage)
         .limit(perPage);
@@ -469,7 +482,8 @@ const getRelativeGroup = async (req, lang) => {
     } else {
       return {
         msg: msg.getRalative,
-        statusCode: 300,
+        statusCode: 200,
+        data: [],
       };
     }
   } catch {
@@ -573,6 +587,58 @@ const getListUser = async (req, lang) => {
   }
 };
 
+const getGroupByUserId = async (UserID, req, lang) => {
+  let { page = 1, isAll = false } = req.query || {};
+  let perPage = 5;
+  const msg = getMsg(lang);
+  try {
+    let total = await userSubGroup.countDocuments({ userId: UserID });
+    let result = [];
+    if (total > 0) {
+      if (isAll === true) {
+        perPage = total;
+        page = 1;
+      }
+      const group = await userSubGroup
+        .find({ userId: UserID })
+        .sort({ _id: -1 })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+
+      const groupIds = map(group, 'groupId');
+      const lstGroup = await Group.find({
+        _id: {
+          $in: groupIds,
+        },
+      });
+
+      const objGroup = keyBy(lstGroup, '_id');
+      result = group.map((item) => {
+        const { groupId, isAdmin } = item;
+        const { nameEn, nameVi, createdDate, cateId, image } =
+          objGroup[groupId];
+        return { groupId, nameEn, nameVi, createdDate, cateId, image, isAdmin };
+      });
+      return {
+        msg: msg.getSub,
+        statusCode: 200,
+        data: { total, result },
+      };
+    } else {
+      return {
+        msg: msg.notHaveSubGr,
+        statusCode: 200,
+        data: { total, result },
+      };
+    }
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -588,4 +654,5 @@ module.exports = {
   updateGroup,
   updateFaculty,
   getListUser,
+  getGroupByUserId,
 };
