@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+
 const schema = mongoose.Schema;
 
 const PostSchema = new schema({
@@ -11,7 +11,7 @@ const PostSchema = new schema({
   isMainGroup: { type: Boolean, default: true },
   createdDate: {
     type: Date,
-    default: moment().format('YYYY-MM-DD HH:mm:ss'),
+    default: Date.now,
   },
 });
 

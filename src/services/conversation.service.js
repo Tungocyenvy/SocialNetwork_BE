@@ -2,7 +2,7 @@ const Conversation = require('../models/conversation.model');
 const Participant = require('../models/participant.model');
 const Profile = require('../models/profile.model');
 const participantService = require('./participant.service');
-const moment = require('moment');
+
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -140,7 +140,7 @@ const updateConversation = async (body, lang) => {
       const conversation = new Conversation();
       conversation._id = body.conversationId;
       conversation.lastestMessage = body.data;
-      conversation.updatedDate = moment().format('YYYY-MM-DD HH:mm:ss');
+      conversation.updatedDate = Date.now;
       const res = await Conversation.findByIdAndUpdate(
         {
           _id: body.conversationId,

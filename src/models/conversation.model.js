@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+
 const schema = mongoose.Schema;
 
 const ConversationSchema = new schema({
@@ -19,7 +19,7 @@ const ConversationSchema = new schema({
   },
   updatedDate: {
     type: Date,
-    default: moment().format('YYYY-MM-DD HH:mm:ss'),
+    default: Date.now,
   },
 });
 

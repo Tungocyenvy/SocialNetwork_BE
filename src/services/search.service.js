@@ -3,7 +3,7 @@ const Group = require('../models/group.model');
 const userSubGroup = require('../models/user_subgroup.model');
 const userMainGroup = require('../models/user_maingroup.model');
 const { map, keyBy } = require('lodash');
-const moment = require('moment');
+
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+
 const schema = mongoose.Schema;
 
 const imageDefault =
@@ -12,7 +12,7 @@ const GroupSchema = new schema({
   isMain: { type: Boolean, default: false },
   createdDate: {
     type: Date,
-    default: moment().format('YYYY-MM-DD HH:mm:ss'),
+    default: Date.now,
   },
   cateId: { type: String, required: true, default: 'none' },
   image: { type: String, required: true, default: imageDefault },

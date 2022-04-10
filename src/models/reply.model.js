@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+
 const schema = mongoose.Schema;
 
 const ReplySchema = new schema({
@@ -7,7 +7,7 @@ const ReplySchema = new schema({
   userId: { type: String, required: true },
   content: { type: String, required: true },
   commentId: { type: String, required: true },
-  createdDate: { type: Date, default: moment().format('YYYY-MM-DD HH:mm:ss') },
+  createdDate: { type: Date, default: Date.now },
 });
 
 const reply = mongoose.model('reply', ReplySchema);

@@ -5,7 +5,7 @@ const Profile = require('../models/profile.model');
 const Role = require('../models/role.model');
 const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
-const moment = require('moment');
+
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -357,7 +357,7 @@ const deleteAccount = async (req) => {
       //check profile && account
       if (account) {
         account.isDelete = true;
-        account.deletedDate = moment().format('YYYY-MM-DD HH:mm:ss');
+        account.deletedDate = Date.now;
         try {
           await account.save();
         } catch {

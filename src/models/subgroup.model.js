@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+
 const schema = mongoose.Schema;
 
 const subGroupSchema = new schema({
@@ -12,7 +12,7 @@ const subGroupSchema = new schema({
   createdDate: {
     type: Date,
     required: true,
-    default: moment().format('YYYY-MM-DD HH:mm:ss'),
+    default: Date.now,
   },
   cateId: { type: String, required: true },
 });

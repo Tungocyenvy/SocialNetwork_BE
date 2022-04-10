@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+
 const schema = mongoose.Schema;
 
 const Notify_maingroupSchema = new schema({
@@ -7,7 +7,7 @@ const Notify_maingroupSchema = new schema({
   postId: { type: String, required: true },
   groupId: { type: String, required: true },
   isRead: { type: Boolean, required: true, default: false },
-  createdDate: { type: Date, default: moment().format('YYYY-MM-DD HH:mm:ss') },
+  createdDate: { type: Date, default: Date.now },
 });
 
 const notify_maingroup = mongoose.model(
