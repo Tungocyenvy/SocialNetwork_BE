@@ -150,6 +150,7 @@ const getComment = async (req, lang) => {
 
 //create comment
 const createComment = async (userId, body, lang) => {
+  let { postId, content } = body || {};
   const msg = getMsg(lang);
   try {
     if (!postId) {
@@ -204,6 +205,7 @@ const createComment = async (userId, body, lang) => {
 };
 
 const updateComment = async (userId, body, lang) => {
+  let { content, commentId } = body || {};
   const msg = getMsg(lang);
   try {
     let comment = await Comment.findById({ _id: commentId });
@@ -345,6 +347,7 @@ const getReply = async (req, lang) => {
 
 //reply comment
 const replyComment = async (userId, body, lang) => {
+  let { content, commentId } = body || {};
   const msg = getMsg(lang);
   try {
     if (!commentId) {
@@ -442,11 +445,12 @@ const deleteReply = async (userId, req, lang) => {
       };
     }
 
+    const commentId = reply.commentId;
     await Reply.findOneAndDelete({ _id: replyId });
-    const comment = Comment.findById({ _id: reply.commmentId });
+    let comment = await Comment.findById({ _id: commentId });
     if (comment) {
-      comment.countReply -= 1;
-      await comment.save();
+      comment.countReply = comment.countReply - 1;
+      await Comment.findByIdAndUpdate({ _id: commentId }, comment);
     }
     return {
       msg: msg.deleteReply,

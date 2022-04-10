@@ -176,11 +176,12 @@ const getListPostByUserId = async (userId, req, lang) => {
           result = listPost
             .filter((item) => item != null)
             .map((item) => {
-              const { _id, author, title, createdDate } = item;
+              const { _id, author, title, content, createdDate } = item;
               const { fullname, avatar } = objProfile[author];
               return {
                 _id,
                 title,
+                content,
                 createdDate,
                 author,
                 fullname,
