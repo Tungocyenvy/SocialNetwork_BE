@@ -243,7 +243,8 @@ const getListPostByGroupId = async (req, lang) => {
           },
         });
 
-        const objProfile = keyby(profile, '_id');
+        const objProfile = keyBy(profile, '_id');
+        console.log("🚀 ~ file: post.service.js ~ line 247 ~ getListPostByGroupId ~ objProfile", objProfile)
 
         const postIds = map(listPost, '_id');
         const comment = await Comment.find({ postId: { $in: postIds } });
