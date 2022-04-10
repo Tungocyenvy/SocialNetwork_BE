@@ -244,18 +244,20 @@ const getListPostByGroupId = async (req, lang) => {
         });
 
         const objProfile = keyBy(profile, '_id');
-        console.log("🚀 ~ file: post.service.js ~ line 247 ~ getListPostByGroupId ~ objProfile", objProfile)
-
         const postIds = map(listPost, '_id');
         const comment = await Comment.find({ postId: { $in: postIds } });
-        const objComment = groupBy(comment, 'postId');
+        let objComment={};
+        if(comment.length>0) 
+       {
+          objComment = groupBy(comment, 'postId');
+       }
 
         result = listPost
           .filter((item) => item != null)
           .map((item) => {
             const { _id, author, title, content, createdDate } = item;
             const { fullname, avatar } = objProfile[author];
-            const countCmt = objComment[_id].length;
+            const countCmt=objComment[_id]? objComment[_id].length:0;
             return {
               _id,
               title,
