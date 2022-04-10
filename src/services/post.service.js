@@ -243,7 +243,7 @@ const getListPostByGroupId = async (req, lang) => {
           },
         });
 
-        const objProfile = groupBy(profile, '_id');
+        const objProfile = keyby(profile, '_id');
 
         const postIds = map(listPost, '_id');
         const comment = await Comment.find({ postId: { $in: postIds } });
