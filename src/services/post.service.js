@@ -9,8 +9,9 @@ const Account = require('../models/account.model');
 const notificationService = require('./notification.service');
 const NotifySend = require('../models/notify_send.model');
 const notifyQueue = require('../models/notify_queue.model');
+const Comment = require('../models/comment.model');
 
-const { map, keyBy } = require('lodash');
+const { map, keyBy, groupBy } = require('lodash');
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {
@@ -242,20 +243,27 @@ const getListPostByGroupId = async (req, lang) => {
           },
         });
 
-        const objProfile = keyBy(profile, '_id');
+        const objProfile = groupBy(profile, '_id');
+
+        const postIds = map(listPost, '_id');
+        const comment = await Comment.find({ postId: { $in: postIds } });
+        const objComment = groupBy(comment, 'postId');
 
         result = listPost
           .filter((item) => item != null)
           .map((item) => {
-            const { _id, author, title, createdDate } = item;
+            const { _id, author, title, content, createdDate } = item;
             const { fullname, avatar } = objProfile[author];
+            const countCmt = objComment[_id].length;
             return {
               _id,
               title,
+              content,
               createdDate,
               author,
               fullname,
               avatar,
+              countCmt,
             };
           });
       }
