@@ -517,7 +517,7 @@ const updateGroup = async (body, lang) => {
 
 const getListUser = async (req, lang) => {
   let perPage = 10;
-  let { page = 1, isStudent = true } = req.query || {};
+  let { page = 1, isStudent = true,isAdmin=false } = req.query || {};
   const msg = getMsg(lang);
   let { type, groupId } = req.params || {};
 
@@ -528,15 +528,16 @@ const getListUser = async (req, lang) => {
       total = await userMainGroup.countDocuments({
         groupId: groupId,
         isStudent: isStudent,
+        isAdmin:isAdmin
       });
       listUser = await userMainGroup
-        .find({ groupId: groupId, isStudent: isStudent })
+        .find({ groupId: groupId, isStudent: isStudent ,isAdmin:isAdmin})
         .skip(perPage * page - perPage)
         .limit(perPage);
     } else {
-      total = await userSubGroup.countDocuments({ groupId: groupId });
+      total = await userSubGroup.countDocuments({ groupId: groupId,isAdmin:isAdmin });
       listUser = await userSubGroup
-        .find({ groupId: groupId })
+        .find({ groupId: groupId,isAdmin:isAdmin })
         .skip(perPage * page - perPage)
         .limit(perPage);
     }
