@@ -91,7 +91,9 @@
     "notHaveUser": "Don't have any user!",
     "getUser": "Get list user successful!",
     "existsUser": "%s already exists in group %s!",
-    "getDetailGr": "Get detail group successful!"
+    "getDetailGr": "Get detail group successful!",
+    "errChangeAdmin" :"You're the only admin on the group, you must assign another admin before removing yoursel!",
+    "checkAdmin" :"Check admin is successful!"
   },
   "jwt": {
     "noProvided": "No token provided!",

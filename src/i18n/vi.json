@@ -91,7 +91,9 @@
     "notHaveUser": "Không có người dùng nào trong nhóm!",
     "getUser": "Lấy danh sách thành viên thành công!",
     "existsUser": "%s đã có trong nhóm %s!",
-    "getDetailGr": "Lấy chi tiết nhóm thành công!"
+    "getDetailGr": "Lấy chi tiết nhóm thành công!",
+    "errChangeAdmin" :"Vui lòng chỉ định một người quản trị mới trước khi xóa người quản trị duy nhất của nhóm!",
+    "checkAdmin" :"Kiểm tra quyền quản trị thành công!"
   },
   "jwt": {
     "noProvided": "Vui lòng truyền token!",

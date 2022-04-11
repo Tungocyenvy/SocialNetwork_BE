@@ -5,25 +5,13 @@
 {admin2: admin#SCNW12},
 {"1811001: 1811001@social922533}
 
+{2111002:2111002@social854443}
+{2111003:2111002@social854443}
+{2111004:2111004@social365584}
+{2111005:2111005@social938670}
 
- "accountData": {
-            "0": {
-                "_id": "2111002",
-                "password": "2111002@social854443"
-            },
-            "1": {
-                "_id": "2111003",
-                "password": "2111003@social774966"
-            },
-            "2": {
-                "_id": "2111004",
-                "password": "2111004@social365584"
-            },
-            "3": {
-                "_id": "2111005",
-                "password": "2111005@social938670"
-            }
-        }
+1811243:Beare eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiMTgxMTI0MyIsImlzcyI6ImdhaSB4dW9uZyByb25nIiwiaWF0IjoxNjQ4ODc0NDMzNDg1LCJleHAiOjE2NDg5NjA4MzM0ODV9.gIvdvO3feMgViAGJFHUlHQSHLmeZ0VotFd7fzejkdtU
+admin:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiYWRtaW4xIiwiaXNzIjoiZ2FpIHh1b25nIHJvbmciLCJpYXQiOjE2NDU1MTYwMzE5NTYsImV4cCI6MTY0NTYwMjQzMTk1Nn0.ah_DbDbDRQ-0Px1auEkIZo3NaY7KSnMiWWVKTLvbDkk
 
 role
 1:admin

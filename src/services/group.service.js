@@ -343,6 +343,15 @@ const changeAdmin = async (body, lang) => {
     if (type == 'main') {
       user = await userMainGroup.findOne({ userId: userId, groupId: groupId });
     } else {
+      if (isRemove === true) {
+        const total = await userSubGroup.countDocuments({ groupId: groupId, isAdmin: true });
+        if (total === 1) {
+          return {
+            msg: msg.errChangeAdmin,
+            statusCode: 300,
+          };
+        }
+      }
       user = await userSubGroup.findOne({ userId: userId, groupId: groupId });
     }
 
@@ -667,6 +676,25 @@ const getDetailGroup = async (req, lang) => {
   }
 };
 
+const checkAdminforSub = async (userID,req, lang) => {
+  let { groupId } = req.query || {};
+  const msg = getMsg(lang);
+  try {
+    const user = await userSubGroup.findOne({userId:userID,groupId:groupId});
+    const isAdmin = user?user.isAdmin:false;
+    return {
+      msg: msg.checkAdmin,
+      statusCode: 200,
+      data:isAdmin
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -684,4 +712,5 @@ module.exports = {
   getListUser,
   getGroupByUserId,
   getDetailGroup,
+  checkAdminforSub
 };
