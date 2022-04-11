@@ -624,12 +624,14 @@ const getGroupByUserId = async (UserID, req, lang) => {
       });
 
       const objGroup = keyBy(lstGroup, '_id');
-      result = group.map((item) => {
+      result =await Promise.all( group.map(async (item) => {
         const { groupId, isAdmin } = item;
         const { nameEn, nameVi, createdDate, cateId, image } =
           objGroup[groupId];
-        return { groupId, nameEn, nameVi, createdDate, cateId, image, isAdmin };
-      });
+        const numMember = await userSubGroup.countDocuments({ groupId: groupId });
+        const numPost = await Post.countDocuments({groupId:groupId})
+        return { groupId, nameEn, nameVi, createdDate, cateId, image, isAdmin,numMember, numPost};
+      }));
       return {
         msg: msg.getSub,
         statusCode: 200,

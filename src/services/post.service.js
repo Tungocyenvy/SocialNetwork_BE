@@ -279,7 +279,8 @@ const getListPostByGroupId = async (req, lang) => {
     } else {
       return {
         msg: msg.notHavePost,
-        statusCode: 300,
+        statusCode: 200,
+        data:[]
       };
     }
   } catch {

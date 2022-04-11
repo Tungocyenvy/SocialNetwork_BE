@@ -12,6 +12,13 @@ const getMsg = (req) => {
   return (msg = I18n.__('search'));
 };
 
+const removeVN = (Text) => {
+  return Text.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+};
+
 const transferProfile = (profile) => {
   const { _id, fullname, avatar, dob, address, email, phone, year, faculty } =
     profile;
@@ -57,9 +64,9 @@ const searchUser = async (req, lang) => {
       }
     } else {
       //search by name
-      total = await Profile.countDocuments({ fullname: key });
+      total = await Profile.countDocuments({  $text:{$search:key}});
       if (total > 0) {
-        result = await Profile.find({ fullname: key })
+        result = await Profile.find({ $text:{$search:key}})
           .skip(perPage * page - perPage)
           .limit(perPage);
       }
@@ -107,7 +114,8 @@ const searchUserForSubGroup = async (req, lang) => {
       if (total <= 0) {
         return {
           msg: msg.notHaveUser,
-          statusCode: 300,
+          statusCode: 200,
+          data:[]
         };
       }
 
@@ -120,7 +128,8 @@ const searchUserForSubGroup = async (req, lang) => {
       if (listUser.length <= 0) {
         return {
           msg: msg.notHaveUser,
-          statusCode: 300,
+          statusCode: 200,
+          data:[]
         };
       }
 
@@ -129,22 +138,22 @@ const searchUserForSubGroup = async (req, lang) => {
         _id: {
           $in: userIds,
         },
-        fullname: key,
+        $match:{$text:{$search:key}}
       });
-
       if (total <= 0) {
         return {
           msg: msg.notHaveUser,
-          statusCode: 300,
+          statusCode: 200,
+          data:[]
         };
       }
+
       profile = await Profile.find({
         _id: {
           $in: userIds,
         },
-        fullname: key,
-      })
-        .skip(perPage * page - perPage)
+       $text:{$or:[{$search:key},key]}}
+      ).skip(perPage * page - perPage)
         .limit(perPage);
     }
 
@@ -200,7 +209,8 @@ const searchUserForMainGroup = async (req, lang) => {
       if (total <= 0) {
         return {
           msg: msg.notHaveUser,
-          statusCode: 300,
+          statusCode: 200,
+          data:[]
         };
       }
       profile = await Profile.find({ _id: keyword })
@@ -218,7 +228,8 @@ const searchUserForMainGroup = async (req, lang) => {
       if (listUser.length <= 0) {
         return {
           msg: msg.notHaveUser,
-          statusCode: 300,
+          statusCode: 200,
+          data:[]
         };
       }
 
@@ -227,20 +238,21 @@ const searchUserForMainGroup = async (req, lang) => {
         _id: {
           $in: userIds,
         },
-        fullname: key,
+        $text:{$search:key}
       });
 
       if (total <= 0) {
         return {
           msg: msg.notHaveUser,
-          statusCode: 300,
+          statusCode: 200,
+          data:[]
         };
       }
       profile = await Profile.find({
         _id: {
           $in: userIds,
         },
-        fullname: key,
+        $text:{$search:key}
       })
         .skip(perPage * page - perPage)
         .limit(perPage);
