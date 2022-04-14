@@ -4,6 +4,8 @@ const notifySend = require('../models/notify_send.model');
 const userSubGroup = require('../models/user_subgroup.model');
 const Profile = require('../models/profile.model');
 const Group = require('../models/group.model');
+const Reply = require('../models/reply.model');
+const Comment = require('../models/comment.model');
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -162,9 +164,10 @@ const createNotifyQueue = async (body, lang) => {
 };
 
 /**1:add friend
- * 2:comment
- * 3: reply
- * 4: createPost
+ * 2:comment - representId:commentId - receiverId:Author Post
+ * 3: reply - representId:replyId - receiverId:Author Comment
+ * 4: createPost - representId:PostId  - receiverId:user in group
+ * 5: replyFollow - representId:replyId  - receiverId:commentId (user reply in comment)
  */
 const createNotify = async (body, lang) => {
   const msg = getMsg(lang);
@@ -174,20 +177,49 @@ const createNotify = async (body, lang) => {
     const templateId = await notifyTemplate.findOne({ type: type });
     data.templateId = templateId;
     delete data.type;
-    const result = await notifySend.create(data);
-    if (result) {
-      let userIds = [];
-      if (type === 'createPost') {
-        const listUser = await userSubGroup.find({
-          groupId: body.receiverId,
-          userId: { $nin: body.senderId },
-        });
-        if (listUser.length > 0) {
-          userIds = map(listUser, 'userId');
-        }
-      } else {
-        userIds = body.receiverId;
+    let result;
+    let userIds = [];
+    if(type==='replyFollow'){//receiverId: commentId
+      const comment = await Comment.findById({_id:data.receiverId});
+      const autComment = comment.userId;
+      const exceptUser=[data.senderId,autComment];
+      let notify = await notifySend.findOne({senderId:data.senderId,receiverId:data.receiverId});
+      if(notify)
+      {
+        notify.createdDate = Date.now;
+        await notifySend.findByIdAndUpdate({_id:notify._id},notify);
+        await notifyQueue.updateMany({notifyId:notify._id,userId:{$nin:data.senderId}},{$set:{isRead:false,createdDate:Date.now}});
+        
+        //first receive notify
+       const lstQueue = notifyQueue.find({notifyId:notify._id});
+       let listUser=[];
+       if(lstQueue.length>0) {listUser = map(lstQueue,'userId');}
+       listUser.push(autComment);
+       const listReply = await Reply.find({commentId:data.receiverId,userId:{$nin:listUser}});
+       if(listReply.length>0) userIds = map(listReply,'userId');
+      }else{//first reply
+        const rs=await notifySend.create(data);
+        await notifyQueue.updateMany({notifyId:rs._id,userId:{$nin:data.senderId}},{$set:{isRead:false,createdDate:Date.now}});
       }
+    }
+    else if (type === 'createPost') {
+      result = await notifySend.create(data);
+      const listUser = await userSubGroup.find({
+        groupId: body.receiverId,
+        userId: { $nin: body.senderId },
+      });
+      if (listUser.length > 0) {
+        userIds = map(listUser, 'userId');
+      }
+    // }else if(type==='reply')
+    // {
+    //   const existNotify = await notifySend.find({senderId:data.senderId,receiverId:data.receiverId,representId:data.representId});
+    } else {
+      result = await notifySend.create(data);
+      userIds.push(body.receiverId);
+    }
+
+    if (userIds.length > 0) {
       const queue = userIds.map((id) => {
         const userId = id;
         const notifyId = result._id;
@@ -195,14 +227,13 @@ const createNotify = async (body, lang) => {
       });
 
       const res = await notifyQueue.insertMany(queue);
-      if (res) {
-        return {
-          msg: msg.createNotify,
-          statusCode: 200,
-          data: result,
-        };
-      }
     }
+
+    return {
+      msg: msg.createNotify,
+      statusCode: 200,
+      data: result,
+    };
   } catch (err) {
     return {
       msg: msg.err,
@@ -249,9 +280,9 @@ const getNotify = async (userID, req, lang) => {
     const receiverIds = map(notify, 'receiverId');
     const group = await Group.find({ _id: receiverIds });
     let objgroup = group.length > 0 ? keyBy(group, '_id') : [];
-    const result = notifyIds.map((item) => {
+    const result =await Promise.all(notifyIds.map(async(item) => {
       const { notifyId, isRead } = objQueue[item];
-      const { templateId, senderId, receiverId } = objNotify[item];
+      const { templateId, senderId, receiverId,type } = objNotify[item];
       const { nameEn, nameVi } = objTemplate[templateId];
       const { fullname, avatar } = objProfile[senderId];
       let groupName = '';
@@ -259,11 +290,21 @@ const getNotify = async (userID, req, lang) => {
         //create post in group
         groupName = objgroup[receiverId].nameEn; //sub group nameEn same nameVi
       }
-      const contentEn = fullname + ' ' + nameEn + ' ' + groupName;
-      const contentVi = fullname + ' ' + nameVi + ' ' + groupName;
+      let senderEn=fullname;
+      let senderVi=fullname;
+      if(type==='replyFollow'||type==='reply') //count by commentId
+      {
+        const total = await notifySend.countDocuments({receiverId:receiverId,senderId:{$nin:senderId}});
+        if(total>0) {
+          senderVi=sender + " và " +total+" người khác";
+          senderVi=sender + " and " +total+" another";
+        }
+      }
+      const contentEn = senderEn + ' ' + nameEn + ' ' + groupName;
+      const contentVi = senderVi + ' ' + nameVi + ' ' + groupName;
 
       return { notifyId, contentEn, contentVi, avatar, isRead };
-    });
+    }));
     return {
       msg: msg.getNotify,
       statusCode: 200,
@@ -300,6 +341,34 @@ const readNotify = async (userID, req, lang) => {
   }
 };
 
+const deleteNotify = async (req, lang) => {
+  let { representId } = req.query || {};
+  const msg = getMsg(lang);
+  try {
+    const notify = await notifySend.find({representId:representId});
+    if(notify.length>0)
+    {
+      const notifyIds = map(notify,'_id');
+      await notifyQueue.deleteMany({notifyId:{$in:notifyIds}});
+      await notifySend.deleteMany({representId:representId});
+
+      return {
+        msg: msg.deleteNotify,
+        statusCode: 200,
+      };
+    }
+    return {
+      msg: msg.notFound,
+      statusCode: 300,
+    };
+  } catch (err) {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   createTemplate,
   getTemplate,
@@ -309,4 +378,5 @@ module.exports = {
   createNotify,
   getNotify,
   readNotify,
+  deleteNotify
 };

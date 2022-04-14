@@ -3,6 +3,7 @@ const Profile = require('../models/profile.model');
 const Reply = require('../models/reply.model');
 const Post = require('../models/post.model');
 const { map, keyBy } = require('lodash');
+const notificationService = require('./notification.service');
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {
@@ -186,9 +187,25 @@ const createComment = async (userId, body, lang) => {
     });
     let resSave = await newComment.save();
     if (resSave) {
+
       const profile = await Profile.findById({ _id: resSave.userId });
       const objProfile = keyBy(profile, '_id');
       const result = transferComment(resSave, objProfile);
+      if (userId !== post.author) {
+        let data = {};
+        data.representId = _id;
+        data.type = 'comment';
+        data.senderId = userId;
+        data.receiverId = post.author;
+        sendNotify = (await notificationService.createNotify(data)).statusCode;
+        if (sendNotify !== 200) {
+          return {
+            msg: msg.errSendNofity,
+            statusCode: 200,
+            data: result,
+          };
+        }
+      }
 
       return {
         msg: msg.createComment,
@@ -249,6 +266,8 @@ const deleteComment = async (userId, req, lang) => {
 
     await Comment.findOneAndDelete({ _id: commentId });
     await Reply.deleteMany({ commentId: commentId });
+    req.query.representId=commentId;
+    await notificationService.deleteNotify(req,lang);
     // await Reply.deleteMany({
     //   commentID: { $in: userIds },
     // });
@@ -277,10 +296,6 @@ const getReply = async (req, lang) => {
   let perPage = 3;
   let { page } = req.query || 1;
   let { commentID } = req.params || {};
-  console.log(
-    '🚀 ~ file: comment.service.js ~ line 278 ~ getReply ~ commentID',
-    commentID,
-  );
   const msg = getMsg(lang);
   try {
     if (!commentID) {
@@ -387,6 +402,28 @@ const replyComment = async (userId, body, lang) => {
       const objProfile = keyBy(profile, '_id');
       const result = transferReply(res, objProfile);
 
+      let data = {};
+      data.representId = objReply._id;
+      data.type ='reply';
+      data.senderId = userId;
+      data.receiverId = comment.userId;
+      //reply to author comment
+      sendReplyNotify = (await notificationService.createNotify(data)).statusCode;
+
+      //notify to user another reply comment
+      data.type ='replyFollow';
+      data.receiverId = commentId;
+      sendNotify =(await notificationService.createNotify(data)).statusCode;
+
+      if(sendNotify!==200 || sendReplyNotify!==200)
+      {
+        return {
+          msg: msg.errSendNofity,
+          statusCode: 200,
+          data: result,
+        };
+      }
+
       return {
         msg: msg.createReply,
         statusCode: 200,
@@ -452,6 +489,9 @@ const deleteReply = async (userId, req, lang) => {
       comment.countReply = comment.countReply - 1;
       await Comment.findByIdAndUpdate({ _id: commentId }, comment);
     }
+
+    req.query.representId=replyId;
+    await notificationService.deleteNotify(req,lang);
     return {
       msg: msg.deleteReply,
       statusCode: 200,

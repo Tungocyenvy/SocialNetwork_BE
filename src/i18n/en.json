@@ -52,7 +52,8 @@
     "createReply": "Your reply comment submission was successful!",
     "notFoundReply": "Reply not found!",
     "updateReply": "Update reply successful!",
-    "deleteReply": "Delete reply successful!"
+    "deleteReply": "Delete reply successful!",
+    "errSendNofity": "Your comment submission was successful & an send notify failed!"
   },
   "conversation": {
     "getConversation": "Get conversation successfully!",
@@ -65,13 +66,13 @@
   },
   "group": {
     "validator": "Don't have userId or groupId!",
-    "group": "'Add user %s to group %s Successful!",
-    "errGroup": "'An error occurred during add %s to group %s process!",
+    "group": "'Add user %s to group Successful!",
+    "errGroup": "'An error occurred during add %s to group process!",
     "notFoundGroup": "Group not found!",
     "deleteListUser": "Delete list user successful!",
     "err": "An error occurred during the process!",
-    "errDelete": "'An error occurred during delete %s from group %s process!",
-    "deleteUser": "Delete %s from %s successful!",
+    "errDelete": "'An error occurred during delete %s from group process!",
+    "deleteUser": "Delete %s from group successful!",
     "sendNotify": "Send notify susscessful!",
     "notHaveMainGr": "Don't have main group!",
     "getListFaculty": "Get list faculty susscessful!",
@@ -81,7 +82,7 @@
     "updateFaculty": "Update faculty successful!",
     "tranferFaculty": "Inter-Faculty Transfer successful!",
     "notFound": "User not found in group!",
-    "changeAdmin": "Change admin for group %s successful!",
+    "changeAdmin": "Change admin for group successful!",
     "createSub": "Create group successful!",
     "notHaveSubGr": "Don't have any group!",
     "getSub": "Get all Group successful!",
@@ -90,7 +91,7 @@
     "updateSub": "Update group successfull!",
     "notHaveUser": "Don't have any user!",
     "getUser": "Get list user successful!",
-    "existsUser": "%s already exists in group %s!",
+    "existsUser": "%s already exists in group!",
     "getDetailGr": "Get detail group successful!",
     "errChangeAdmin" :"You're the only admin on the group, you must assign another admin before removing yoursel!",
     "checkAdmin" :"Check admin is successful!"
@@ -154,6 +155,8 @@
     "createNotify": "Create notification successful!",
     "notHaveNotify": "Don't have any notification!",
     "getNotify": "Get Notify successful!",
-    "readNotify": "Change read notify successful!"
+    "readNotify": "Change read notify successful!",
+    "notFound":"Notify not found!",
+    "deleteNotify":"Delete notify successful!"
   }
 }

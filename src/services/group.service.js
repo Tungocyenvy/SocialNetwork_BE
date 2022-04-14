@@ -50,7 +50,7 @@ const addUser = async (body, lang) => {
         });
         if (countUser > 0) {
           return {
-            msg: msg.existsUser.replace('%s', userId).replace('%s', groupId),
+            msg: msg.existsUser.replace('%s', userId),
             statusCode: 300,
           };
         }
@@ -62,7 +62,7 @@ const addUser = async (body, lang) => {
         });
         if (countUser > 0) {
           return {
-            msg: msg.existsUser.replace('%s', userId).replace('%s', groupId),
+            msg: msg.existsUser.replace('%s', userId),
             statusCode: 300,
           };
         }
@@ -70,18 +70,18 @@ const addUser = async (body, lang) => {
         await userSubGroup.create(data);
       }
       return {
-        msg: msg.group.replace('%s', userId).replace('%s', groupId),
+        msg: msg.group.replace('%s', userId),
         statusCode: 200,
       };
     } catch {
       return {
-        msg: msg.errGroup.replace('%s', userId).replace('%s', groupId),
+        msg: msg.errGroup.replace('%s', userId),
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: msg.errGroup.replace('%s', userId).replace('%s', groupId),
+      msg: msg.errGroup.replace('%s', userId),
       statusCode: 300,
     };
   }
@@ -168,18 +168,18 @@ const deleteUser = async (body, lang) => {
         });
       }
       return {
-        msg: msg.deleteUser.replace('%s', userId).replace('%s', groupId),
+        msg: msg.deleteUser.replace('%s', userId),
         statusCode: 200,
       };
     } catch {
       return {
-        msg: msg.errDelete.replace('%s', userId).replace('%s', groupId),
+        msg: msg.errDelete.replace('%s', userId),
         statusCode: 300,
       };
     }
   } catch {
     return {
-      msg: msg.errDelete.replace('%s', userId).replace('%s', groupId),
+      msg: msg.errDelete.replace('%s', userId),
       statusCode: 300,
     };
   }
@@ -304,7 +304,7 @@ const tranferFaculty = async (body, lang) => {
     console.log(sttDelete);
     if (sttDelete === 300) {
       return {
-        msg: msg.errDelete.replace('%s', userId).replace('%s', facultyFrom),
+        msg: msg.errDelete.replace('%s', userId),
         statusCode: 300,
       };
     }
@@ -312,7 +312,7 @@ const tranferFaculty = async (body, lang) => {
       .statusCode;
     if (sttAdd === 300) {
       return {
-        msg: msg.errGroup.replace('%s', userId).replace('%s', facultyTo),
+        msg: msg.errGroup.replace('%s', userId),
         statusCode: 300,
       };
     }
@@ -368,7 +368,7 @@ const changeAdmin = async (body, lang) => {
     if (type != 'main')
       await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
     return {
-      msg: msg.changeAdmin.replace('%s', groupId),
+      msg: msg.changeAdmin,
       statusCode: 200,
       data: user,
     };
@@ -424,6 +424,7 @@ const getAllGroup = async (req, lang) => {
   const msg = getMsg(lang);
   try {
     let total = await Group.countDocuments({ isMain: false });
+    console.log("🚀 ~ file: group.service.js ~ line 427 ~ getAllGroup ~ total", total)
     if (total <= 0) {
       return {
         msg: msg.notHaveSubGr,
@@ -454,9 +455,10 @@ const getRelativeGroup = async (UserID, req, lang) => {
   const msg = getMsg(lang);
   try {
     req.query.isAll = true;
-    const data = (await getGroupByUserId(UserID, req, lang)).data;
-    const count = data.total;
-    const listGroup = data.result;
+    const rs = (await getGroupByUserId(UserID, req, lang)).data;
+    console.log("🚀 ~ file: group.service.js ~ line 458 ~ getRelativeGroup ~ data", rs)
+    const count = rs.total;
+    const listGroup = rs.result;
     let groupIds = [];
     if (count > 0) {
       groupIds = map(listGroup, 'groupId');
@@ -476,13 +478,24 @@ const getRelativeGroup = async (UserID, req, lang) => {
       _id: { $nin: groupIds },
     });
     if (total > 0) {
-      const result = await Group.find({
+      const group = await Group.find({
         isMain: false,
         cateId: { $in: cateIds },
         _id: { $nin: groupIds },
       })
         .skip(perPage * page - perPage)
         .limit(perPage);
+
+      const result =await Promise.all(group.map(async (item)=>{
+        const {_id,isMain,createdDate,cateId,image,nameEn,nameVi}=item;
+        const numMember = await userSubGroup.countDocuments({ groupId: _id });
+        const numPost = await Post.countDocuments({groupId:_id})
+
+        return{
+          _id,isMain,createdDate,cateId,image,nameEn,nameVi,numMember,numPost
+        };
+      }));
+      
 
       return {
         msg: msg.getRalative,

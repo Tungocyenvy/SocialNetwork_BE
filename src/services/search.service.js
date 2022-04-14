@@ -138,7 +138,7 @@ const searchUserForSubGroup = async (req, lang) => {
         _id: {
           $in: userIds,
         },
-        $match:{$text:{$search:key}}
+        $text:{$search:key}
       });
       if (total <= 0) {
         return {
@@ -152,8 +152,9 @@ const searchUserForSubGroup = async (req, lang) => {
         _id: {
           $in: userIds,
         },
-       $text:{$or:[{$search:key},key]}}
-      ).skip(perPage * page - perPage)
+        $match:{fullname:key}}
+      )
+      .skip(perPage * page - perPage)
         .limit(perPage);
     }
 

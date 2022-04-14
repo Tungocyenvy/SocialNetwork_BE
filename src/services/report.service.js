@@ -214,7 +214,7 @@ const getReportAllGroup = async (req, lang) => {
     return {
       msg: msg.getReport,
       statusCode: 200,
-      data: result,
+      data: {result,total}
     };
   } catch {
     return {
@@ -291,7 +291,7 @@ const getReportAllPost = async (req, lang) => {
     return {
       msg: msg.getReport,
       statusCode: 200,
-      data: result,
+      data: {result,total}
     };
   } catch {
     return {

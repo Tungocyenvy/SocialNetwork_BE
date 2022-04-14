@@ -52,7 +52,8 @@
     "createReply": "Phản hồi bình luận thành công!",
     "notFoundReply": "Không tìm thấy phản hồi!",
     "updateReply": "Chỉnh sửa phản hồi thành công!",
-    "deleteReply": "Xóa phản hồi thành công!"
+    "deleteReply": "Xóa phản hồi thành công!",
+    "errSendNofity" : "Bình luận bài viết thành công và lỗi trong quá trình gửi thông báo!"
   },
   "conversation": {
     "getConversation": "Lấy cuộc trò chuyện thành công!",
@@ -65,13 +66,13 @@
   },
   "group": {
     "validator": "Thiếu userId hoặc postId!",
-    "group": "Thêm người dùng %s vào nhóm %s thành công!",
-    "errGroup": "Xảy ra lỗi trong qua trình thêm người dùng %s vào nhóm %s !",
+    "group": "Thêm người dùng %s vào nhóm thành công!",
+    "errGroup": "Xảy ra lỗi trong qua trình thêm người dùng %s vào nhóm!",
     "notFoundGroup": "Không tìm thấy nhóm!",
     "deleteListUser": "Xóa người dùng thành công!",
     "err": "Xảy ra lỗi trong quá trình xử lý!",
-    "errDelete": "Xảy ra lỗi trong qua trình xóa người dùng %s khỏi nhóm %s !",
-    "deleteUser": "Xóa người dùng %s khỏi nhóm %s thành công!",
+    "errDelete": "Xảy ra lỗi trong qua trình xóa người dùng %s khỏi nhóm !",
+    "deleteUser": "Xóa người dùng %s khỏi nhóm thành công!",
     "sendNotify": "Gửi thông báo thành công!",
     "notHaveMainGr": "Không có main group nào!",
     "getListFaculty": "Lấy danh sách khoa thành công!",
@@ -81,7 +82,7 @@
     "updateFaculty": "Chỉnh sửa khoa thành công!",
     "tranferFaculty": "Chuyển khoa thành công!",
     "notFound": "Không tìm thấy người dùng trong nhóm này!",
-    "changeAdmin": "Thay đổi quản trị viên cho nhóm %s thành công!",
+    "changeAdmin": "Thay đổi quản trị viên cho nhóm thành công!",
     "createSub": "Tạo nhóm thành công!",
     "notHaveSubGr": "Không có bất kỳ nhóm nào!",
     "getSub": "Lấy danh sách nhóm thành công!",
@@ -90,7 +91,7 @@
     "updateSub": "Chỉnh sửa nhóm thành công!",
     "notHaveUser": "Không có người dùng nào trong nhóm!",
     "getUser": "Lấy danh sách thành viên thành công!",
-    "existsUser": "%s đã có trong nhóm %s!",
+    "existsUser": "%s đã có trong nhóm!",
     "getDetailGr": "Lấy chi tiết nhóm thành công!",
     "errChangeAdmin" :"Vui lòng chỉ định một người quản trị mới trước khi xóa người quản trị duy nhất của nhóm!",
     "checkAdmin" :"Kiểm tra quyền quản trị thành công!"
@@ -154,6 +155,8 @@
     "createNotify": "Tạo thông báo thành công!",
     "notHaveNotify": "Không có thông báo nào!",
     "getNotify": "Lấy thông báo thành công!",
-    "readNotify": "Đổi trạng thái đã đọc thông báo thành công!"
+    "readNotify": "Đổi trạng thái đã đọc thông báo thành công!",
+    "notFound":"Không tìm thấy thông báo!",
+    "deleteNotify":"Xóa thông báo thành công!"
   }
 }

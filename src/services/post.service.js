@@ -89,7 +89,7 @@ const createPost = async (userID, body, lang) => {
           .statusCode;
       } else {
         let data = {};
-        data.postId = newPost._id;
+        data.representId = newPost._id;
         data.type = 'createPost';
         data.senderId = userID;
         data.receiverId = groupId;

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const schema = mongoose.Schema;
 
 const Notify_sendSchema = new schema({
-  postId: { type: String, required: true },
+  representId: { type: String, required: true },
   templateId: { type: String, required: true },
   senderId: { type: String, required: true },
   receiverId: { type: String, required: true },

@@ -26,7 +26,7 @@ router.get('/user', jwt.verify, groupController.getGroupByUserId);
 router.get('/relative', jwt.verify, groupController.getRelativeGroup);
 router.get('/:groupId', groupController.getDetailGroup);
 
-router.get('/sub', groupController.getAllGroup);
+router.get('/sub/all', groupController.getAllGroup);
 router.post('/sub', jwt.verify, groupController.createSubgroup);
 router.put('/sub', groupController.updateGroup);
 router.post('/sub/report', reportController.createReportGroup);
