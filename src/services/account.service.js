@@ -295,6 +295,7 @@ const signup = async (req) => {
       let groupId = 'grsv';
       if (roleId !== 4) groupId = 'grgv';
       let type = 'main';
+      let isAdmin= false;
       for (var k = 0; k < 2; k++) {
         //i=0 add grsv,grgv,
         //i=1 add gr faculity

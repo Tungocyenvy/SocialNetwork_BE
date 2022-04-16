@@ -19,6 +19,14 @@ const createReportGroup = async (body, lang) => {
   const msg = getMsg(lang);
   let { groupId, reportId } = body || {};
   try {
+    const group = await Group.findById({_id:groupId,isMain:false})
+    if(!group)
+    {
+      return {
+        msg: msg.notFoundGroup,
+        statusCode: 300,
+      };
+    }
     const report = await ReportGroup.findOne({
       groupId: groupId,
       reportId: reportId,
@@ -26,25 +34,16 @@ const createReportGroup = async (body, lang) => {
     if (report) {
       report.count += 1;
       await report.save();
-      return {
-        msg: msg.createReport,
-        statusCode: 200,
-      };
     }
-
-    const res = await ReportGroup.create(body);
-
-    if (res) {
-      return {
-        msg: msg.createReport,
-        statusCode: 200,
-      };
-    } else {
-      return {
-        msg: msg.createReportFail,
-        statusCode: 300,
-      };
+    else{
+      const res = await ReportGroup.create(body);
     }
+    group.countReport +=1;
+    await group.save();
+    return {
+      msg: msg.createReport,
+      statusCode: 200,
+    };
   } catch {
     return {
       msg: msg.err,
@@ -58,6 +57,15 @@ const createReportPost = async (body, lang) => {
   const msg = getMsg(lang);
   let { postId, reportId } = body || {};
   try {
+    const post = await Post.findById({_id:postId,isMainGroup:false})
+    if(!post)
+    {
+      return {
+        msg: msg.notFoundPost,
+        statusCode: 300,
+      };
+    }
+
     const report = await ReportPost.findOne({
       postId: postId,
       reportId: reportId,
@@ -65,25 +73,17 @@ const createReportPost = async (body, lang) => {
     if (report) {
       report.count += 1;
       await report.save();
+    }
+    else{
+      const res = await ReportPost.create(body);
+    }
+
+    post.countReport+=1;
+    await post.save();
       return {
         msg: msg.createReport,
         statusCode: 200,
       };
-    }
-
-    const res = await ReportPost.create(body);
-
-    if (res) {
-      return {
-        msg: msg.createReport,
-        statusCode: 200,
-      };
-    } else {
-      return {
-        msg: msg.createReportFail,
-        statusCode: 300,
-      };
-    }
   } catch {
     return {
       msg: msg.err,
@@ -177,10 +177,12 @@ const getReportAllGroup = async (req, lang) => {
     if (total <= 0) {
       return {
         msg: msg.notHaveGroup,
-        statusCode: 300,
+        statusCode: 200,
+        data:{result:[],total}
       };
     }
     const listGroup = await Group.find({ isMain: false })
+      .sort({countReport:-1})
       .skip(perPage * page - perPage)
       .limit(perPage);
 
@@ -235,14 +237,17 @@ const getReportAllPost = async (req, lang) => {
     if (total <= 0) {
       return {
         msg: msg.notHavePost,
-        statusCode: 300,
+        statusCode: 200,
+        data:{result:[],total}
       };
     }
     const listPost = groupId
       ? await Post.find({ isMainGroup: false, groupId: groupId })
+          .sort({countReport:-1})
           .skip(perPage * page - perPage)
           .limit(perPage)
       : await Post.find({ isMainGroup: false })
+          .sort({countReport:-1})
           .skip(perPage * page - perPage)
           .limit(perPage);
 

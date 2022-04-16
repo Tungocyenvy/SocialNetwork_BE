@@ -65,6 +65,7 @@
     "getListConver": "Lấy danh sách cuộc trò chuyện thành công"
   },
   "group": {
+    "notExists":"Người dùng này không tồn tại!",
     "validator": "Thiếu userId hoặc postId!",
     "group": "Thêm người dùng %s vào nhóm thành công!",
     "errGroup": "Xảy ra lỗi trong qua trình thêm người dùng %s vào nhóm!",
@@ -94,7 +95,8 @@
     "existsUser": "%s đã có trong nhóm!",
     "getDetailGr": "Lấy chi tiết nhóm thành công!",
     "errChangeAdmin" :"Vui lòng chỉ định một người quản trị mới trước khi xóa người quản trị duy nhất của nhóm!",
-    "checkAdmin" :"Kiểm tra quyền quản trị thành công!"
+    "checkAdmin" :"Kiểm tra quyền quản trị thành công!",
+    "notFoundUser":"Không tìm thấy thông tin người dùng"
   },
   "jwt": {
     "noProvided": "Vui lòng truyền token!",
@@ -128,6 +130,8 @@
     "updatePost": "Chỉnh sửa bài viết thành công!"
   },
   "report": {
+    "notFoundGroup":"Không tìm thấy group này!",
+    "notFoundPost":"Không tìm thấy bài viết này!",
     "notHave": "Không có báo cáo nào!",
     "getReport": "Lấy báo cáo thành công!",
     "err": "Xảy ra lỗi trong quá trình xử lý!",

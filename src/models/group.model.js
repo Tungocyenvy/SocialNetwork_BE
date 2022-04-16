@@ -10,12 +10,13 @@ const GroupSchema = new schema({
   nameEn: { type: String, required: true },
   nameVi: { type: String, required: true },
   isMain: { type: Boolean, default: false },
+  cateId: { type: String, required: true, default: 'none' },
+  image: { type: String, required: true, default: imageDefault },
+  countReport:{ type: Number, required: true, default:0 },
   createdDate: {
     type: Date,
     default: Date.now,
   },
-  cateId: { type: String, required: true, default: 'none' },
-  image: { type: String, required: true, default: imageDefault },
 });
 
 const group = mongoose.model('group', GroupSchema);

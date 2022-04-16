@@ -65,6 +65,7 @@
     "getListConver": "Get list conversation successfully!"
   },
   "group": {
+    "notExists":"Account not exists!",
     "validator": "Don't have userId or groupId!",
     "group": "'Add user %s to group Successful!",
     "errGroup": "'An error occurred during add %s to group process!",
@@ -94,7 +95,8 @@
     "existsUser": "%s already exists in group!",
     "getDetailGr": "Get detail group successful!",
     "errChangeAdmin" :"You're the only admin on the group, you must assign another admin before removing yoursel!",
-    "checkAdmin" :"Check admin is successful!"
+    "checkAdmin" :"Check admin is successful!",
+    "notFoundUser":"Profile's user not found!"
   },
   "jwt": {
     "noProvided": "No token provided!",
@@ -128,6 +130,8 @@
     "updatePost": "Update post successful!"
   },
   "report": {
+    "notFoundGroup":"Group not found!",
+    "notFoundPost":"Post not found!",
     "notHave": "Don't have any report!",
     "getReport": "Get report successful!",
     "err": "An error occurred during the process!",

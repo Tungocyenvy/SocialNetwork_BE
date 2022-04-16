@@ -2,6 +2,7 @@ const Profile = require('../models/profile.model');
 const Group = require('../models/group.model');
 const userSubGroup = require('../models/user_subgroup.model');
 const userMainGroup = require('../models/user_maingroup.model');
+const Account = require('../models/account.model');
 const { map, keyBy } = require('lodash');
 
 const I18n = require('../config/i18n');
@@ -39,12 +40,13 @@ const transferProfile = (profile) => {
 const searchUser = async (req, lang) => {
   let keyword = req.query.keyword;
   let perPage = 10;
-  let { page } = req.query || 1;
+  let { page=1,isStudent=null } = req.query || {};
   const msg = getMsg(lang);
   try {
     const sub = 'admin';
 
     let result;
+    let account;
 
     //filter special characters and uppercase, lowercase
     let key = new RegExp(
@@ -56,19 +58,65 @@ const searchUser = async (req, lang) => {
 
     //check key is identify (number or admin)
     if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
-      total = await Profile.countDocuments({ _id: keyword });
+      if (isStudent === null) { //get all
+        total = await Account.countDocuments({ _id: keyword });
+      } else {
+        if (isStudent === true) { //get student
+          total = await Account.countDocuments({ _id: keyword, roleId: 4 });
+        } else { //get teacher
+          total = await Account.countDocuments({ _id: keyword, roleId: { $in: [2, 3] } });
+        }
+      }
+
       if (total > 0) {
-        result = await Profile.findById({ _id: keyword })
-          .skip(perPage * page - perPage)
-          .limit(perPage);
+        if (isStudent === null) {
+          result = await Profile.findById({ _id: keyword });
+        } else {
+          if (isStudent === true) {
+            account = await Account.findOne({ _id: keyword, roleId: 4 });
+          } else {
+            account = await Account.findOne({ _id: keyword, roleId: { $in: [2, 3] } });
+          }
+            account = await Account.findOne({ _id: keyword, roleId: { $in: [2, 3] } });
+          if(account)
+          {
+            result = await Profile.findById({ _id: keyword });
+          }
+        }
       }
     } else {
       //search by name
-      total = await Profile.countDocuments({  $text:{$search:key}});
+      if (isStudent === null) { //get all
+        total = await Profile.countDocuments({$text:{$search:key}});
+      } else {
+        if (isStudent === 'true') { //get student
+          account = await Account.find({roleId: 4 });
+        } else { //get teacher
+          account = await Account.find({roleId: { $in: [2, 3] } });
+        }
+        if(account.length>0){
+          const accountIds = map(account,'_id');
+          total = await Profile.countDocuments({$text:{$search:key},_id:{$in:accountIds}});
+        }
+      }
       if (total > 0) {
-        result = await Profile.find({ $text:{$search:key}})
+        if (isStudent === null) { //get all
+          result = await Profile.find({$text:{$search:key}})
           .skip(perPage * page - perPage)
           .limit(perPage);
+        } else {
+          if (isStudent === 'true') { //get student
+            account = await Account.find({roleId: 4 });
+          } else { //get teacher
+            account = await Account.find({roleId: { $in: [2, 3] } });
+          }
+          if(account.length>0){
+            const accountIds = map(account,'_id');
+            result = await Profile.find({$text:{$search:key},_id:{$in:accountIds}})
+            .skip(perPage * page - perPage)
+            .limit(perPage);
+          }
+        }
       }
     }
     return {

@@ -179,44 +179,58 @@ const createNotify = async (body, lang) => {
     delete data.type;
     let result;
     let userIds = [];
-    if(type==='replyFollow'){//receiverId: commentId
-      const comment = await Comment.findById({_id:data.receiverId});
-      const autComment = comment.userId;
-      const exceptUser=[data.senderId,autComment];
-      let notify = await notifySend.findOne({senderId:data.senderId,receiverId:data.receiverId});
-      if(notify)
-      {
-        notify.createdDate = Date.now;
-        await notifySend.findByIdAndUpdate({_id:notify._id},notify);
-        await notifyQueue.updateMany({notifyId:notify._id,userId:{$nin:data.senderId}},{$set:{isRead:false,createdDate:Date.now}});
-        
-        //first receive notify
-       const lstQueue = notifyQueue.find({notifyId:notify._id});
-       let listUser=[];
-       if(lstQueue.length>0) {listUser = map(lstQueue,'userId');}
-       listUser.push(autComment);
-       const listReply = await Reply.find({commentId:data.receiverId,userId:{$nin:listUser}});
-       if(listReply.length>0) userIds = map(listReply,'userId');
-      }else{//first reply
-        const rs=await notifySend.create(data);
-        await notifyQueue.updateMany({notifyId:rs._id,userId:{$nin:data.senderId}},{$set:{isRead:false,createdDate:Date.now}});
+          /**
+       * 1. Lần đầu comment -> case default
+       * 2. Người reply duy nhất -> case default
+       * 3. tác giả comment reply -> case replyFollow
+       * 4. Những người reply khác -> 2 case default(receive AutCmt), replyFollow (receive những người reply cmt)
+       * 5. Tạo post -> case createPost
+       */
+    switch(type){
+      case 'replyFollow':{
+        /**
+         * 1.User đã reply trước đó rồi và giờ reply ->update notify send/queue
+         * 2.User lần đầu reply -> tạo notify send,queue
+         * 3. reply nhưng chưa nhận thông báo nào -> thêm notify queue
+         */
+        const comment = await Comment.findById({ _id: data.receiverId });
+        const autComment = comment.userId;
+        const exceptUser = [data.senderId, autComment];
+        let notify = await notifySend.findOne({ senderId: data.senderId, receiverId: data.receiverId });
+        if (notify) {
+          //replied before (1)
+          notify.createdDate = Date.now;
+          await notifySend.findByIdAndUpdate({ _id: notify._id }, notify);
+          await notifyQueue.updateMany({ notifyId: notify._id, userId: { $nin: data.senderId } }, { $set: { isRead: false, createdDate: Date.now } });
+
+          //first receive notify (3)
+          const lstQueue = notifyQueue.find({ notifyId: notify._id });
+          let listUser = [];
+          if (lstQueue.length > 0) { listUser = map(lstQueue, 'userId'); }
+          const listReply = await Reply.find({ commentId: data.receiverId, userId: { $nin: listUser } });
+          if (listReply.length > 0) userIds = map(listReply, 'userId');
+        } else {//first reply (2)
+          const rs = await notifySend.create(data);
+          const lstReply = await Reply.find({ commentId: data.receiverId, _id: { $nin: data.representId } });
+          if (lstReply.length > 0) userIds = map(lstReply, 'userId');
+        }
+        break;
       }
-    }
-    else if (type === 'createPost') {
-      result = await notifySend.create(data);
-      const listUser = await userSubGroup.find({
-        groupId: body.receiverId,
-        userId: { $nin: body.senderId },
-      });
-      if (listUser.length > 0) {
-        userIds = map(listUser, 'userId');
-      }
-    // }else if(type==='reply')
-    // {
-    //   const existNotify = await notifySend.find({senderId:data.senderId,receiverId:data.receiverId,representId:data.representId});
-    } else {
-      result = await notifySend.create(data);
-      userIds.push(body.receiverId);
+      case 'createPost':
+        {
+          result = await notifySend.create(data);
+          const listUser = await userSubGroup.find({
+            groupId: body.receiverId,
+            userId: { $nin: body.senderId },
+          });
+          if (listUser.length > 0) {
+            userIds = map(listUser, 'userId');
+          }
+          break;
+        }
+      default: //comment,reply
+        result = await notifySend.create(data);
+        userIds.push(body.receiverId);
     }
 
     if (userIds.length > 0) {
@@ -242,6 +256,11 @@ const createNotify = async (body, lang) => {
   }
 };
 
+/**
+ * 1. comment: tác giả comment 1 người reply -> ... đã phản hồi bình luận của bạn
+ *  2 người reply trở lên -> ...(reply mới nhất) và n người khác đã phản hồi bình luận của bạn
+ * 2.reply: ... đã phản hồi một bình luận bạn đang theo dõi
+ */
 const getNotify = async (userID, req, lang) => {
   let perPage = 10;
   let { page = 1 } = req.query || {};

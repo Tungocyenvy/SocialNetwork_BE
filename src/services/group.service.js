@@ -33,7 +33,16 @@ const addUser = async (body, lang) => {
   const msg = getMsg(lang);
   try {
     let isStudent = true;
-    if (roleId != null && roleId !== 4) isStudent = false;
+    const account = await Account.findById({_id:userId});
+    if(!account)
+    {
+      return {
+        msg: msg.notExists,
+        statusCode: 200,
+      };
+    }
+    const roleId= account.roleId;
+    if (roleId !== 4) isStudent = false;
     if (!userId || !groupId) {
       return {
         msg: msg.validator,
@@ -54,6 +63,7 @@ const addUser = async (body, lang) => {
             statusCode: 300,
           };
         }
+        if(roleId===2 && groupId!='grgv') data.isAdmin=true;
         await userMainGroup.create(data);
       } else {
         countUser = await userSubGroup.countDocuments({
@@ -212,27 +222,37 @@ const getListFaculty = async (req, lang) => {
     if (total <= 0) {
       return {
         msg: msg.notHaveMainGr,
-        statusCode: 300,
+        statusCode: 200,
+        data:[]
       };
     }
     if (isAll) perPage = total;
-    const listGroupMain = await Group.find({ isMain: true })
+    const listGroupMain = await Group.find({ isMain: true, _id:{$nin:['grsv','grgv']} })
       .skip(perPage * page - perPage)
       .limit(perPage);
 
-    const result = listGroupMain.filter(
-      (x) => x._id !== 'grsv' && x._id != 'grgv',
-    );
-    if (result.length > 0) {
+
+    if (listGroupMain.length > 0) {
+      const facultyIds = map(listGroupMain,'_id');
+      const userGroup = await userMainGroup.find({groupId:{$in:facultyIds},isAdmin:true});
+      const userIds = map(userGroup,'userId');
+      const profile = await Profile.find({_id:{$in:userIds}});
+      const objProfile = keyBy(profile,'faculty');
+      const rs = listGroupMain.map((item)=>{
+        const {_id} = item;
+        const deanProfile = objProfile[_id];
+        return {...item._doc,profile: {...deanProfile._doc}};
+      });
       return {
         msg: msg.getListFaculty,
         statusCode: 200,
-        data: result,
+        data: rs,
       };
     } else {
       return {
         msg: msg.notHaveFaculty,
-        statusCode: 300,
+        statusCode: 200,
+        data:[]
       };
     }
   } catch (err) {
@@ -419,22 +439,18 @@ const createSubGroup = async (userId, body, lang) => {
 };
 
 const getAllGroup = async (req, lang) => {
-  let perPage = 10;
-  let { page } = req.query || 1;
   const msg = getMsg(lang);
   try {
     let total = await Group.countDocuments({ isMain: false });
-    console.log("🚀 ~ file: group.service.js ~ line 427 ~ getAllGroup ~ total", total)
     if (total <= 0) {
       return {
         msg: msg.notHaveSubGr,
-        statusCode: 300,
+        statusCode: 200,
+        data:{ total, result:[] }
       };
     }
 
     const result = await Group.find({ isMain: false })
-      .skip(perPage * page - perPage)
-      .limit(perPage);
 
     return {
       msg: msg.getSub,
@@ -464,12 +480,6 @@ const getRelativeGroup = async (UserID, req, lang) => {
       groupIds = map(listGroup, 'groupId');
     }
     const group = count > 0 ? await Group.find({ _id: { $in: groupIds } }) : [];
-    // if (!group) {
-    //   return {
-    //     msg: msg.notFoundGroup,
-    //     statusCode: 300,
-    //   };
-    // }
     const cateIds = map(group, 'cateId') || '6247e027aafeb586cb35c956';
 
     let total = await Group.countDocuments({
@@ -702,6 +712,34 @@ const checkAdminforSub = async (userID,req, lang) => {
       statusCode: 200,
       data:isAdmin
     };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+const getFacultyForDean = async (UserID, req, lang) => {
+  const msg = getMsg(lang);
+  try {
+    const profile  = await Profile.findById({_id:UserID});
+    if(!profile)
+    {
+      return {
+        msg: msg.notFoundUser,
+        statusCode: 300,
+      };
+    }
+
+    const faculty = profile.faculty;
+    const group = await Group.findOne({_id:faculty,isMain:true});
+   
+      return {
+        msg: msg.getSub,
+        statusCode: 200,
+        data: { total, result },
+      };
   } catch {
     return {
       msg: msg.err,
