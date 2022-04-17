@@ -5,6 +5,7 @@ const Profile = require('../models/profile.model');
 const Role = require('../models/role.model');
 const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
+const moment = require('moment');
 
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
@@ -365,7 +366,7 @@ const deleteAccount = async (req) => {
       const account = await Account.findById({ _id: data._id });
       //check profile && account
       if (account) {
-        let result ={...account._doc,deletedDate:new Date()};
+        let result ={...account._doc,deletedDate:moment().toDate()};
         result.isDelete = true;
         result.isAdminSG=false;
         try {

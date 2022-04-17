@@ -297,11 +297,12 @@ const getDetailPost = async (postId, lang) => {
   const msg = getMsg(lang);
   try {
     if (!postId) postId = '';
-    const res = await Post.findById({ _id: postId });
-    if (res) {
+    const result = await Post.findById({ _id: postId });
+    if (result) {
+      const countCmt = await Comment.countDocuments({postId:postId});
       return {
         msg: msg.getDetail,
-        data: res,
+        data: {result,countCmt},
         statusCode: 200,
       };
     } else {
