@@ -21,6 +21,7 @@ router.delete('/listuser', groupController.deleteListUser); //delete listUser
 router.post('/user/admin', groupController.changeAdmin);
 router.post('/user/tranfer', groupController.tranferFaculty);
 router.get('/user', jwt.verify, groupController.getGroupByUserId);
+router.get('/user/fac', jwt.verify, groupController.getFacultyByUserId);
 
 //Sub group
 router.get('/relative', jwt.verify, groupController.getRelativeGroup);

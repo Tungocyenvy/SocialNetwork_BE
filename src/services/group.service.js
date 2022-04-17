@@ -228,6 +228,7 @@ const getListFaculty = async (req, lang) => {
     }
     if (isAll) perPage = total;
     const listGroupMain = await Group.find({ isMain: true, _id:{$nin:['grsv','grgv']} })
+      .sort({_id:-1})
       .skip(perPage * page - perPage)
       .limit(perPage);
 
@@ -720,7 +721,7 @@ const checkAdminforSub = async (userID,req, lang) => {
   }
 };
 
-const getFacultyForDean = async (UserID, req, lang) => {
+const getFacultyByUserId = async (UserID, req, lang) => {
   const msg = getMsg(lang);
   try {
     const profile  = await Profile.findById({_id:UserID});
@@ -733,12 +734,12 @@ const getFacultyForDean = async (UserID, req, lang) => {
     }
 
     const faculty = profile.faculty;
-    const group = await Group.findOne({_id:faculty,isMain:true});
+    const result = await Group.findOne({_id:faculty,isMain:true});
    
       return {
-        msg: msg.getSub,
+        msg: msg.getListFaculty,
         statusCode: 200,
-        data: { total, result },
+        data: result,
       };
   } catch {
     return {
@@ -765,5 +766,6 @@ module.exports = {
   getListUser,
   getGroupByUserId,
   getDetailGroup,
-  checkAdminforSub
+  checkAdminforSub,
+  getFacultyByUserId
 };
