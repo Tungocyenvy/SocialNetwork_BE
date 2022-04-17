@@ -200,7 +200,7 @@ const getListPostByUserId = async (userId, req, lang) => {
         return {
           msg: msg.notHavePost,
           statusCode: 200,
-          data:{result:[],total:[]}
+          data:{result:[],total:0}
         };
       }
     } else {
@@ -281,7 +281,7 @@ const getListPostByGroupId = async (req, lang) => {
       return {
         msg: msg.notHavePost,
         statusCode: 200,
-        data:{result:[],total:[]}
+        data:{result:[],total:0}
       };
     }
   } catch {

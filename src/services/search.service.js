@@ -48,9 +48,9 @@ const searchUser = async (req, lang) => {
       total = await Profile.countDocuments({ keyword: key });
     } else {
       if (isStudent === 'true') { //get student
-        account = await Account.find({ roleId: 4 });
+        account = await Account.find({ roleId: 4, isDelete:false });
       } else { //get teacher
-        account = await Account.find({ roleId: { $in: [2, 3] } });
+        account = await Account.find({ roleId: { $in: [2, 3] },isDelete:false });
       }
       if (account.length > 0) {
         const accountIds = map(account, '_id');
@@ -64,9 +64,9 @@ const searchUser = async (req, lang) => {
           .limit(perPage);
       } else {
         if (isStudent === 'true') { //get student
-          account = await Account.find({ roleId: 4 });
+          account = await Account.find({ roleId: 4, isDelete:false});
         } else { //get teacher
-          account = await Account.find({ roleId: { $in: [2, 3] } });
+          account = await Account.find({ roleId: { $in: [2, 3] },isDelete:false });
         }
         if (account.length > 0) {
           const accountIds = map(account, '_id');
@@ -112,21 +112,23 @@ const searchUserForSubGroup = async (req, lang) => {
       return {
         msg: msg.notHaveUser,
         statusCode: 200,
-        data: []
+        data: {result:[],total:0}
       };
     }
 
     const userIds = map(listUser, 'userId');
-    total = await Profile.countDocuments({ _id: { $in: userIds, }, keyword: key });
+    const account = await Account.find({_id:{$in:userIds},isDelete:false});
+    const accountIds=map(account,'_id');
+    total = await Profile.countDocuments({ _id: { $in: accountIds, }, keyword: key });
     if (total <= 0) {
       return {
         msg: msg.notHaveUser,
         statusCode: 200,
-        data: []
+        data: {result:[],total:0}
       };
     }
 
-    profile = await Profile.find({ _id: { $in: userIds }, keyword: key })
+    profile = await Profile.find({ _id: { $in: accountIds }, keyword: key })
       .skip(perPage * page - perPage)
       .limit(perPage);
 
@@ -177,16 +179,19 @@ const searchUserForMainGroup = async (req, lang) => {
     }
 
     const userIds = map(listUser, 'userId');
-    total = await Profile.countDocuments({ _id: { $in: userIds, }, keyword: key });
+    const account = await Account.find({_id:{$in:userIds},isDelete:false});
+    const accountIds=map(account,'_id');
+    total = await Profile.countDocuments({ _id: { $in: accountIds, }, keyword: key });
 
     if (total <= 0) {
       return {
         msg: msg.notHaveUser,
         statusCode: 200,
-        data: []
+        data: {result:[],total:0}
       };
     }
-    profile = await Profile.find({ _id: { $in: userIds, }, keyword: key })
+    profile = await Profile.find({ _id: { $in: accountIds, }, keyword: key })
+      .skip(perPage * page - perPage)
       .limit(perPage);
 
     const result = profile.map((item) => {

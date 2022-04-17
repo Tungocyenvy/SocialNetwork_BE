@@ -481,7 +481,6 @@ const getRelativeGroup = async (UserID, req, lang) => {
   try {
     req.query.isAll = true;
     const rs = (await getGroupByUserId(UserID, req, lang)).data;
-    console.log("🚀 ~ file: group.service.js ~ line 458 ~ getRelativeGroup ~ data", rs)
     const count = rs.total;
     const listGroup = rs.result;
     let groupIds = [];
@@ -566,42 +565,54 @@ const getListUser = async (req, lang) => {
     let listUser = [];
     let total = 0;
     if (type === 'main') {
-      total = await userMainGroup.countDocuments({
-        groupId: groupId,
-        isStudent: isStudent,
-        isAdmin:isAdmin
-      });
+      // total = await userMainGroup.countDocuments({
+      //   groupId: groupId,
+      //   isStudent: isStudent,
+      //   isAdmin:isAdmin
+      // });
       listUser = await userMainGroup
         .find({ groupId: groupId, isStudent: isStudent,isAdmin:isAdmin})
         .skip(perPage * page - perPage)
         .limit(perPage);
     } else {
-      total = await userSubGroup.countDocuments({ groupId: groupId,isAdmin:isAdmin});
+      // total = await userSubGroup.countDocuments({ groupId: groupId,isAdmin:isAdmin});
       listUser = await userSubGroup
         .find({ groupId: groupId,isAdmin:isAdmin})
         .skip(perPage * page - perPage)
         .limit(perPage);
     }
 
-    if (total == 0) {
+    if (listUser.length<=0) {
       return {
         msg: msg.notHaveUser,
         statusCode: 200,
-        data: {},
+        data: {result:[],total:0},
       };
     }
 
+    const objUser = keyBy(listUser,'userId');
+
     const userIds = map(listUser, 'userId');
+    const account = await Account.find({_id:{$in:userIds},isDelete:false});
+    if(account.length<=0)
+    {
+      return {
+        msg: msg.notHaveUser,
+        statusCode: 200,
+        data: {result:[],total:0},
+      };
+    }
+    const accountIds= map(account,'_id');
     const profile = await Profile.find({
       _id: {
-        $in: userIds,
+        $in: accountIds,
       },
     });
 
     objProfile = keyBy(profile, '_id');
 
-    const result = listUser.map((item) => {
-      const { userId, isAdmin } = item;
+    const result = accountIds.map((item) => {
+      const { userId, isAdmin } = objUser[item];
       const { fullname, avatar, dob, address, phone, email, year, faculty } =
         objProfile[userId];
       return {
@@ -617,6 +628,12 @@ const getListUser = async (req, lang) => {
         faculty,
       };
     });
+    if(type==='main')
+    {
+      total = await userMainGroup.countDocuments({userId:{$in:accountIds}, groupId: groupId});
+    }else{
+      total = await userSubGroup.countDocuments({userId:{$in:accountIds}, groupId: groupId});
+    }
     return {
       msg: msg.getUser,
       statusCode: 200,
