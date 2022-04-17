@@ -360,9 +360,17 @@ const changeAdmin = async (body, lang) => {
   let { groupId, userId, type, isRemove } = body || {};
   const msg = getMsg(lang);
   try {
-    let user = {};
+    let user;
     if (type == 'main') {
       user = await userMainGroup.findOne({ userId: userId, groupId: groupId });
+      let oldAdmin = await userMainGroup.findOne({groupId: groupId, isAdmin:true});
+      if(oldAdmin)
+      {
+        oldAdmin.isAdmin=false;
+        await oldAdmin.save();
+        await Account.findByIdAndUpdate({_id:oldAdmin.userId},{roleId:3});
+      }
+      await Account.findByIdAndUpdate({_id:userId},{roleId:2});
     } else {
       if (isRemove === true) {
         const total = await userSubGroup.countDocuments({ groupId: groupId, isAdmin: true });
@@ -372,6 +380,8 @@ const changeAdmin = async (body, lang) => {
             statusCode: 300,
           };
         }
+      }else{
+        await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
       }
       user = await userSubGroup.findOne({ userId: userId, groupId: groupId });
     }
@@ -384,10 +394,8 @@ const changeAdmin = async (body, lang) => {
     }
 
     user.isAdmin = true;
-    if (isRemove) user.isAdmin = false;
+    if (isRemove===true) user.isAdmin = false;
     await user.save();
-    if (type != 'main')
-      await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
     return {
       msg: msg.changeAdmin,
       statusCode: 200,
