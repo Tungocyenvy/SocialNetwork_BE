@@ -226,7 +226,7 @@ const getListFaculty = async (req, lang) => {
         data:[]
       };
     }
-    if (isAll) perPage = total;
+    if (isAll===true) perPage = total;
     const listGroupMain = await Group.find({ isMain: true, _id:{$nin:['grsv','grgv']} })
       .sort({_id:-1})
       .skip(perPage * page - perPage)
@@ -247,13 +247,13 @@ const getListFaculty = async (req, lang) => {
       return {
         msg: msg.getListFaculty,
         statusCode: 200,
-        data: rs,
+        data: {rs,total},
       };
     } else {
       return {
         msg: msg.notHaveFaculty,
         statusCode: 200,
-        data:[]
+        data:{rs:[],total:0}
       };
     }
   } catch (err) {
@@ -322,7 +322,6 @@ const tranferFaculty = async (body, lang) => {
     const sttDelete = (
       await deleteUser({ userId, groupId: facultyFrom, type: 'main' })
     ).statusCode;
-    console.log(sttDelete);
     if (sttDelete === 300) {
       return {
         msg: msg.errDelete.replace('%s', userId),

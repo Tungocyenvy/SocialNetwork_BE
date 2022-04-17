@@ -441,7 +441,6 @@ const replyComment = async (userId, body, lang) => {
 const updateReply = async (userId, body, lang) => {
   let { content, replyId } = body || {};
   const msg = getMsg(lang);
-  //console.log(_id);
   try {
     let reply = await Reply.findById({ _id: replyId });
     if (!reply) {

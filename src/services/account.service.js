@@ -240,7 +240,6 @@ const signup = async (req) => {
   let body = req.body || {};
   const msg = getMsg(req);
   try {
-    // console.log(body[0]);
     let logs = [];
     let accountData = {};
     let message = '';
@@ -248,7 +247,6 @@ const signup = async (req) => {
       let objAccount = {};
       let data = body[i];
       let userId = String(data._id);
-      console.log(userId);
       const profile = await Profile.findById({ _id: userId });
       const account = await Account.findById({ _id: userId });
       //check profile && account
@@ -360,7 +358,6 @@ const deleteAccount = async (req) => {
   let body = req.body || {};
   const msg = getMsg(req);
   try {
-    // console.log(body[0]);
     let logs = [];
     let message = '';
     for (var i in body) {

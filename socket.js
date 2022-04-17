@@ -36,7 +36,6 @@ function Socket(io) {
     // if not, return null
     // })
     io.on("connection", (socket) => {
-        // console.log(`-(${socket.id})` + " is connected");
         Object.keys(SocketHandler).forEach(e => {
             registerEventHandler(SocketHandler[e](socket), socket)
 
