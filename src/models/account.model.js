@@ -8,7 +8,7 @@ const AccountSchema = new schema({
   roleId: { type: Number, required: true },
   isAdminSG: { type: Boolean, required: true, default: false },
   isDelete: { type: Boolean, required: true, default: false },
-  deletedDate: { type: Date, default: Date.now },
+  deletedDate: { type: Date},
 });
 
 const account = mongoose.model('account', AccountSchema);
