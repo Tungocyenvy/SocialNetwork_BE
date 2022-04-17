@@ -370,6 +370,7 @@ const deleteAccount = async (req) => {
       if (account) {
         account.isDelete = true;
         account.deletedDate = Date.now;
+        account.isAdminSG=false;
         try {
           await account.save();
         } catch {
