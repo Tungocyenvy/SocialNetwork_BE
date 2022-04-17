@@ -362,14 +362,14 @@ const deleteAccount = async (req) => {
     let message = '';
     for (var i in body) {
       let data = body[i];
-      let account = await Account.findById({ _id: data._id });
+      const account = await Account.findById({ _id: data._id });
       //check profile && account
       if (account) {
-        account.isDelete = true;
-        account.deletedDate = Date.now;
-        account.isAdminSG=false;
+        let result ={...account._doc,deletedDate:new Date()};
+        result.isDelete = true;
+        result.isAdminSG=false;
         try {
-          await account.save();
+          await Account.findOneAndUpdate({ _id: data._id },result);
         } catch {
           message = msg.errDelete.replace('%s', data._id);
           logs.push(message);

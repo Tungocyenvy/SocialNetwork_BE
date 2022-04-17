@@ -366,7 +366,7 @@ const changeAdmin = async (body, lang) => {
       if(oldAdmin)
       {
         oldAdmin.isAdmin=false;
-        await oldAdmin.save();
+        await userMainGroup.findByIdAndUpdate({_id:oldAdmin._id},oldAdmin);
         await Account.findByIdAndUpdate({_id:oldAdmin.userId},{roleId:3});
       }
       await Account.findByIdAndUpdate({_id:userId},{roleId:2});
@@ -395,10 +395,11 @@ const changeAdmin = async (body, lang) => {
     user.isAdmin = true;
     if (isRemove===true) user.isAdmin = false;
     await user.save();
+    const result = await Profile.findById({_id:userId});
     return {
       msg: msg.changeAdmin,
       statusCode: 200,
-      data: user,
+      data: result,
     };
   } catch (err) {
     return {
@@ -564,17 +565,11 @@ const getListUser = async (req, lang) => {
     let listUser = [];
     let total = 0;
     if (type === 'main') {
-      // total = await userMainGroup.countDocuments({
-      //   groupId: groupId,
-      //   isStudent: isStudent,
-      //   isAdmin:isAdmin
-      // });
       listUser = await userMainGroup
         .find({ groupId: groupId, isStudent: isStudent,isAdmin:isAdmin})
         .skip(perPage * page - perPage)
         .limit(perPage);
     } else {
-      // total = await userSubGroup.countDocuments({ groupId: groupId,isAdmin:isAdmin});
       listUser = await userSubGroup
         .find({ groupId: groupId,isAdmin:isAdmin})
         .skip(perPage * page - perPage)
