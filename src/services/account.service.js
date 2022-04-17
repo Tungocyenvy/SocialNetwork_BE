@@ -9,6 +9,14 @@ const groupService = require('./group.service');
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
+const removeVN = (Text) => {
+  return Text.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+};
+
+
 const getMsg = (req) => {
   let lang = req.headers['accept-language'] || 'en';
   I18n.setLocale(lang);
@@ -255,6 +263,9 @@ const signup = async (req) => {
       data.email = userId + '@gmail.com';
       data.dob = new Date(data.dob);
       delete data.roleId;
+
+      let keyword = userId+" "+data.fullname +" "+ removeVN(data.fullname);
+      data.keyword= keyword;
 
       //create Profile
       try {

@@ -12,7 +12,8 @@ const ProfileSchema = new schema({
   email: { type: String, required: true },
   avatar: { type: String, required: true, default: avatarDefaul },
   year: { type: Number, required: true },
-}).index({fullname:'text'});
+  keyword:{type:String,required:true}
+}).index({keyword:'text'});
 
 const Profile = mongoose.model('Profile', ProfileSchema);
 module.exports = Profile;

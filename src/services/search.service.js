@@ -21,18 +21,9 @@ const removeVN = (Text) => {
 };
 
 const transferProfile = (profile) => {
-  const { _id, fullname, avatar, dob, address, email, phone, year, faculty } =
-    profile;
+  const { _id, fullname, avatar, dob, address, email, phone, year, faculty } = profile;
   return {
-    userId: _id,
-    fullname,
-    avatar,
-    dob,
-    address,
-    email,
-    phone,
-    year,
-    faculty,
+    userId: _id, fullname, avatar, dob, address, email, phone, year, faculty,
   };
 };
 
@@ -40,82 +31,48 @@ const transferProfile = (profile) => {
 const searchUser = async (req, lang) => {
   let keyword = req.query.keyword;
   let perPage = 10;
-  let { page=1,isStudent=null } = req.query || {};
+  let { page = 1, isStudent = null } = req.query || {};
   const msg = getMsg(lang);
   try {
-    const sub = 'admin';
-
     let result;
     let account;
 
     //filter special characters and uppercase, lowercase
     let key = new RegExp(
-      keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      removeVN(keyword).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
       'i',
     );
 
     let total = 0;
-
-    //check key is identify (number or admin)
-    if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
-      if (isStudent === null) { //get all
-        total = await Account.countDocuments({ _id: keyword });
-      } else {
-        if (isStudent === true) { //get student
-          total = await Account.countDocuments({ _id: keyword, roleId: 4 });
-        } else { //get teacher
-          total = await Account.countDocuments({ _id: keyword, roleId: { $in: [2, 3] } });
-        }
-      }
-
-      if (total > 0) {
-        if (isStudent === null) {
-          result = await Profile.findById({ _id: keyword });
-        } else {
-          if (isStudent === true) {
-            account = await Account.findOne({ _id: keyword, roleId: 4 });
-          } else {
-            account = await Account.findOne({ _id: keyword, roleId: { $in: [2, 3] } });
-          }
-            account = await Account.findOne({ _id: keyword, roleId: { $in: [2, 3] } });
-          if(account)
-          {
-            result = await Profile.findById({ _id: keyword });
-          }
-        }
-      }
+    if (isStudent === null) { //get all
+      total = await Profile.countDocuments({ keyword: key });
     } else {
-      //search by name
-      if (isStudent === null) { //get all
-        total = await Profile.countDocuments({$text:{$search:key}});
-      } else {
-        if (isStudent === 'true') { //get student
-          account = await Account.find({roleId: 4 });
-        } else { //get teacher
-          account = await Account.find({roleId: { $in: [2, 3] } });
-        }
-        if(account.length>0){
-          const accountIds = map(account,'_id');
-          total = await Profile.countDocuments({$text:{$search:key},_id:{$in:accountIds}});
-        }
+      if (isStudent === 'true') { //get student
+        account = await Account.find({ roleId: 4 });
+      } else { //get teacher
+        account = await Account.find({ roleId: { $in: [2, 3] } });
       }
-      if (total > 0) {
-        if (isStudent === null) { //get all
-          result = await Profile.find({$text:{$search:key}})
+      if (account.length > 0) {
+        const accountIds = map(account, '_id');
+        total = await Profile.countDocuments({ keyword: key, _id: { $in: accountIds } });
+      }
+    }
+    if (total > 0) {
+      if (isStudent === null) { //get all
+        result = await Profile.find({ keyword: key })
           .skip(perPage * page - perPage)
           .limit(perPage);
-        } else {
-          if (isStudent === 'true') { //get student
-            account = await Account.find({roleId: 4 });
-          } else { //get teacher
-            account = await Account.find({roleId: { $in: [2, 3] } });
-          }
-          if(account.length>0){
-            const accountIds = map(account,'_id');
-            result = await Profile.find({$text:{$search:key},_id:{$in:accountIds}})
+      } else {
+        if (isStudent === 'true') { //get student
+          account = await Account.find({ roleId: 4 });
+        } else { //get teacher
+          account = await Account.find({ roleId: { $in: [2, 3] } });
+        }
+        if (account.length > 0) {
+          const accountIds = map(account, '_id');
+          result = await Profile.find({ keyword: key, _id: { $in: accountIds } })
             .skip(perPage * page - perPage)
             .limit(perPage);
-          }
         }
       }
     }
@@ -145,66 +102,33 @@ const searchUserForSubGroup = async (req, lang) => {
 
     //filter special characters and uppercase, lowercase
     let key = new RegExp(
-      keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      removeVN(keyword).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
       'i',
     );
 
     let total = 0;
-
-    //check key is identify (number or admin)
-    if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
-      //check in group
-      total = await userSubGroup.countDocuments({
-        userId: keyword,
-        groupId: groupId,
-      });
-
-      if (total <= 0) {
-        return {
-          msg: msg.notHaveUser,
-          statusCode: 200,
-          data:[]
-        };
-      }
-
-      profile = await Profile.find({ _id: keyword })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
-    } else {
-      //search by name
-      const listUser = await userSubGroup.find({ groupId: groupId });
-      if (listUser.length <= 0) {
-        return {
-          msg: msg.notHaveUser,
-          statusCode: 200,
-          data:[]
-        };
-      }
-
-      const userIds = map(listUser, 'userId');
-      total = await Profile.countDocuments({
-        _id: {
-          $in: userIds,
-        },
-        $text:{$search:key}
-      });
-      if (total <= 0) {
-        return {
-          msg: msg.notHaveUser,
-          statusCode: 200,
-          data:[]
-        };
-      }
-
-      profile = await Profile.find({
-        _id: {
-          $in: userIds,
-        },
-        $match:{fullname:key}}
-      )
-      .skip(perPage * page - perPage)
-        .limit(perPage);
+    const listUser = await userSubGroup.find({ groupId: groupId });
+    if (listUser.length <= 0) {
+      return {
+        msg: msg.notHaveUser,
+        statusCode: 200,
+        data: []
+      };
     }
+
+    const userIds = map(listUser, 'userId');
+    total = await Profile.countDocuments({ _id: { $in: userIds, }, keyword: key });
+    if (total <= 0) {
+      return {
+        msg: msg.notHaveUser,
+        statusCode: 200,
+        data: []
+      };
+    }
+
+    profile = await Profile.find({ _id: { $in: userIds }, keyword: key })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
 
     const result = profile.map((item) => {
       return transferProfile(item);
@@ -235,77 +159,35 @@ const searchUserForMainGroup = async (req, lang) => {
 
     //filter special characters and uppercase, lowercase
     let key = new RegExp(
-      keyword.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      removeVN(keyword).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
       'i',
     );
 
     let total = 0;
-
-    //check key is identify (number or admin)
-    if (Number(keyword) === Number(keyword) + 0 || keyword.indexOf(sub) === 0) {
-      //check in group
-      total =
-        isStudent === null
-          ? await userMainGroup.countDocuments({
-              userId: keyword,
-              groupId: groupId,
-            })
-          : await userMainGroup.countDocuments({
-              userId: keyword,
-              groupId: groupId,
-              isStudent: isStudent,
-            });
-      if (total <= 0) {
-        return {
-          msg: msg.notHaveUser,
-          statusCode: 200,
-          data:[]
-        };
-      }
-      profile = await Profile.find({ _id: keyword })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
-    } else {
-      //search by name
-      const listUser =
-        isStudent === null
-          ? await userMainGroup.find({ groupId: groupId })
-          : await userMainGroup.find({
-              groupId: groupId,
-              isStudent: isStudent,
-            });
-      if (listUser.length <= 0) {
-        return {
-          msg: msg.notHaveUser,
-          statusCode: 200,
-          data:[]
-        };
-      }
-
-      const userIds = map(listUser, 'userId');
-      total = await Profile.countDocuments({
-        _id: {
-          $in: userIds,
-        },
-        $text:{$search:key}
-      });
-
-      if (total <= 0) {
-        return {
-          msg: msg.notHaveUser,
-          statusCode: 200,
-          data:[]
-        };
-      }
-      profile = await Profile.find({
-        _id: {
-          $in: userIds,
-        },
-        $text:{$search:key}
-      })
-        .skip(perPage * page - perPage)
-        .limit(perPage);
+    const listUser =
+      isStudent === null
+        ? await userMainGroup.find({ groupId: groupId })
+        : await userMainGroup.find({ groupId: groupId, isStudent: isStudent });
+    if (listUser.length <= 0) {
+      return {
+        msg: msg.notHaveUser,
+        statusCode: 200,
+        data: []
+      };
     }
+
+    const userIds = map(listUser, 'userId');
+    total = await Profile.countDocuments({ _id: { $in: userIds, }, keyword: key });
+
+    if (total <= 0) {
+      return {
+        msg: msg.notHaveUser,
+        statusCode: 200,
+        data: []
+      };
+    }
+    profile = await Profile.find({ _id: { $in: userIds, }, keyword: key })
+      .limit(perPage);
 
     const result = profile.map((item) => {
       return transferProfile(item);
@@ -345,10 +227,7 @@ const searchGroup = async (req, lang) => {
       isMain: false,
     });
     if (total > 0) {
-      result = await Group.find({
-        $or: [{ nameEn: key }, { nameVi: key }],
-        isMain: false,
-      })
+      result = await Group.find({ $or: [{ nameEn: key }, { nameVi: key }], isMain: false })
         .skip(perPage * page - perPage)
         .limit(perPage);
     }
