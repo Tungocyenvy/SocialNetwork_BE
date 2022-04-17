@@ -302,7 +302,7 @@ const getDetailPost = async (postId, lang) => {
       const countCmt = await Comment.countDocuments({postId:postId});
       return {
         msg: msg.getDetail,
-        data: {result,countCmt},
+        data: {...result._doc,countCmt},
         statusCode: 200,
       };
     } else {
