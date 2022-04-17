@@ -19,10 +19,17 @@ const Message= require('../models/message.model');
  * 6.delete reply
  * 7.delete msg->conversation->participant 
  */
-cron.schedule('*/1 * * * * *', () => {
-    let date = new Date().getDate - 90;
-    console.log("🚀 ~ file: schedule.service.js ~ line 24 ~ cron.schedule ~ date", date)
-    const time = new Date(date)
-    console.log("🚀 ~ file: schedule.service.js ~ line 26 ~ cron.schedule ~ time", time)
+cron.schedule('*/1 * * * * *', async() => {
+  const day = new Date();
+  const now = new Date();
+  let getDay =day.setDate(now.getDate() - 90);
+  console.log("🚀 ~ file: schedule.service.js ~ line 27 ~ cron.schedule ~ getDay", getDay)
+  // let now = dateFormat(
+  //   (new Date()).setDate(day.getDate() -90),
+  //   'dd/mm/yyyy',
+  // );
+    // let now = (Date.now).split('/');
+    // console.log("🚀 ~ file: schedule.service.js ~ line 25 ~ cron.schedule ~ now", now)
+    // now = new Date(now[2], now[1] - 3, now[0]);
     const account = await Account.find({isDelete:true, deletedDate:{$lte:new Date()}})
   });

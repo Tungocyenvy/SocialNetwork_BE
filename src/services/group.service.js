@@ -765,7 +765,7 @@ const getFacultyByUserId = async (UserID, req, lang) => {
       return {
         msg: msg.getListFaculty,
         statusCode: 200,
-        data: result,
+        data: {result},
       };
   } catch {
     return {
