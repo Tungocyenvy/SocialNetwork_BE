@@ -19,7 +19,10 @@ const Message= require('../models/message.model');
  * 6.delete reply
  * 7.delete msg->conversation->participant 
  */
-cron.schedule('* * 0/1  * * *', () => {
-    const time = new Date().getDate - 90;
+cron.schedule('*/1 * * * * *', () => {
+    let date = new Date().getDate - 90;
+    console.log("🚀 ~ file: schedule.service.js ~ line 24 ~ cron.schedule ~ date", date)
+    const time = new Date(date)
+    console.log("🚀 ~ file: schedule.service.js ~ line 26 ~ cron.schedule ~ time", time)
     const account = await Account.find({isDelete:true, deletedDate:{$lte:new Date()}})
   });

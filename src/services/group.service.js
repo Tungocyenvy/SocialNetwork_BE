@@ -223,7 +223,7 @@ const getListFaculty = async (req, lang) => {
       return {
         msg: msg.notHaveMainGr,
         statusCode: 200,
-        data:[]
+        data:{result:[],total}
       };
     }
     if (isAll===true) perPage = total;
@@ -239,7 +239,7 @@ const getListFaculty = async (req, lang) => {
       const userIds = map(userGroup,'userId');
       const profile = await Profile.find({_id:{$in:userIds}});
       const objProfile = keyBy(profile,'faculty');
-      const rs = listGroupMain.map((item)=>{
+      const result = listGroupMain.map((item)=>{
         const {_id} = item;
         const deanProfile = objProfile[_id];
         return {...item._doc,profile: {...deanProfile._doc}};
@@ -247,13 +247,13 @@ const getListFaculty = async (req, lang) => {
       return {
         msg: msg.getListFaculty,
         statusCode: 200,
-        data: {rs,total},
+        data: {result,total},
       };
     } else {
       return {
         msg: msg.notHaveFaculty,
         statusCode: 200,
-        data:{rs:[],total:0}
+        data:{result:[],total:0}
       };
     }
   } catch (err) {
