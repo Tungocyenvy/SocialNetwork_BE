@@ -362,7 +362,7 @@ const changeAdmin = async (body, lang) => {
     let user;
     if (type == 'main') {
       user = await userMainGroup.findOne({ userId: userId, groupId: groupId });
-      let oldAdmin = await userMainGroup.findOne({groupId: groupId, isAdmin:true});
+      let oldAdmin = await userMainGroup.findOne({groupId: groupId, isAdmin:true,userId:{$nin:userId}});
       if(oldAdmin)
       {
         oldAdmin.isAdmin=false;
