@@ -34,8 +34,14 @@ cron.schedule('*/1 * * * * *', async () => {
     await userSubGroup.deleteMany({ userId: { $in: accountIds } });
     await userMainGroup.deleteMany({ userId: { $in: accountIds } });
     await Post.deleteMany({ author: { $in: accountIds } });
-    await Reply.deleteMany({ userId: { $in: accountIds } });
-    await Comment.deleteMany({ userId: { $in: accountIds } });
+    const comment= await Comment.find({userId: { $in: accountIds }});
+    if(comment.length>0)
+    {
+      const commentIds= map(comment,'_id');
+      await Reply.deleteMany({ commentId: { $in: commentIds } });
+      await Comment.deleteMany({ userId: { $in: commentIds } });
+
+    }
 
     //msg-conver-participant for 1-1
     const participant = await Paticipant.find({ participantId: { $in: accountIds } });
