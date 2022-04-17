@@ -430,6 +430,7 @@ const recoveryAccount = async (req) => {
 //**PROFILE */
 //get Infor User
 const getProfile = async (AccountId, req) => {
+console.log("🚀 ~ file: account.service.js ~ line 433 ~ getProfile ~ req", req)
   const msg = getMsg(req);
   try {
     const data = await Profile.findById({ _id: AccountId });

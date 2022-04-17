@@ -55,10 +55,7 @@ const changePassword = async (req, res, next) => {
 
 const getProfile = async (req, res, next) => {
   const AccountId = req.value.body.token.data;
-  const resService = await accountService.getProfile({
-    AccountId,
-    req,
-  });
+  const resService = await accountService.getProfile(AccountId,req);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,

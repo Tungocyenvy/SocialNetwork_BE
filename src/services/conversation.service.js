@@ -41,7 +41,7 @@ const getConversationId = async (userOne, userTwo) => {
 };
 const getConversation = async (userOne, userTwo, lang) => {
   const msg = getMsg(lang);
-  const result = await getConversationId(userOne, userOne);
+  const result = await getConversationId(userOne, userTwo);
   if (result) {
     const conversation = await Conversation.findById(result);
     const user = await Profile.findById(userTwo);
