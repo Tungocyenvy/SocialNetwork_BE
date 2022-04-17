@@ -199,13 +199,14 @@ const getReportAllGroup = async (req, lang) => {
         }
         const report = rs.data;
         //get post
-        const { _id, nameEn, nameVi } = objGroup[item];
+        const { _id, nameEn, nameVi,countReport } = objGroup[item];
         const countPost = await Post.countDocuments({ groupId: item });
         return {
           groupId: _id,
           nameEn,
           nameVi,
           countPost,
+          countReport,
           report,
         };
       }),
@@ -278,7 +279,7 @@ const getReportAllPost = async (req, lang) => {
           return;
         }
         const report = rs.data;
-        const { _id, content } = objPost[item];
+        const { _id, content,countReport } = objPost[item];
         countComment = objReply[item] ? objReply[item].length : 0;
         if (countComment != 0)
           countComment += sum(map(objReply[item], 'countReply'));
@@ -286,6 +287,7 @@ const getReportAllPost = async (req, lang) => {
           postId: _id,
           content,
           countComment,
+          countReport,
           report,
         };
       }),
