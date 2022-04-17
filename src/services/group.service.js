@@ -759,7 +759,9 @@ const getFacultyByUserId = async (UserID, req, lang) => {
     }
 
     const faculty = profile.faculty;
-    const result = await Group.findOne({_id:faculty,isMain:true});
+    const group = await Group.findOne({_id:faculty,isMain:true});
+    let result=[];
+    result.push(group);
    
       return {
         msg: msg.getListFaculty,

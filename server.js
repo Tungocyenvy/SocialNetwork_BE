@@ -15,13 +15,15 @@ const io = require('socket.io')(server, {
   }
 });
 
-
-
-
 const db = require('./src/config/database');
 db.connectDb();
 
+const cron = require('node-cron');
 
+cron.schedule('*/1 * * * * *', () => {
+    console.log('running a task every minute');
+  });
+  
 //Implement cors
 app.use(cors());
 //Access-Controll-Allow-Origin
