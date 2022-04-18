@@ -12,7 +12,7 @@ const Notify_sendSchema = new schema({
     required: true,
     default: Date.now,
   },
-});
+}).index({senderId:1,receiverId:1,representId:1});
 
 const notify_send = mongoose.model('notify_send', Notify_sendSchema);
 module.exports = notify_send;

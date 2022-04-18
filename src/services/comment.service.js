@@ -404,18 +404,28 @@ const replyComment = async (userId, body, lang) => {
 
       let data = {};
       data.representId = objReply._id;
-      data.type ='reply';
       data.senderId = userId;
-      data.receiverId = comment.userId;
-      //reply to author comment
-      sendReplyNotify = (await notificationService.createNotify(data)).statusCode;
-
+      if (userId !== comment.userId) {
+        data.type = 'reply';
+        data.receiverId = comment.userId;
+        //reply to author comment
+        sendReplyNotify = (await notificationService.createNotify(data)).statusCode;
+      }
       //notify to user another reply comment
       data.type ='replyFollow';
       data.receiverId = commentId;
       sendNotify =(await notificationService.createNotify(data)).statusCode;
 
-      if(sendNotify!==200 || sendReplyNotify!==200)
+      //notify to author post
+      const post = await Post.findOne({_id:comment.postId});
+      const authPost = post.author;
+      if (authPost !== userId) {
+        data.type = 'comment';
+        data.receiverId = authPost;
+        sendAutPost = (await notificationService.createNotify(data)).statusCode;
+      }
+
+      if(sendNotify!==200 || sendReplyNotify!==200||sendAutPost!==200)
       {
         return {
           msg: msg.errSendNofity,

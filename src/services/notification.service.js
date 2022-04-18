@@ -179,11 +179,12 @@ const createNotify = async (body, lang) => {
     delete data.type;
     let result;
     let userIds = [];
-          /**
+          /** 
+           * 0. default -> chủ post
        * 1. Lần đầu comment -> case default
        * 2. Người reply duy nhất -> case default
        * 3. tác giả comment reply -> case replyFollow
-       * 4. Những người reply khác -> 2 case default(receive AutCmt), replyFollow (receive những người reply cmt)
+       * 4. Những người reply khác -> 2 case: default(receive AutCmt), replyFollow (receive những người reply cmt)
        * 5. Tạo post -> case createPost
        */
     switch(type){
@@ -199,6 +200,7 @@ const createNotify = async (body, lang) => {
         let notify = await notifySend.findOne({ senderId: data.senderId, receiverId: data.receiverId });
         if (notify) {
           //replied before (1)
+          notify.representId=data.representId;
           notify.createdDate = Date.now;
           await notifySend.findByIdAndUpdate({ _id: notify._id }, notify);
           await notifyQueue.updateMany({ notifyId: notify._id, userId: { $nin: data.senderId } }, { $set: { isRead: false, createdDate: Date.now } });
@@ -207,11 +209,12 @@ const createNotify = async (body, lang) => {
           const lstQueue = notifyQueue.find({ notifyId: notify._id });
           let listUser = [];
           if (lstQueue.length > 0) { listUser = map(lstQueue, 'userId'); }
+          listUser.push(autComment);
           const listReply = await Reply.find({ commentId: data.receiverId, userId: { $nin: listUser } });
           if (listReply.length > 0) userIds = map(listReply, 'userId');
         } else {//first reply (2)
           const rs = await notifySend.create(data);
-          const lstReply = await Reply.find({ commentId: data.receiverId, _id: { $nin: data.representId } });
+          const lstReply = await Reply.find({ commentId: data.receiverId, _id: { $nin: data.representId },userId:{$nin:autComment} });
           if (lstReply.length > 0) userIds = map(lstReply, 'userId');
         }
         break;
@@ -229,8 +232,16 @@ const createNotify = async (body, lang) => {
           break;
         }
       default: //comment,reply
-        result = await notifySend.create(data);
-        userIds.push(body.receiverId);
+        let notifyPost = await notifySend.findOne({ senderId: data.senderId, receiverId: data.receiverId });
+        if (notifyPost) {
+          notifyPost.createdDate = Date.now;
+          notifyPost.representId=data.representId;
+          await notifySend.findByIdAndUpdate({ _id: notifyPost._id }, notifyPost);
+          await notifyQueue.updateMany({ notifyId: notifyPost._id, userId: { $nin: data.senderId } }, { $set: { isRead: false, createdDate: Date.now } },{multi: true});
+        } else {
+          result = await notifySend.create(data);
+          userIds.push(body.receiverId);
+        }
     }
 
     if (userIds.length > 0) {

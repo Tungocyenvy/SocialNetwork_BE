@@ -7,7 +7,7 @@ const Notify_queueSchema = new schema({
   notifyId: { type: String, required: true },
   isRead: { type: Boolean, required: true, default: false },
   createdDate: { type: Date, default: Date.now },
-});
+}).index({userId:1,notifyId:1});
 
 const Notify_queue = mongoose.model('notify_queue', Notify_queueSchema);
 module.exports = Notify_queue;

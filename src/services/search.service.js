@@ -152,7 +152,7 @@ const searchUserForSubGroup = async (req, lang) => {
 //forMainGroup
 const searchUserForMainGroup = async (req, lang) => {
   let perPage = 10;
-  let { keyword, groupId, page = 1, isStudent = null } = req.query || {};
+  let { keyword, groupId, page = 1, isStudent = null, isDelete=false } = req.query || {};
   const msg = getMsg(lang);
   try {
     const sub = 'admin';
@@ -179,7 +179,7 @@ const searchUserForMainGroup = async (req, lang) => {
     }
 
     const userIds = map(listUser, 'userId');
-    const account = await Account.find({_id:{$in:userIds},isDelete:false});
+    const account = await Account.find({_id:{$in:userIds},isDelete:isDelete});
     const accountIds=map(account,'_id');
     total = await Profile.countDocuments({ _id: { $in: accountIds, }, keyword: key });
 
