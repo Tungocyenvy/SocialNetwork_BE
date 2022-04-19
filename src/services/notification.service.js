@@ -326,15 +326,12 @@ const getNotify = async (userID, req, lang) => {
     const objTemplate = keyBy(template, '_id');
 
     const senderIds = map(notify, 'senderId');
-    console.log("🚀 ~ file: notification.service.js ~ line 329 ~ getNotify ~ senderIds", senderIds)
     const profile = await Profile.find({ _id: { $in: senderIds } });
     const objProfile = keyBy(profile, '_id');
-    console.log("🚀 ~ file: notification.service.js ~ line 332 ~ getNotify ~ objProfile", objProfile)
 
     const receiverIds = map(notify, 'receiverId');
     const group = await Group.find({ _id: receiverIds });
     let objgroup = group.length > 0 ? keyBy(group, '_id') : [];
-    console.log("🚀 ~ file: notification.service.js ~ line 337 ~ getNotify ~ objgroup", objgroup)
     const result =notifyIds.map(item => {
       const { notifyId, isRead } = objQueue[item]||{};
       const { templateId, senderId, receiverId } = objNotify[item];
@@ -360,7 +357,6 @@ const getNotify = async (userID, req, lang) => {
       return { notifyId, contentEn, contentVi, avatar, isRead };
 
     });
-    console.log("🚀 ~ file: notification.service.js ~ line 362 ~ result ~ result", result)
     return {
       msg: msg.getNotify,
       statusCode: 200,
