@@ -10,7 +10,7 @@ const notificationService = require('./notification.service');
 const NotifySend = require('../models/notify_send.model');
 const notifyQueue = require('../models/notify_queue.model');
 const Comment = require('../models/comment.model');
-
+const Reply = require('../models/reply.model');
 const { map, keyBy, groupBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -89,6 +89,7 @@ const createPost = async (userID, body, lang) => {
           .statusCode;
       } else {
         let data = {};
+        data.postId = newPost._id;
         data.representId = newPost._id;
         data.type = 'createPost';
         data.senderId = userID;
@@ -325,6 +326,13 @@ const deletePost = async (req, lang) => {
   try {
     const res = await Post.findByIdAndDelete({ _id: postId });
     if (res) {
+      const comment = await Comment.find({postId:postId});
+      if(comment.length>0)
+      {
+        const commentIds = map(comment,'_id');
+        await Reply.deleteMany({commentId:{$in:commentIds}});
+        await Comment.deleteMany({ postId: postId });
+      }
       const notify = await NotifySend.find({ postId: postId });
       if (notify.length > 0) {
         const notifyIds = map(notify, '_id');

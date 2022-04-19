@@ -6,8 +6,10 @@ const Profile = require('../models/profile.model');
 const Group = require('../models/group.model');
 const Reply = require('../models/reply.model');
 const Comment = require('../models/comment.model');
-const { map, keyBy } = require('lodash');
+const Post = require('../models/post.model');
+const { map, keyBy,groupBy } = require('lodash');
 const I18n = require('../config/i18n');
+const moment = require('moment');
 
 const getMsg = (req) => {
   let lang = req || 'en';
@@ -177,7 +179,7 @@ const createNotify = async (body, lang) => {
     const templateId = await notifyTemplate.findOne({ type: type });
     data.templateId = templateId;
     delete data.type;
-    let result;
+    let result={};
     let userIds = [];
           /** 
            * 0. default -> chủ post
@@ -196,25 +198,32 @@ const createNotify = async (body, lang) => {
          */
         const comment = await Comment.findById({ _id: data.receiverId });
         const autComment = comment.userId;
+        const post = await Post.findById({_id:comment.postId});
+        const authPost = post.author;
         const exceptUser = [data.senderId, autComment];
-        let notify = await notifySend.findOne({ senderId: data.senderId, receiverId: data.receiverId });
+        let listUser = [];
+        let notify = await notifySend.findOne({ senderId: data.senderId, receiverId: data.receiverId, postId:data.postId });
         if (notify) {
           //replied before (1)
           notify.representId=data.representId;
           notify.createdDate = Date.now;
           await notifySend.findByIdAndUpdate({ _id: notify._id }, notify);
-          await notifyQueue.updateMany({ notifyId: notify._id, userId: { $nin: data.senderId } }, { $set: { isRead: false, createdDate: Date.now } });
-
+          await notifyQueue.updateMany({ notifyId: notify._id, userId: { $nin: data.senderId } }, { $set: { isRead: false, createdDate: moment().toDate() } });
           //first receive notify (3)
-          const lstQueue = notifyQueue.find({ notifyId: notify._id });
-          let listUser = [];
-          if (lstQueue.length > 0) { listUser = map(lstQueue, 'userId'); }
+          const lstQueue = await notifyQueue.find({ notifyId: notify._id });
+          if (lstQueue.length > 0) { listUser =map(lstQueue, 'userId'); }
           listUser.push(autComment);
+          listUser.push(data.senderId);
+          listUser.push(authPost);
           const listReply = await Reply.find({ commentId: data.receiverId, userId: { $nin: listUser } });
-          if (listReply.length > 0) userIds = map(listReply, 'userId');
+          if (listReply.length > 0) {
+            result=notify;
+            userIds = map(listReply, 'userId');
+          }
         } else {//first reply (2)
-          const rs = await notifySend.create(data);
-          const lstReply = await Reply.find({ commentId: data.receiverId, _id: { $nin: data.representId },userId:{$nin:autComment} });
+          listUser = [autComment,data.senderId,authPost];
+          result = await notifySend.create(data);
+          const lstReply = await Reply.find({ commentId: data.receiverId, _id: { $nin: data.representId },userId:{$nin:listUser} });
           if (lstReply.length > 0) userIds = map(lstReply, 'userId');
         }
         break;
@@ -232,12 +241,12 @@ const createNotify = async (body, lang) => {
           break;
         }
       default: //comment,reply
-        let notifyPost = await notifySend.findOne({ senderId: data.senderId, receiverId: data.receiverId });
+        let notifyPost = await notifySend.findOne({ senderId: data.senderId, receiverId: data.receiverId,postId:data.postId });
         if (notifyPost) {
           notifyPost.createdDate = Date.now;
           notifyPost.representId=data.representId;
           await notifySend.findByIdAndUpdate({ _id: notifyPost._id }, notifyPost);
-          await notifyQueue.updateMany({ notifyId: notifyPost._id, userId: { $nin: data.senderId } }, { $set: { isRead: false, createdDate: Date.now } },{multi: true});
+          await notifyQueue.updateMany({ notifyId: notifyPost._id, userId: { $nin: data.senderId } }, { $set: { isRead: false, createdDate: moment().toDate()} });
         } else {
           result = await notifySend.create(data);
           userIds.push(body.receiverId);
@@ -245,12 +254,12 @@ const createNotify = async (body, lang) => {
     }
 
     if (userIds.length > 0) {
-      const queue = userIds.map((id) => {
+      let uniqueId= [...new Set(userIds)];
+      const queue = uniqueId.map((id) => {
         const userId = id;
         const notifyId = result._id;
         return { userId, notifyId };
       });
-
       const res = await notifyQueue.insertMany(queue);
     }
 
@@ -271,6 +280,7 @@ const createNotify = async (body, lang) => {
  * 1. comment: tác giả comment 1 người reply -> ... đã phản hồi bình luận của bạn
  *  2 người reply trở lên -> ...(reply mới nhất) và n người khác đã phản hồi bình luận của bạn
  * 2.reply: ... đã phản hồi một bình luận bạn đang theo dõi
+ * author Post .... và n người khác đã bình luận bài viết của bạn
  */
 const getNotify = async (userID, req, lang) => {
   let perPage = 10;
@@ -285,6 +295,18 @@ const getNotify = async (userID, req, lang) => {
         data: [],
       };
     }
+
+    // const allQueue = await notifyQueue
+    // .find({ userId: userID })
+    // .sort({
+    //   createdDate: -1,
+    // });
+
+    // const listNotifyId = map(allQueue,'notifyId');
+    // const listNotify = await notifySend.find({ _id: { $in: listNotifyId } }).sort({
+    //   createdDate: -1,
+    // });
+    // const groupNotify = groupBy(listNotify,'receiverId');
 
     const queue = await notifyQueue
       .find({ userId: userID })
@@ -304,37 +326,41 @@ const getNotify = async (userID, req, lang) => {
     const objTemplate = keyBy(template, '_id');
 
     const senderIds = map(notify, 'senderId');
+    console.log("🚀 ~ file: notification.service.js ~ line 329 ~ getNotify ~ senderIds", senderIds)
     const profile = await Profile.find({ _id: { $in: senderIds } });
     const objProfile = keyBy(profile, '_id');
+    console.log("🚀 ~ file: notification.service.js ~ line 332 ~ getNotify ~ objProfile", objProfile)
 
     const receiverIds = map(notify, 'receiverId');
     const group = await Group.find({ _id: receiverIds });
     let objgroup = group.length > 0 ? keyBy(group, '_id') : [];
-    const result =await Promise.all(notifyIds.map(async(item) => {
-      const { notifyId, isRead } = objQueue[item];
-      const { templateId, senderId, receiverId,type } = objNotify[item];
-      const { nameEn, nameVi } = objTemplate[templateId];
+    console.log("🚀 ~ file: notification.service.js ~ line 337 ~ getNotify ~ objgroup", objgroup)
+    const result =notifyIds.map(item => {
+      const { notifyId, isRead } = objQueue[item]||{};
+      const { templateId, senderId, receiverId } = objNotify[item];
+      const { nameEn, nameVi,type } = objTemplate[templateId];
       const { fullname, avatar } = objProfile[senderId];
       let groupName = '';
-      if (receiverId != userID) {
+      if (type==='createPost') {
         //create post in group
-        groupName = objgroup[receiverId].nameEn; //sub group nameEn same nameVi
+        groupName = objgroup[receiverId].nameEn||''; //sub group nameEn same nameVi
       }
       let senderEn=fullname;
       let senderVi=fullname;
-      if(type==='replyFollow'||type==='reply') //count by commentId
-      {
-        const total = await notifySend.countDocuments({receiverId:receiverId,senderId:{$nin:senderId}});
-        if(total>0) {
-          senderVi=sender + " và " +total+" người khác";
-          senderVi=sender + " and " +total+" another";
-        }
-      }
+      // if(type==='replyFollow'||type==='reply' || type==='comment') //count by commentId
+      // {
+      //   const total = await notifySend.countDocuments({receiverId:receiverId,senderId:{$nin:senderId}});
+      //   if(total>0) {
+      //     senderEn=fullname + " và " +total+" người khác";
+      //     senderVi=fullname + " and " +total+" another";
+      //   }
+      // }
       const contentEn = senderEn + ' ' + nameEn + ' ' + groupName;
       const contentVi = senderVi + ' ' + nameVi + ' ' + groupName;
-
       return { notifyId, contentEn, contentVi, avatar, isRead };
-    }));
+
+    });
+    console.log("🚀 ~ file: notification.service.js ~ line 362 ~ result ~ result", result)
     return {
       msg: msg.getNotify,
       statusCode: 200,

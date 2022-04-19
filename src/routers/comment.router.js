@@ -11,7 +11,7 @@ router.post('/', jwt.verify, commentController.createComment);
 //update
 router.put('/', jwt.verify, commentController.updateComment);
 //delete
-router.delete('/:commentId', jwt.verify, commentController.deleteComment);
+router.delete('/:commentId', commentController.deleteComment);
 
 //CUD REPLY
 //creat reply

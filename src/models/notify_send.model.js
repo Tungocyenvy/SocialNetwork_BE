@@ -4,6 +4,7 @@ const schema = mongoose.Schema;
 
 const Notify_sendSchema = new schema({
   representId: { type: String, required: true },
+  postId: { type: String, required: true },
   templateId: { type: String, required: true },
   senderId: { type: String, required: true },
   receiverId: { type: String, required: true },

@@ -48,9 +48,8 @@ const updateComment = async (req, res, next) => {
 };
 
 const deleteComment = async (req, res, next) => {
-  const userId = req.value.body.token.data;
   const lang = req.headers['accept-language'];
-  const resService = await commentService.deleteComment(userId, req, lang);
+  const resService = await commentService.deleteComment(req, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(

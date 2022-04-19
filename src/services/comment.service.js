@@ -193,6 +193,7 @@ const createComment = async (userId, body, lang) => {
       const result = transferComment(resSave, objProfile);
       if (userId !== post.author) {
         let data = {};
+        data.postId = postId;
         data.representId = _id;
         data.type = 'comment';
         data.senderId = userId;
@@ -252,7 +253,7 @@ const updateComment = async (userId, body, lang) => {
   }
 };
 
-const deleteComment = async (userId, req, lang) => {
+const deleteComment = async (req, lang) => {
   let { commentId } = req.params || {};
   const msg = getMsg(lang);
   try {
@@ -403,8 +404,10 @@ const replyComment = async (userId, body, lang) => {
       const result = transferReply(res, objProfile);
 
       let data = {};
+      data.postId = comment.postId;
       data.representId = objReply._id;
       data.senderId = userId;
+      let sendReplyNotify=sendNotify=sendAutPost=200;
       if (userId !== comment.userId) {
         data.type = 'reply';
         data.receiverId = comment.userId;
@@ -419,7 +422,7 @@ const replyComment = async (userId, body, lang) => {
       //notify to author post
       const post = await Post.findOne({_id:comment.postId});
       const authPost = post.author;
-      if (authPost !== userId) {
+      if (authPost !== userId && comment.userId!==authPost) {
         data.type = 'comment';
         data.receiverId = authPost;
         sendAutPost = (await notificationService.createNotify(data)).statusCode;
