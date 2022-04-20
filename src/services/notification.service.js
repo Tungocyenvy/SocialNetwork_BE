@@ -296,17 +296,18 @@ const getNotify = async (userID, req, lang) => {
       };
     }
 
-    // const allQueue = await notifyQueue
-    // .find({ userId: userID })
-    // .sort({
-    //   createdDate: -1,
-    // });
+    const allQueue = await notifyQueue
+    .find({ userId: userID })
+    .sort({
+      createdDate: -1,
+    });
 
-    // const listNotifyId = map(allQueue,'notifyId');
-    // const listNotify = await notifySend.find({ _id: { $in: listNotifyId } }).sort({
-    //   createdDate: -1,
-    // });
-    // const groupNotify = groupBy(listNotify,'receiverId');
+    const listNotifyId = map(allQueue,'notifyId');
+    const listNotify = await notifySend.find({ _id: { $in: listNotifyId } }).sort({
+      createdDate: -1,
+    });
+    const groupNotify = groupBy(listNotify,'receiverId');
+    console.log("🚀 ~ file: notification.service.js ~ line 310 ~ getNotify ~ groupNotify", groupNotify)
 
     const queue = await notifyQueue
       .find({ userId: userID })
