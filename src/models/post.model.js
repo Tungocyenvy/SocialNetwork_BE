@@ -9,7 +9,6 @@ const PostSchema = new schema({
   author: { type: String, require: true },
   groupId: { type: String, require: true },
   isMainGroup: { type: Boolean, default: true },
-  isRead:{type: Boolean, default: false},
   countReport:{ type: Number, required: true, default:0 },
   createdDate: {
     type: Date,

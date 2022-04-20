@@ -12,7 +12,7 @@ router.get('/:postId', postController.getDetailPost);
 //FOR MAIN GROUP
 //getListPostbyId
 router.get('/main/:groupId', jwt.verify, postController.getListPostByUserId);
-
+router.put('/', postController.readMainNotify);
 //FOR SUB GROUP
 //getListPostbygroupid
 router.get('/sub/:groupId', postController.getListPostByGroupId);

@@ -127,7 +127,8 @@
     "getDetail": "Lấy chi tiết bài viết thành công!",
     "notFoundPost": "Không tìm thấy bài viết!",
     "deletePost": "Xóa bài viết thành công!",
-    "updatePost": "Chỉnh sửa bài viết thành công!"
+    "updatePost": "Chỉnh sửa bài viết thành công!",
+    "readNotify" :"Đọc thông báo thành công!"
   },
   "report": {
     "notFoundGroup":"Không tìm thấy group này!",

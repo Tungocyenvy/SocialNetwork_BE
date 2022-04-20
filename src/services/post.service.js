@@ -130,7 +130,9 @@ const getListPostByUserId = async (userId, req, lang) => {
   let { isStudent = true, page = 1 } = req.query || {};
   const msg = getMsg(lang);
   try {
-    let lstNotify = [];
+
+    let total = 0;
+    let representId = userId;
     const account = await Account.findById({ _id: userId });
     if (account) {
       if (account.roleId === 1 || account.roleId === 2) {
@@ -140,58 +142,52 @@ const getListPostByUserId = async (userId, req, lang) => {
           isStudent: isStudent,
         });
         if (represent) {
-          lstNotify = await NotifyMainGroup.find({
-            userId: represent.userId,
-            groupId: groupId,
-          });
+          representId = represent.userId;
         }
-      } else {
-        lstNotify = await NotifyMainGroup.find({
-          userId: userId,
-          groupId: groupId,
-        });
       }
-      if (lstNotify.length > 0) {
+      total = await NotifyMainGroup.countDocuments({
+        userId: representId,
+        groupId: groupId
+      });
+      if (total > 0) {
+        const lstNotify =await NotifyMainGroup.find({userId: representId,groupId: groupId})
+        .sort({
+          createdDate: -1,
+        }).skip(perPage * page - perPage).limit(perPage);
+
         //get top 10 post
         const postIds = map(lstNotify, 'postId');
+        const listPost = await Post.find({ _id: { $in: postIds } });
+        const objPost = keyBy(listPost, '_id');
 
-        let result = [];
-        const total = await Post.countDocuments({ _id: { $in: postIds } });
-        if (total > 0) {
-          const listPost = await Post.find({ _id: { $in: postIds } })
-            .sort({
-              createdDate: -1,
-            })
-            .skip(perPage * page - perPage)
-            .limit(perPage);
+        //get profile author [fullname, avatar]
+        const userIds = map(listPost, 'author');
+        const profile = await Profile.find({
+          _id: {
+            $in: userIds,
+          },
+        });
 
-          //get profile author [fullname, avatar]
-          const userIds = map(listPost, 'author');
-          const profile = await Profile.find({
-            _id: {
-              $in: userIds,
-            },
+        const objProfile = keyBy(profile, '_id');
+
+        const result = lstNotify
+          .filter((item) => item != null)
+          .map((item) => {
+            const { _id,postId, isRead } = item;
+            const { author, title, content, createdDate } = objPost[postId];
+            const { fullname, avatar } = objProfile[author];
+            return {
+              _id:postId,
+              notifyId:_id,
+              title,
+              content,
+              createdDate,
+              isRead,
+              author,
+              fullname,
+              avatar,
+            };
           });
-
-          const objProfile = keyBy(profile, '_id');
-
-          result = listPost
-            .filter((item) => item != null)
-            .map((item) => {
-              const { _id, author, title, content, createdDate,isRead } = item;
-              const { fullname, avatar } = objProfile[author];
-              return {
-                _id,
-                title,
-                content,
-                createdDate,
-                isRead,
-                author,
-                fullname,
-                avatar,
-              };
-            });
-        }
 
         return {
           msg: msg.getListPost,
@@ -202,7 +198,7 @@ const getListPostByUserId = async (userId, req, lang) => {
         return {
           msg: msg.notHavePost,
           statusCode: 200,
-          data:{result:[],total:0}
+          data: { result: [], total: 0 }
         };
       }
     } else {
@@ -249,18 +245,17 @@ const getListPostByGroupId = async (req, lang) => {
         const objProfile = keyBy(profile, '_id');
         const postIds = map(listPost, '_id');
         const comment = await Comment.find({ postId: { $in: postIds } });
-        let objComment={};
-        if(comment.length>0) 
-       {
+        let objComment = {};
+        if (comment.length > 0) {
           objComment = groupBy(comment, 'postId');
-       }
+        }
 
         result = listPost
           .filter((item) => item != null)
           .map((item) => {
             const { _id, author, title, content, createdDate } = item;
             const { fullname, avatar } = objProfile[author];
-            const countCmt=objComment[_id]? objComment[_id].length:0;
+            const countCmt = objComment[_id] ? objComment[_id].length : 0;
             return {
               _id,
               title,
@@ -283,7 +278,7 @@ const getListPostByGroupId = async (req, lang) => {
       return {
         msg: msg.notHavePost,
         statusCode: 200,
-        data:{result:[],total:0}
+        data: { result: [], total: 0 }
       };
     }
   } catch {
@@ -301,10 +296,10 @@ const getDetailPost = async (postId, lang) => {
     if (!postId) postId = '';
     const result = await Post.findById({ _id: postId });
     if (result) {
-      const countCmt = await Comment.countDocuments({postId:postId});
+      const countCmt = await Comment.countDocuments({ postId: postId });
       return {
         msg: msg.getDetail,
-        data: {...result._doc,countCmt},
+        data: { ...result._doc, countCmt },
         statusCode: 200,
       };
     } else {
@@ -327,11 +322,10 @@ const deletePost = async (req, lang) => {
   try {
     const res = await Post.findByIdAndDelete({ _id: postId });
     if (res) {
-      const comment = await Comment.find({postId:postId});
-      if(comment.length>0)
-      {
-        const commentIds = map(comment,'_id');
-        await Reply.deleteMany({commentId:{$in:commentIds}});
+      const comment = await Comment.find({ postId: postId });
+      if (comment.length > 0) {
+        const commentIds = map(comment, '_id');
+        await Reply.deleteMany({ commentId: { $in: commentIds } });
         await Comment.deleteMany({ postId: postId });
       }
       const notify = await NotifySend.find({ postId: postId });
@@ -384,6 +378,28 @@ const updatePost = async (body, lang) => {
   }
 };
 
+const readMainNotify = async (req, lang) => {
+  let {notifyId} = req.query||{}
+  const msg = getMsg(lang);
+  try {
+    const res = await NotifyMainGroup.findByIdAndUpdate({ _id: notifyId}, {isRead:true});
+    if (res) {
+      const result = await NotifyMainGroup.findById({ _id: notifyId });
+      return {
+        msg: msg.readNotify,
+        statusCode: 200,
+        data: result,
+      };
+    }
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+
 module.exports = {
   createPost,
   getDetailPost,
@@ -391,4 +407,5 @@ module.exports = {
   getListPostByGroupId,
   deletePost,
   updatePost,
+  readMainNotify
 };

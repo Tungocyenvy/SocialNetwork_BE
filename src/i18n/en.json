@@ -127,7 +127,8 @@
     "getDetail": "Get detail post successful!",
     "notFoundPost": "Post not found!",
     "deletePost": "Delete post successful!",
-    "updatePost": "Update post successful!"
+    "updatePost": "Update post successful!",
+    "readNotify" :"Read notify main group successful!"
   },
   "report": {
     "notFoundGroup":"Group not found!",
