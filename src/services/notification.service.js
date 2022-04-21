@@ -338,7 +338,7 @@ const getNotify = async (userID, req, lang) => {
       {
         if(total>0) {
           senderVi=fullname + " và " +total+" người khác";
-          senderEn=fullname + " and " +total+" another";
+          senderEn=fullname + " and " +total+" others";
         }
       }
       const contentEn = senderEn + ' ' + nameEn + ' ' + groupName;
