@@ -7,8 +7,6 @@ const userSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
 const Account = require('../models/account.model');
 const notificationService = require('./notification.service');
-const NotifySend = require('../models/notify_send.model');
-const notifyQueue = require('../models/notify_queue.model');
 const Comment = require('../models/comment.model');
 const Reply = require('../models/reply.model');
 const Notification =require('../models/notification.model');
@@ -24,6 +22,7 @@ const getMsg = (req) => {
 const getPostId = (groupId, lastestPost) => {
   let Id = Number(lastestPost.match(/[0-9]+$/)[0]) + 1;
   Id = groupId + Id;
+  console.log("🚀 ~ file: post.service.js ~ line 27 ~ getPostId ~ Id", Id)
   return Id;
 };
 
@@ -48,7 +47,7 @@ const createPost = async (userID, body, lang) => {
     }
     //create id increment
     const post = await Post.find({
-      _id: { $regex: groupId, $options: 'is' },
+      groupId: groupId,
     });
     let id = groupId + 1;
     if (post.length > 0) {

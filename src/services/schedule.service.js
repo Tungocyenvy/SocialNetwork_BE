@@ -9,8 +9,7 @@ const Reply = require('../models/reply.model');
 const Paticipant = require('../models/participant.model');
 const Conversation = require('../models/conversation.model');
 const Message = require('../models/message.model');
-const notifyQueue = require('../models/notify_queue.model');
-const notifySend = require('../models/notify_send.model');
+const Notification =require('../models/notification.model');
 const moment = require('moment');
 const { map, keyBy } = require('lodash');
 const reply = require('../models/reply.model');
@@ -52,12 +51,7 @@ cron.schedule('*/1 * * * * *', async () => {
       await Conversation.deleteMany({ _id: { $in: converIds } });
     }
 
-    const notify = await notifySend.find({ $or: [{ userId: { $in: accountIds } }, { receiverId: { $in: accountIds } }] });
-    if (notify.length > 0) {
-      const notityIds = map(notify, '_id');
-      await notifyQueue.deleteMany({ $or: [{ userId: { $in: accountIds } }, { notifyId: { $in: notityIds } }] });
-      await notifySend.deleteMany({ _id: { $in: notityIds } });
-    }
+    await Notification.deleteMany({$or:[{receiverId:{$in:accountIds}},{senderId:{$in:accountIds}}]});
 
     await Profile.deleteMany({ _id: { $in: accountIds } });
     await Account.deleteMany({ _id: { $in: accountIds } });

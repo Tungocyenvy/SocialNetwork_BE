@@ -8,8 +8,8 @@ const NotifySchema = new schema({
   templateId: { type: String, required: true },
   groupId:{ type: String, required: true },
   postId: { type: String, required: true },
-  commentId: { type: String,default:null },
-  replyId: { type: String,default:null},
+  commentId: { type: String,default:"" },
+  replyId: { type: String,default:""},
   isRead: { type: Boolean,default:false },
   createdDate: {
     type: Date,

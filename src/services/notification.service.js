@@ -1,6 +1,4 @@
-const notifyQueue = require('../models/notify_queue.model');
 const notifyTemplate = require('../models/notify_template.model');
-const notifySend = require('../models/notify_send.model');
 const userSubGroup = require('../models/user_subgroup.model');
 const Profile = require('../models/profile.model');
 const Group = require('../models/group.model');
@@ -149,23 +147,6 @@ const deleteTemplate = async (req, lang) => {
   }
 };
 
-const createNotifyQueue = async (body, lang) => {
-  const msg = getMsg(lang);
-  try {
-    const result = await notifyQueue.create(body);
-    return {
-      msg: msg.createQueue,
-      statusCode: 200,
-      data: result,
-    };
-  } catch (err) {
-    return {
-      msg: msg.err,
-      statusCode: 300,
-    };
-  }
-};
-
 /**1:add friend
  * 2:comment -postId, commentId, receiverId:Author Post
  * 3: reply - postId, commentId, replyId - receiverId:Author Comment
@@ -267,10 +248,10 @@ const createNotifyQueue = async (body, lang) => {
     if (userIds.length > 0) {
       let uniqueId=  uniq(userIds);
       const queue = uniqueId.map((id) => {
-        let objQueue = data;
-        objQueue.receiverId =id;
+        const {postId,groupId,senderId,templateId,commentId,replyId}=data||{};
+        const receiverId = id;
 
-        return objQueue;
+        return {postId,groupId,senderId,templateId,commentId,replyId,receiverId};
       });
       const res = await Notification.insertMany(queue);
     }
@@ -309,24 +290,24 @@ const getNotify = async (userID, req, lang) => {
       };
     }
 
-    // const allNotify = await Notification
-    // .aggregate([  { $match:{ receiverId: userID }},  { $group:{senderId,postId,commentId}}])
-    // .sort({
-    //   createdDate: -1,
-    // });
-    // console.log("🚀 ~ file: notification.service.js ~ line 317 ~ getNotify ~ allNotify", allNotify)
- 
-
-    const notify = await Notification
-      .find({ receiverId: userID })
-      .sort({
-        createdDate: -1,
-      })
+    const allNotify = await Notification
+    .aggregate([  { $match:{ "receiverId": userID }},
+      {$sort:{createdDate:-1}}, //sort for group by
+      { $group:{_id:{templateId:"$templateId",postId:"$postId",commentId:"$commentId"},
+      count : {$sum : 1},
+      data : {$push : "$$ROOT"}}},
+    {$sort:{data:-1}}]) //sort for return
       .skip(perPage * page - perPage)
       .limit(perPage);
+ 
+
+    const notify =allNotify.map(x=>{
+      let data=x.data[0];
+      data.count = x.count;
+      return data;
+    });
 
     const notifyIds = map(notify, '_id');
-    // const notify = await notifySend.find({ _id: { $in: notifyIds } });
     objNotify = keyBy(notify, '_id');
 
     const templateIds = map(notify, 'templateId');
@@ -338,27 +319,28 @@ const getNotify = async (userID, req, lang) => {
     const objProfile = keyBy(profile, '_id');
 
     const groupIds = map(notify, 'groupId');
-    const group = await Group.find({ _id: groupIds });
+    const group = await Group.find({ _id: {$in:groupIds} });
     let objgroup = group.length > 0 ? keyBy(group, '_id') : [];
+    console.log("🚀 ~ file: notification.service.js ~ line 352 ~ getNotify ~ objgroup", objgroup)
     const result =notifyIds.map(item => {
-      const { _id,templateId, senderId, receiverId,isRead } = objNotify[item];
+      const { _id,templateId, senderId, receiverId,isRead,count,groupId } = objNotify[item];
       const { nameEn, nameVi,type } = objTemplate[templateId];
       const { fullname, avatar } = objProfile[senderId];
+      const total =count-1;
       let groupName = '';
       if (type==='createPost') {
         //create post in group
-        groupName = objgroup[receiverId].nameEn||''; //sub group nameEn same nameVi
+        groupName = objgroup[groupId].nameEn||''; //sub group nameEn same nameVi
       }
       let senderEn=fullname;
       let senderVi=fullname;
-      // if(type==='replyFollow'||type==='reply' || type==='comment') //count by commentId
-      // {
-      //   const total = await notifySend.countDocuments({receiverId:receiverId,senderId:{$nin:senderId}});
-      //   if(total>0) {
-      //     senderEn=fullname + " và " +total+" người khác";
-      //     senderVi=fullname + " and " +total+" another";
-      //   }
-      // }
+      if(type==='replyFollow'||type==='reply' || type==='comment') //count by commentId
+      {
+        if(total>0) {
+          senderVi=fullname + " và " +total+" người khác";
+          senderEn=fullname + " and " +total+" another";
+        }
+      }
       const contentEn = senderEn + ' ' + nameEn + ' ' + groupName;
       const contentVi = senderVi + ' ' + nameVi + ' ' + groupName;
       return { notifyId:_id, contentEn, contentVi, avatar, isRead };
@@ -404,7 +386,6 @@ module.exports = {
   getTemplate,
   updateTemplate,
   deleteTemplate,
-  createNotifyQueue,
   createNotify,
   getNotify,
   readNotify,
