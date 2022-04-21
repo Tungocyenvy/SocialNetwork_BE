@@ -303,11 +303,8 @@ const getNotify = async (userID, req, lang) => {
     });
 
     const listNotifyId = map(allQueue,'notifyId');
-    const listNotify = await notifySend.find({ _id: { $in: listNotifyId } }).sort({
-      createdDate: -1,
-    });
+    const listNotify = await notifySend.aggregate([{$match:{}}]);
     const groupNotify = groupBy(listNotify,'receiverId');
-    console.log("🚀 ~ file: notification.service.js ~ line 310 ~ getNotify ~ groupNotify", groupNotify)
 
     const queue = await notifyQueue
       .find({ userId: userID })
@@ -375,17 +372,15 @@ const readNotify = async (userID, req, lang) => {
   let { notifyId } = req.query || {};
   const msg = getMsg(lang);
   try {
-    const res = await notifyQueue.findOneAndUpdate(
+    await notifyQueue.findOneAndUpdate(
       { notifyId: notifyId, userId: userID },
       { isRead: true },
     );
-    if (res) {
-      return {
-        msg: msg.readNotify,
-        statusCode: 200,
-        data: [],
-      };
-    }
+    return {
+      msg: msg.readNotify,
+      statusCode: 200,
+      data: [],
+    };
   } catch (err) {
     return {
       msg: msg.err,
