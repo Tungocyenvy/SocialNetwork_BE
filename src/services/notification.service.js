@@ -309,11 +309,12 @@ const getNotify = async (userID, req, lang) => {
       };
     }
 
-    const allQueue = await Notification
-    .find({ receiverId: userID })
-    .sort({
-      createdDate: -1,
-    });
+    // const allNotify = await Notification
+    // .aggregate([  { $match:{ receiverId: userID }},  { $group:{senderId,postId,commentId}}])
+    // .sort({
+    //   createdDate: -1,
+    // });
+    // console.log("🚀 ~ file: notification.service.js ~ line 317 ~ getNotify ~ allNotify", allNotify)
  
 
     const notify = await Notification
@@ -340,13 +341,14 @@ const getNotify = async (userID, req, lang) => {
     const group = await Group.find({ _id: groupIds });
     let objgroup = group.length > 0 ? keyBy(group, '_id') : [];
     const result =notifyIds.map(item => {
-      const { _id,templateId, senderId, receiverId,isRead } = objNotify[item];
-      const { nameEn, nameVi,type } = objTemplate[templateId];
-      const { fullname, avatar } = objProfile[senderId];
+      // const { _id,templateId, senderId, receiverId,isRead } = objNotify[item];
+      const rsNotify =objNotify[item];
+      const { nameEn, nameVi,type } = objTemplate[rsNotify.templateId];
+      const { fullname, avatar } = objProfile[rsNotify.senderId];
       let groupName = '';
       if (type==='createPost') {
         //create post in group
-        groupName = objgroup[receiverId].nameEn||''; //sub group nameEn same nameVi
+        groupName = objgroup[rsNotify.receiverId].nameEn||''; //sub group nameEn same nameVi
       }
       let senderEn=fullname;
       let senderVi=fullname;
@@ -360,7 +362,7 @@ const getNotify = async (userID, req, lang) => {
       // }
       const contentEn = senderEn + ' ' + nameEn + ' ' + groupName;
       const contentVi = senderVi + ' ' + nameVi + ' ' + groupName;
-      return { notifyId:_id, contentEn, contentVi, avatar, isRead };
+      return { notifyId:rsNotify._id, contentEn, contentVi, avatar, isRead:rsNotify.isRead,notyify:rsNotify };
 
     });
     return {
