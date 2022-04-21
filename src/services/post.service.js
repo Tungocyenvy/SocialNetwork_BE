@@ -11,6 +11,7 @@ const NotifySend = require('../models/notify_send.model');
 const notifyQueue = require('../models/notify_queue.model');
 const Comment = require('../models/comment.model');
 const Reply = require('../models/reply.model');
+const Notification =require('../models/notification.model');
 const { map, keyBy, groupBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -90,10 +91,9 @@ const createPost = async (userID, body, lang) => {
       } else {
         let data = {};
         data.postId = newPost._id;
-        data.representId = newPost._id;
+        data.groupId = groupId;
         data.type = 'createPost';
         data.senderId = userID;
-        data.receiverId = groupId;
 
         sendNotify = (await notificationService.createNotify(data)).statusCode;
       }
@@ -328,12 +328,7 @@ const deletePost = async (req, lang) => {
         await Reply.deleteMany({ commentId: { $in: commentIds } });
         await Comment.deleteMany({ postId: postId });
       }
-      const notify = await NotifySend.find({ postId: postId });
-      if (notify.length > 0) {
-        const notifyIds = map(notify, '_id');
-        await NotifySend.deleteMany({ postId: postId });
-        await notifyQueue.deleteMany({ notifyId: { $in: notifyIds } });
-      }
+      await Notification.deleteMany({postId:postId});
       //pending delete notify
       return {
         msg: msg.deletePost,

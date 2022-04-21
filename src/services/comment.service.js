@@ -3,7 +3,8 @@ const Profile = require('../models/profile.model');
 const Reply = require('../models/reply.model');
 const Post = require('../models/post.model');
 const { map, keyBy } = require('lodash');
-const notificationService = require('./notification.service');
+const Notification = require('../models/notification.model');
+const notificationService= require('./notification.service');
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {
@@ -194,10 +195,11 @@ const createComment = async (userId, body, lang) => {
       if (userId !== post.author) {
         let data = {};
         data.postId = postId;
-        data.representId = _id;
+        data.commentId = _id;
         data.type = 'comment';
         data.senderId = userId;
         data.receiverId = post.author;
+        data.groupId=post.groupId;
         sendNotify = (await notificationService.createNotify(data)).statusCode;
         if (sendNotify !== 200) {
           return {
@@ -267,8 +269,7 @@ const deleteComment = async (req, lang) => {
 
     await Comment.findOneAndDelete({ _id: commentId });
     await Reply.deleteMany({ commentId: commentId });
-    req.query.representId=commentId;
-    await notificationService.deleteNotify(req,lang);
+    await Notification.deleteMany({commentId:commentId})
     // await Reply.deleteMany({
     //   commentID: { $in: userIds },
     // });
@@ -402,25 +403,27 @@ const replyComment = async (userId, body, lang) => {
       const profile = await Profile.findById({ _id: userId });
       const objProfile = keyBy(profile, '_id');
       const result = transferReply(res, objProfile);
-
+      
+      const post = await Post.findOne({_id:comment.postId});
       let data = {};
       data.postId = comment.postId;
-      data.representId = objReply._id;
       data.senderId = userId;
+      data.commentId = commentId;
+      data.groupId=post.groupId;
       let sendReplyNotify=sendNotify=sendAutPost=200;
       if (userId !== comment.userId) {
         data.type = 'reply';
+        data.replyId = objReply._id;
         data.receiverId = comment.userId;
         //reply to author comment
         sendReplyNotify = (await notificationService.createNotify(data)).statusCode;
       }
       //notify to user another reply comment
       data.type ='replyFollow';
-      data.receiverId = commentId;
+      data.replyId = objReply._id;
       sendNotify =(await notificationService.createNotify(data)).statusCode;
 
       //notify to author post
-      const post = await Post.findOne({_id:comment.postId});
       const authPost = post.author;
       if (authPost !== userId && comment.userId!==authPost) {
         data.type = 'comment';
@@ -501,9 +504,7 @@ const deleteReply = async (userId, req, lang) => {
       comment.countReply = comment.countReply - 1;
       await Comment.findByIdAndUpdate({ _id: commentId }, comment);
     }
-
-    req.query.representId=replyId;
-    await notificationService.deleteNotify(req,lang);
+    await Notification.deleteMany({replyId:replyId});
     return {
       msg: msg.deleteReply,
       statusCode: 200,
