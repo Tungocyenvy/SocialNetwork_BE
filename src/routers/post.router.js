@@ -20,5 +20,6 @@ router.delete('/sub/:postId', postController.deletPost);
 router.put('/sub/', postController.updatePost);
 router.post('/sub/report', reportController.createReportPost);
 router.get('/sub/report/all', reportController.getReportAllPost);
+router.get('/user/all', jwt.verify, postController.getAllPostForUser);
 
 module.exports = router;

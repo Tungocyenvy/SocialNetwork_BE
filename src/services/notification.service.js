@@ -321,7 +321,6 @@ const getNotify = async (userID, req, lang) => {
     const groupIds = map(notify, 'groupId');
     const group = await Group.find({ _id: {$in:groupIds} });
     let objgroup = group.length > 0 ? keyBy(group, '_id') : [];
-    console.log("🚀 ~ file: notification.service.js ~ line 352 ~ getNotify ~ objgroup", objgroup)
     const result =notifyIds.map(item => {
       const { _id,templateId, senderId, receiverId,isRead,count,groupId } = objNotify[item];
       const { nameEn, nameVi,type } = objTemplate[templateId];
@@ -363,16 +362,26 @@ const readNotify = async (userID, req, lang) => {
   let { notifyId } = req.query || {};
   const msg = getMsg(lang);
   try {
-    await Notification.findOneAndUpdate(
-      { _id: notifyId, receiverId: userID },
-      { isRead: true },
-    );
-    const result = await Notification.findById( { _id: notifyId, receiverId: userID });
-    return {
-      msg: msg.readNotify,
-      statusCode: 200,
-      data: result||{},
-    };
+    const notify = await Notification.findById( { _id: notifyId, receiverId: userID });
+    if (notify) {
+      await Notification.updateMany({ postId: notify.postId, commentId: notify.commentId, receiverId: userID }, { $set: { isRead: true } });
+
+      // await Notification.findOneAndUpdate(
+      //   { _id: notifyId, receiverId: userID },
+      //   { isRead: true },
+      // );
+      const result = await Notification.findById({ _id: notifyId, receiverId: userID });
+      return {
+        msg: msg.readNotify,
+        statusCode: 200,
+        data: result || {},
+      };
+    }else{
+      return {
+      msg: msg.notFound,
+        statusCode: 300,
+      };
+    }
   } catch (err) {
     return {
       msg: msg.err,

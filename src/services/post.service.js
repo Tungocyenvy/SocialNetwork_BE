@@ -288,6 +288,95 @@ const getListPostByGroupId = async (req, lang) => {
   }
 };
 
+//get post by userId for sub group
+const getAllPostForUser = async (userID,req, lang) => {
+  let perPage = 10;
+  let { page } = req.query || 1;
+  const msg = getMsg(lang);
+  try {
+    //get top 10 list post
+
+    const group = await userSubGroup.find({userId:userID});
+    if(group.length<=0)
+    {
+      return {
+        msg: msg.notHavePost,
+        statusCode: 200,
+        data: { result: [], total: 0 }
+      };
+    }
+    const groupIds = map(group,'groupId');
+    const total = await Post.countDocuments({groupId:{$in:groupIds}});
+    let result = [];
+    if (total > 0) {
+      const listPost = await Post.find({groupId:{$in:groupIds}})
+        .sort({
+          createdDate: -1,
+        })
+        .skip(perPage * page - perPage)
+        .limit(perPage);
+      if (listPost.length > 0) {
+        //get infor group
+        const listGroupId=map(listPost,'groupId');
+        const subGroup =await Group.find({_id:{$in:listGroupId}});
+        const objGroup =keyBy(subGroup,'_id');
+        //get profile author [fullname, avatar]
+        const userIds = map(listPost, 'author');
+        const profile = await Profile.find({
+          _id: {
+            $in: userIds,
+          },
+        });
+
+        const objProfile = keyBy(profile, '_id');
+        const postIds = map(listPost, '_id');
+        const comment = await Comment.find({ postId: { $in: postIds } });
+        let objComment = {};
+        if (comment.length > 0) {
+          objComment = groupBy(comment, 'postId');
+        }
+
+        result = listPost
+          .filter((item) => item != null)
+          .map((item) => {
+            const { _id,groupId, author, title, content, createdDate } = item;
+            const { fullname, avatar } = objProfile[author];
+            const countCmt = objComment[_id] ? objComment[_id].length : 0;
+            const group = objGroup[groupId];
+            return {
+              _id,
+              title,
+              content,
+              createdDate,
+              author,
+              fullname,
+              avatar,
+              countCmt,
+              group,
+            };
+          });
+      }
+
+      return {
+        msg: msg.getListPost,
+        statusCode: 200,
+        data: { result, total },
+      };
+    } else {
+      return {
+        msg: msg.notHavePost,
+        statusCode: 200,
+        data: { result: [], total: 0 }
+      };
+    }
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 //get detail post by post id
 const getDetailPost = async (postId, lang) => {
   const msg = getMsg(lang);
@@ -328,7 +417,6 @@ const deletePost = async (req, lang) => {
         await Comment.deleteMany({ postId: postId });
       }
       await Notification.deleteMany({postId:postId});
-      //pending delete notify
       return {
         msg: msg.deletePost,
         statusCode: 200,
@@ -401,5 +489,6 @@ module.exports = {
   getListPostByGroupId,
   deletePost,
   updatePost,
-  readMainNotify
+  readMainNotify,
+  getAllPostForUser
 };

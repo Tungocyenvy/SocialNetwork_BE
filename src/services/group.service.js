@@ -6,6 +6,9 @@ const Group = require('../models/group.model');
 const Account = require('../models/account.model');
 const Profile = require('../models/profile.model');
 const Post = require('../models/post.model');
+const Reply = require('../models/reply.model');
+const Comment = require('../models/comment.model');
+const Notification = require('../models/notification.model');
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -770,6 +773,46 @@ const getFacultyByUserId = async (UserID, req, lang) => {
   }
 };
 
+const deleteGroup = async (req, lang) => {
+  let{groupId} = req.query||{}
+  const msg = getMsg(lang);
+  try {
+    const group = await Group.findById({_id:groupId});
+    if (group) {
+      const post = await Post.find({groupId:groupId});
+      if(post.length>0)
+      {
+        const postIds = map(post, '_id');
+        const comment = await Comment.find({ postId: {$in:postIds}});
+        if (comment.length > 0) {
+          const commentIds = map(comment, '_id');
+          await Reply.deleteMany({ commentId: { $in: commentIds } });
+          await Comment.deleteMany({ _id: {$in:commentIds} });
+        }
+        await Post.deleteMany({ _id: {$in:postIds} });
+      }
+      await Notification.deleteMany({ groupId: groupId });
+      await Notify.deleteMany({ groupId: groupId});
+      await Group.findByIdAndDelete({_id:groupId});
+      return {
+        msg: msg.deleteGroup,
+        statusCode: 200,
+        data: {}
+      };
+    }else{
+      return {
+        msg: msg.notFoundGroup,
+        statusCode: 300,
+      };
+    }
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+}
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -788,5 +831,6 @@ module.exports = {
   getGroupByUserId,
   getDetailGroup,
   checkAdminforSub,
-  getFacultyByUserId
+  getFacultyByUserId,
+  deleteGroup
 };

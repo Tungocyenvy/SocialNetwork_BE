@@ -262,6 +262,22 @@ const getFacultyByUserId = async (req, res, next) => {
   }
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
+
+const deleteGroup = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.deleteGroup(req, lang);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -280,5 +296,6 @@ module.exports = {
   getGroupByUserId,
   getDetailGroup,
   checkAdminforSub,
-  getFacultyByUserId
+  getFacultyByUserId,
+  deleteGroup
 };

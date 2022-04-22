@@ -96,7 +96,8 @@
     "getDetailGr": "Lấy chi tiết nhóm thành công!",
     "errChangeAdmin" :"Vui lòng chỉ định một người quản trị mới trước khi xóa người quản trị duy nhất của nhóm!",
     "checkAdmin" :"Kiểm tra quyền quản trị thành công!",
-    "notFoundUser":"Không tìm thấy thông tin người dùng"
+    "notFoundUser":"Không tìm thấy thông tin người dùng",
+    "deleteGroup":"Xóa nhóm thành công!"
   },
   "jwt": {
     "noProvided": "Vui lòng truyền token!",

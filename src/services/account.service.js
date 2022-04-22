@@ -140,6 +140,7 @@ const forgotPassword = async (req) => {
 };
 
 // Reset Password
+//when forgot password
 const resetPassword = async (req) => {
   let { userId, password, confirmPassword } = req.body || {};
   const msg = getMsg(req);
@@ -536,6 +537,38 @@ const getListAccount = async (req) => {
   }
 };
 
+//for change phone
+const verifyPhoneNumber = async (req) => {
+  let { _id } = req.body || {};
+  const msg = getMsg(req);
+  // check account
+  var data = await Profile.findById({ _id });
+  if (data != null) {
+    try {
+      var toPhone = data.phone;
+      var content = getOTP();
+      const sendsms = sendSMS(toPhone, content);
+      return {
+        msg: msg.sms,
+        statusCode: 200,
+        data: { content },
+      };
+    } catch {
+      return {
+        msg: msg.err,
+        statusCode: 300,
+      };
+    }
+  } else {
+    return {
+      msg: msg.notFound.replace('%s', _id),
+      statusCode: 300,
+    };
+  }
+};
+
+
+
 module.exports = {
   signinService,
   forgotPassword,
@@ -547,4 +580,5 @@ module.exports = {
   updateProfile,
   changePassword,
   getListAccount,
+  verifyPhoneNumber
 };

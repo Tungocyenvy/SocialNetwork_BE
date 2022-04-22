@@ -5,6 +5,7 @@ const groupController = require('../controllers/group.controller');
 const reportController = require('../controllers/report.controller');
 const searchController = require('../controllers/search.controller');
 
+router.delete('/', groupController.deleteGroup);
 //group faculty
 router.get('/main/fac', groupController.getListFaculty);
 router.post('/main/fac', groupController.createFaculty);
@@ -40,5 +41,6 @@ router.get('/sub/search', searchController.searchGroup);
 
 router.get('/sub/search/user', searchController.searchUserForSubGroup);
 router.get('/main/search/user', searchController.searchUserForMainGroup);
+
 
 module.exports = router;
