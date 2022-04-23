@@ -9,6 +9,7 @@ const Post = require('../models/post.model');
 const Reply = require('../models/reply.model');
 const Comment = require('../models/comment.model');
 const Notification = require('../models/notification.model');
+const moment = require('moment');
 const { map, keyBy } = require('lodash');
 const I18n = require('../config/i18n');
 
@@ -102,45 +103,22 @@ const addUser = async (body, lang) => {
 
 //delete user from MainGroup
 const deleteListUser = async (body, lang) => {
-  let { userIds, groupId, type } = body || {};
+  let { userIds } = body || {};
   const msg = getMsg(lang);
   try {
-    if (!userIds || !groupId) {
+    if (!userIds) {
       return {
         msg: msg.validator,
         statusCode: 300,
       };
     }
-    const group = await Group.findById({ _id: groupId });
-    if (!group) {
-      return {
-        msg: msg.notFoundGroup,
-        statusCode: 300,
-      };
-    }
-
-    try {
-      if (type === 'main') {
-        await userMainGroup.deleteMany({
-          userId: { $in: userIds },
-          groupId: groupId,
-        });
-      } else {
-        await userSubGroup.deleteMany({
-          userId: { $in: userIds },
-          groupId: groupId,
-        });
-      }
-      return {
-        msg: msg.deleteListUser,
-        statusCode: 200,
-      };
-    } catch {
-      return {
-        msg: msg.err,
-        statusCode: 300,
-      };
-    }
+    await Account.updateMany({
+      _id: { $in: userIds }
+    }, { $set: { isDelete: true, deletedDate: moment().toDate() } });
+    return {
+      msg: msg.deleteListUser,
+      statusCode: 200,
+    };
   } catch {
     return {
       msg: msg.err,
@@ -382,8 +360,6 @@ const changeAdmin = async (body, lang) => {
             statusCode: 300,
           };
         }
-      }else{
-        await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
       }
       user = await userSubGroup.findOne({ userId: userId, groupId: groupId });
     }
@@ -434,7 +410,6 @@ const createSubGroup = async (userId, body, lang) => {
         const isAdmin = true;
         let dataUser = { userId, groupId, isAdmin };
         await userSubGroup.create(dataUser);
-        await Account.findByIdAndUpdate({ _id: userId }, { isAdminSG: true });
         return {
           msg: msg.createSub,
           statusCode: 200,

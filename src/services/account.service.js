@@ -254,7 +254,7 @@ const signup = async (req) => {
       //check profile && account
       if (profile || account) {
         message = msg.exists.replace('%s', userId);
-        logs.push(message);
+        logs.push({message});
         continue;
       }
 
@@ -272,7 +272,7 @@ const signup = async (req) => {
         await Profile.create(data);
       } catch {
         message = msg.errAddProfile.replace('%s', userId);
-        logs.push(message);
+        logs.push({message});
         continue;
       }
 
@@ -284,7 +284,7 @@ const signup = async (req) => {
       if (!hassPassword) {
         await Profile.findByIdAndDelete({ _id: userId });
         message = msg.errHashPass.replace('%s', userId);
-        logs.push(message);
+        logs.push({message});
         continue;
       }
       const newAccount = new Account({
@@ -298,7 +298,7 @@ const signup = async (req) => {
       } catch {
         await Profile.findByIdAndDelete({ _id: userId });
         message = msg.arrAddAccount.replace('%s', userId);
-        logs.push(message);
+        logs.push({message});
         continue;
       }
 
@@ -315,7 +315,7 @@ const signup = async (req) => {
         }
         if (!groupId) {
           message = msg.faculty.replace('%s', userId);
-          logs.push(message);
+          logs.push({message});
           continue;
         }
         try {
@@ -327,12 +327,12 @@ const signup = async (req) => {
           });
           if (stt.statusCode === 300) {
             message = stt.msg; //msg.group.replace('%s', userId).replace('%s', groupId);
-            logs.push(message);
+            logs.push({message});
             continue;
           }
         } catch {
           message = msg.group.replace('%s', userId).replace('%s', groupId);
-          logs.push(message);
+          logs.push({message});
           continue;
         }
       }
@@ -431,7 +431,6 @@ const recoveryAccount = async (req) => {
 //**PROFILE */
 //get Infor User
 const getProfile = async (AccountId, req) => {
-console.log("🚀 ~ file: account.service.js ~ line 433 ~ getProfile ~ req", req)
   const msg = getMsg(req);
   try {
     const data = await Profile.findById({ _id: AccountId });
