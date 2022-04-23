@@ -337,7 +337,12 @@ const getNotify = async (userID, req, lang) => {
       {
         if(total>0) {
           senderVi=fullname + " và " +total+" người khác";
-          senderEn=fullname + " and " +total+" others";
+          if(total===1)
+          {
+            senderEn=fullname + " and " +total+" another";
+          }else{
+            senderEn=fullname + " and " +total+" others";
+          }
         }
       }
       const contentEn = senderEn + ' ' + nameEn + ' ' + groupName;
@@ -390,6 +395,23 @@ const readNotify = async (userID, req, lang) => {
   }
 };
 
+const readAllNotify = async (userID, req, lang) => {
+  const msg = getMsg(lang);
+  try {
+    await Notification.updateMany({ receiverId: userID }, { $set: { isRead: true } });
+    return {
+      msg: msg.readNotify,
+      statusCode: 200,
+      data: {},
+    };
+  } catch (err) {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   createTemplate,
   getTemplate,
@@ -398,4 +420,5 @@ module.exports = {
   createNotify,
   getNotify,
   readNotify,
+  readAllNotify
 };

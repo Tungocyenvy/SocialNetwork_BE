@@ -12,5 +12,6 @@ router.delete('/template', notificationService.deleteTemplate);
 router.post('/', notificationService.createNotify);
 router.get('/', jwt.verify, notificationService.getNotify);
 router.put('/', jwt.verify, notificationService.readNotify);
+router.get('/all', jwt.verify, notificationService.readAllNotify);
 
 module.exports = router;
