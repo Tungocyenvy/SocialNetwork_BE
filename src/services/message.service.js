@@ -82,7 +82,7 @@ const getMessage = async (req, userId, lang) => {
       message.reverse();
       lstMessage = message.map((x) => {
         var objMessage = {};
-        objMessage.data = x.data;
+        objMessage.data = x.data||{};
         objMessage.isAuth = x.senderId === userId ? true : false;
         return objMessage;
       });

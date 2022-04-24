@@ -105,14 +105,14 @@ const getReportGroup = async (groupId, lang) => {
     if (listReport.length <= 0) {
       result = reportIds.map((item) => {
         const count = 0;
-        const { _id, nameEn, nameVi } = objReportCate[item];
+        const { _id, nameEn, nameVi } = objReportCate[item]||{};
         return { reportId: _id, nameEn, nameVi, count };
       });
     } else {
       const objReport = keyBy(listReport, 'reportId');
       result = reportIds.map((item) => {
         const count = objReport[item] ? objReport[item].count : 0;
-        const { _id, nameEn, nameVi } = objReportCate[item];
+        const { _id, nameEn, nameVi } = objReportCate[item]||{};
         return { reportId: _id, nameEn, nameVi, count };
       });
     }
@@ -142,14 +142,14 @@ const getReportPost = async (postId, lang) => {
     if (listReport.length <= 0) {
       result = reportIds.map((item) => {
         const count = 0;
-        const { _id, nameEn, nameVi } = objReportCate[item];
+        const { _id, nameEn, nameVi } = objReportCate[item]||{};
         return { reportId: _id, nameEn, nameVi, count };
       });
     } else {
       const objReport = keyBy(listReport, 'reportId');
       result = reportIds.map((item) => {
         const count = objReport[item] ? objReport[item].count : 0;
-        const { _id, nameEn, nameVi } = objReportCate[item];
+        const { _id, nameEn, nameVi } = objReportCate[item]||{};
         return { reportId: _id, nameEn, nameVi, count };
       });
     }
@@ -197,9 +197,9 @@ const getReportAllGroup = async (req, lang) => {
           log = rs;
           return;
         }
-        const report = rs.data;
+        const report = rs.data||{};
         //get post
-        const { _id, nameEn, nameVi,countReport } = objGroup[item];
+        const { _id, nameEn, nameVi,countReport } = objGroup[item]||{};
         const countPost = await Post.countDocuments({ groupId: item });
         return {
           groupId: _id,
@@ -278,8 +278,8 @@ const getReportAllPost = async (req, lang) => {
           log = rs;
           return;
         }
-        const report = rs.data;
-        const { _id, content,countReport } = objPost[item];
+        const report = rs.data||{};
+        const { _id, content,countReport } = objPost[item]||{};
         countComment = objReply[item] ? objReply[item].length : 0;
         if (countComment != 0)
           countComment += sum(map(objReply[item], 'countReply'));

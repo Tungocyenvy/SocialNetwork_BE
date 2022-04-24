@@ -14,8 +14,8 @@ const getMsg = (req) => {
 };
 
 const transferComment = (comment, profile) => {
-  const { _id, userId, content, postId, countReply, createdDate } = comment;
-  const { fullname, avatar } = profile[userId];
+  const { _id, userId, content, postId, countReply, createdDate } = comment||{};
+  const { fullname, avatar } = profile[userId]||{};
   return {
     commentId: _id,
     userId,
@@ -29,8 +29,8 @@ const transferComment = (comment, profile) => {
 };
 
 const transferReply = (reply, profile) => {
-  const { _id, userId, content, createdDate } = reply;
-  const { fullname, avatar } = profile[userId];
+  const { _id, userId, content, createdDate } = reply||{};
+  const { fullname, avatar } = profile[userId]||{};
   return {
     replyId: _id,
     userId,

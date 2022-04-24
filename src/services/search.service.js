@@ -21,7 +21,7 @@ const removeVN = (Text) => {
 };
 
 const transferProfile = (profile) => {
-  const { _id, fullname, avatar, dob, address, email, phone, year, faculty } = profile;
+  const { _id, fullname, avatar, dob, address, email, phone, year, faculty } = profile||{};
   return {
     userId: _id, fullname, avatar, dob, address, email, phone, year, faculty,
   };
@@ -83,8 +83,8 @@ const searchUser = async (req, lang) => {
         const faculty = await Group.find({_id:{$in:facultyIds}});
         const objFaculty= keyBy(faculty,'_id');
         result= profile.map(item=>{
-          const objProfile=item;
-          const {nameEn,nameVi}=objFaculty[objProfile.faculty];
+          const objProfile=item||{};
+          const {nameEn,nameVi}=objFaculty[objProfile.faculty]||{};
           return {...objProfile._doc,facultyNameEn:nameEn,facultyNameVi:nameVi};
         })
       }

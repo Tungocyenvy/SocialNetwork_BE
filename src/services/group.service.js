@@ -221,8 +221,8 @@ const getListFaculty = async (req, lang) => {
       const profile = await Profile.find({_id:{$in:userIds}});
       const objProfile = keyBy(profile,'faculty');
       const result = listGroupMain.map((item)=>{
-        const {_id} = item;
-        const deanProfile = objProfile[_id];
+        const {_id} = item||{};
+        const deanProfile = objProfile[_id]||{};
         return {...item._doc,profile: {...deanProfile._doc}};
       });
       return {
@@ -483,7 +483,7 @@ const getRelativeGroup = async (UserID, req, lang) => {
         .limit(perPage);
 
       const result =await Promise.all(group.map(async (item)=>{
-        const {_id,isMain,createdDate,cateId,image,nameEn,nameVi}=item;
+        const {_id,isMain,createdDate,cateId,image,nameEn,nameVi}=item||{};
         const numMember = await userSubGroup.countDocuments({ groupId: _id });
         const numPost = await Post.countDocuments({groupId:_id})
 
@@ -584,9 +584,9 @@ const getListUser = async (req, lang) => {
     objProfile = keyBy(profile, '_id');
 
     const result = accountIds.map((item) => {
-      const { userId, isAdmin } = objUser[item];
+      const { userId, isAdmin } = objUser[item]||{};
       const { fullname, avatar, dob, address, phone, email, year, faculty } =
-        objProfile[userId];
+        objProfile[userId]||{};
       return {
         userId,
         isAdmin,
@@ -646,9 +646,9 @@ const getGroupByUserId = async (UserID, req, lang) => {
 
       const objGroup = keyBy(lstGroup, '_id');
       result =await Promise.all( group.map(async (item) => {
-        const { groupId, isAdmin } = item;
+        const { groupId, isAdmin } = item||{};
         const { nameEn, nameVi, createdDate, cateId, image } =
-          objGroup[groupId];
+          objGroup[groupId]||{};
         const numMember = await userSubGroup.countDocuments({ groupId: groupId });
         const numPost = await Post.countDocuments({groupId:groupId})
         return { groupId, nameEn, nameVi, createdDate, cateId, image, isAdmin,numMember, numPost};

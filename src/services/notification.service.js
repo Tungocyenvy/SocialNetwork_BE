@@ -331,8 +331,8 @@ const getNotifyByUserId = async (userID, req, lang) => {
  
 
     const notify =allNotify.map(x=>{
-      let data=x.data[0];
-      data.count = x.count;
+      let data=x.data[0]||{};
+      data.count = x.count||0;
       return data;
     });
 
@@ -351,9 +351,9 @@ const getNotifyByUserId = async (userID, req, lang) => {
     const group = await Group.find({ _id: {$in:groupIds} });
     let objgroup = group.length > 0 ? keyBy(group, '_id') : [];
     const result =notifyIds.map(item => {
-      const { _id,templateId, senderId, receiverId,isRead,count,groupId } = objNotify[item];
-      const { nameEn, nameVi,type } = objTemplate[templateId];
-      const { fullname, avatar } = objProfile[senderId];
+      const { _id,templateId, senderId, receiverId,isRead,count,groupId } = objNotify[item]||{};
+      const { nameEn, nameVi,type } = objTemplate[templateId]||{};
+      const { fullname, avatar } = objProfile[senderId]||{};
       const total =count-1;
       let groupName = '';
       if (type==='createPost') {

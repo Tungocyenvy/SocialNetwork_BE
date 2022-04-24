@@ -224,9 +224,9 @@ const getListConversation = async (userId, req, lang) => {
         result = conversation
           .filter((item) => item.lastestMessage !== null)
           .map((item) => {
-            const { _id, lastestMessage } = objConversation[item._id];
-            const { participantId } = objParticipant[item._id];
-            const user = objProfile[participantId];
+            const { _id, lastestMessage } = objConversation[item._id]||{};
+            const { participantId } = objParticipant[item._id]||{};
+            const user = objProfile[participantId]||{};
             return {
               _id,
               lastestMessage,

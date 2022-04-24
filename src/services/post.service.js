@@ -171,9 +171,9 @@ const getListPostByUserId = async (userId, req, lang) => {
         const result = lstNotify
           .filter((item) => item != null)
           .map((item) => {
-            const { _id,postId, isRead } = item;
-            const { author, title, content, createdDate } = objPost[postId];
-            const { fullname, avatar } = objProfile[author];
+            const { _id,postId, isRead } = item||{};
+            const { author, title, content, createdDate } = objPost[postId]||{};
+            const { fullname, avatar } = objProfile[author]||{};
             return {
               _id:postId,
               notifyId:_id,
@@ -251,8 +251,8 @@ const getListPostByGroupId = async (req, lang) => {
         result = listPost
           .filter((item) => item != null)
           .map((item) => {
-            const { _id, author, title, content, createdDate } = item;
-            const { fullname, avatar } = objProfile[author];
+            const { _id, author, title, content, createdDate } = item||{};
+            const { fullname, avatar } = objProfile[author]||{};
             const countCmt = objComment[_id] ? objComment[_id].length : 0;
             return {
               _id,
@@ -338,10 +338,10 @@ const getAllPostForUser = async (userID,req, lang) => {
         result = listPost
           .filter((item) => item != null)
           .map((item) => {
-            const { _id,groupId, author, title, content, createdDate } = item;
-            const { fullname, avatar } = objProfile[author];
+            const { _id,groupId, author, title, content, createdDate } = item||{};
+            const { fullname, avatar } = objProfile[author]||{};
             const countCmt = objComment[_id] ? objComment[_id].length : 0;
-            const group = objGroup[groupId];
+            const group = objGroup[groupId]||{};
             return {
               _id,
               title,
