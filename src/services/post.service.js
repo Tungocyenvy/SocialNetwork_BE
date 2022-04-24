@@ -20,9 +20,8 @@ const getMsg = (req) => {
 };
 
 const getPostId = (groupId, lastestPost) => {
-  let Id = Number(lastestPost.match(/[0-9]+$/)[0]) + 1;
-  Id = groupId + Id;
-  console.log("🚀 ~ file: post.service.js ~ line 27 ~ getPostId ~ Id", Id)
+  let Id = Number(lastestPost.match(/[0-9]+$/)[0]) + Number(1);
+  Id = groupId+'Post' + Id;
   return Id;
 };
 
@@ -49,7 +48,7 @@ const createPost = async (userID, body, lang) => {
     const post = await Post.find({
       groupId: groupId,
     });
-    let id = groupId + 1;
+    let id = groupId+"Post" + 1;
     if (post.length > 0) {
       const lastedPostId = post[post.length - 1]._id;
       id = getPostId(groupId, lastedPostId);

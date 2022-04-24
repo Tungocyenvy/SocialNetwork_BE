@@ -16,6 +16,8 @@ const io = require('socket.io')(server, {
   }
 });
 
+global.io = io;
+
 const db = require('./src/config/database');
 db.connectDb();
 

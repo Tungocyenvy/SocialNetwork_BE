@@ -36,6 +36,7 @@ const searchUser = async (req, lang) => {
   try {
     let result;
     let account;
+    let profile=[];
 
     //filter special characters and uppercase, lowercase
     let key = new RegExp(
@@ -59,7 +60,7 @@ const searchUser = async (req, lang) => {
     }
     if (total > 0) {
       if (isStudent === null) { //get all
-        result = await Profile.find({ keyword: key })
+        profile = await Profile.find({ keyword: key })
           .skip(perPage * page - perPage)
           .limit(perPage);
       } else {
@@ -70,10 +71,22 @@ const searchUser = async (req, lang) => {
         }
         if (account.length > 0) {
           const accountIds = map(account, '_id');
-          result = await Profile.find({ keyword: key, _id: { $in: accountIds } })
+          profile = await Profile.find({ keyword: key, _id: { $in: accountIds } })
             .skip(perPage * page - perPage)
             .limit(perPage);
         }
+      }
+
+      if(profile.length>0)
+      {
+        const facultyIds =map(profile,'faculty');
+        const faculty = await Group.find({_id:{$in:facultyIds}});
+        const objFaculty= keyBy(faculty,'_id');
+        result= profile.map(item=>{
+          const objProfile=item;
+          const {nameEn,nameVi}=objFaculty[objProfile.faculty];
+          return {...objProfile._doc,facultyNameEn:nameEn,facultyNameVi:nameVi};
+        })
       }
     }
     return {

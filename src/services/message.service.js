@@ -56,10 +56,14 @@ const createMessage = async (data, lang) => {
 
 const getMessage = async (req, userId, lang) => {
   let { conversationId } = req.query || {};
-  let perPage = 15;
+  let perPage = 20;
   let { page } = req.query || 1;
   const msg = getMsg(lang);
   try {
+    if(page>1)
+    {
+      perPage=10;
+    }
     let lstMessage = [];
     //get top 7 lastest message
     const total = await Message.countDocuments({

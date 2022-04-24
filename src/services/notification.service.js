@@ -6,10 +6,12 @@ const Reply = require('../models/reply.model');
 const Comment = require('../models/comment.model');
 const Post = require('../models/post.model');
 const Notification = require('../models/notification.model');
-const socket = require('socket.io');
+// const socket = require('../../socket');
 const { map, keyBy,groupBy,uniq } = require('lodash');
 const I18n = require('../config/i18n');
 const moment = require('moment');
+
+const EVENT_NOTIFICATION_SSC = require('../sockets/events/server/notification');
 
 const getMsg = (req) => {
   let lang = req || 'en';
@@ -273,14 +275,16 @@ const deleteTemplate = async (req, lang) => {
       result=res[0]._id;
     }
 
-    const payload = await getNotify(result);
-    console.log(uniq(tmpUser));
+    let payload = (await getNotify(result)).data;
+    payload.userIds=uniq(tmpUser)||[];
 
-    socket.to(uniq(tmpUser)).emit(EVENT_NOTIFICATION_SSC.SEND_NOTIFICATION_SSC, {
-      data: payload.data,
-      msg: 'send notification room success',
-      status: 200,
-    });
+    if (payload.userIds.length > 0) {
+      global.io.to(payload.userIds).emit(EVENT_NOTIFICATION_SSC.SEND_NOTIFICATION_SSC, {
+        data: payload,
+        msg: 'send notification room success',
+        status: 200,
+      });
+    } 
 
     return {
       msg: msg.createNotify,
@@ -294,7 +298,6 @@ const deleteTemplate = async (req, lang) => {
     };
   }
 };
-
 
 /**
  * 1. comment: tác giả comment 1 người reply -> ... đã phản hồi bình luận của bạn

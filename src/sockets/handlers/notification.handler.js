@@ -1,7 +1,7 @@
 const EVENT_NOTIFICATION_CSS = require('../events/client/notification');
 const EVENT_NOTIFICATION_SSC = require('../events/server/notification');
-const notification = require('../../services/notification.service');
-const conversation = require('../../services/conversation.service');
+const postService = require('../../services/post.service');
+const commentService =require('../../services/comment.service');
 
 function NotificationHandler(socket) {
   const listens = {};
@@ -24,8 +24,8 @@ function NotificationHandler(socket) {
   };
 
   listens[EVENT_NOTIFICATION_CSS.LEAVE_ROOM_CSS] = (payload) => {
-    socket.leave(payload.room);
-    socket.to(payload.room).emit(EVENT_NOTIFICATION_SSC.LEAVE_ROOM_SSC, {
+    socket.leave(payload._id);
+    socket.to(payload._id).emit(EVENT_NOTIFICATION_SSC.LEAVE_ROOM_SSC, {
       data: null,
       msg: 'leave room success',
       status: 200,
