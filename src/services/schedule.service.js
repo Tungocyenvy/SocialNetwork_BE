@@ -14,6 +14,7 @@ const moment = require('moment');
 const { map, keyBy } = require('lodash');
 const reply = require('../models/reply.model');
 
+//delete Account
 /**
  * 1.Delete account
  * 2.Delete profile
@@ -22,11 +23,13 @@ const reply = require('../models/reply.model');
  * 5. delete comment
  * 6.delete reply
  * 7.delete msg->conversation->participant 
+ * 8.delete notify
  */
-cron.schedule('*/1 * * * * *', async () => {
-  let expirationDate = moment().subtract(3, 'months');
 
-  // new Date(now.setDate(now.getDate() - 90));
+cron.schedule('*/1 * * * * *', async () => {
+
+  //delete account overs 3 month
+  let expirationDate = moment().subtract(3, 'months');
   const account = await Account.find({ isDelete: true, deletedDate: { $lte: expirationDate.toDate() } });
   if (account.length > 0) {
     const accountIds = map(account, '_id');
@@ -55,5 +58,14 @@ cron.schedule('*/1 * * * * *', async () => {
 
     await Profile.deleteMany({ _id: { $in: accountIds } });
     await Account.deleteMany({ _id: { $in: accountIds } });
+  }
+
+  //delete notify over 7 days
+  let expirationNotifyDate = moment().subtract(7, 'days');
+  const notify = await Notification.find({ createdDate: { $lte: expirationNotifyDate.toDate() } });
+  if(notify.length>0)
+  {
+    const notifyIds = map(notify,'_id');
+    await Notification.deleteMany({_id:{$in:notifyIds}});
   }
 });

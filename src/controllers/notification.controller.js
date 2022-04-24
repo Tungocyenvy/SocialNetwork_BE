@@ -71,10 +71,10 @@ const createNotify = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
-const getNotify = async (req, res, next) => {
+const getNotifyByUserId = async (req, res, next) => {
   const userID = req.value.body.token.data;
   const lang = req.headers['accept-language'];
-  const resService = await notificationService.getNotify(userID, req, lang);
+  const resService = await notificationService.getNotifyByUserId(userID, req, lang);
 
   if (resService.statusCode === 200 || resService.statusCode === 201)
     return controller.sendSuccess(
@@ -116,6 +116,21 @@ const readAllNotify = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const getNotify = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
+  const notifyId = req.query.notifyId;
+  const resService = await notificationService.getNotify(notifyId, lang);
+
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 
 module.exports = {
   createTemplate,
@@ -123,7 +138,8 @@ module.exports = {
   updateTemplate,
   deleteTemplate,
   createNotify,
-  getNotify,
+  getNotifyByUserId,
   readNotify,
-  readAllNotify
+  readAllNotify,
+  getNotify
 };

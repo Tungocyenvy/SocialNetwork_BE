@@ -6,6 +6,7 @@ const Reply = require('../models/reply.model');
 const Comment = require('../models/comment.model');
 const Post = require('../models/post.model');
 const Notification = require('../models/notification.model');
+const socket = require('socket.io');
 const { map, keyBy,groupBy,uniq } = require('lodash');
 const I18n = require('../config/i18n');
 const moment = require('moment');
@@ -163,6 +164,8 @@ const deleteTemplate = async (req, lang) => {
     delete data.type;
     let result={};
     let userIds = [];
+    let tmp=[];
+    let tmpUser=[]; //for send notify
           /** 
            * 0. createPost -> case createPost
        * 1. comment -> case comment
@@ -187,7 +190,9 @@ const deleteTemplate = async (req, lang) => {
           //replied before (1)
           const notifyIds =map(notify, '_id');
           await Notification.updateMany({ _id:{$in:notifyIds}, receiverId: { $nin: exceptUser } }, { $set: { isRead: false, createdDate: moment().toDate(),replyId:data.replyId } });
-          
+          tmp=await Notification.find({_id:{$in:notifyIds}, receiverId: { $nin: exceptUser } });
+          result = notifyIds[0];
+          const receiverIds= map(Notification,'receiverId');
           //first receive notify (3)
           let listUser = map(notify,'receiverId');
           listUser.push(autComment);
@@ -196,10 +201,12 @@ const deleteTemplate = async (req, lang) => {
           const listReply = await Reply.find({ commentId: data.commentId, userId: { $nin: listUser } });
           if (listReply.length > 0) {
             userIds = map(listReply, 'userId');
+            tmpUser = map(listReply, 'userId');
           }
+          tmpUser.push(receiverIds);
         } else {//first reply (2)
           const lstReply = await Reply.find({ commentId: data.commentId,userId:{$nin:exceptUser} });
-          if (lstReply.length > 0) userIds = map(lstReply, 'userId');
+          if (lstReply.length > 0) {userIds = map(lstReply, 'userId'); tmpUser = map(lstReply, 'userId');}
         }
         break;
       }
@@ -212,8 +219,12 @@ const deleteTemplate = async (req, lang) => {
             notifyComment.commentId=data.commentId;
             notifyComment.isRead =false;
             await Notification.findByIdAndUpdate({_id:notifyComment._id},notifyComment);
+            result = notifyComment._id;
+            tmpUser.push(notifyComment.receiverId);
           }else{
-            await Notification.create(data);
+            const tmp=await Notification.create(data);
+            result = tmp._id;
+            tmpUser.push(data.receiverId);
           }
 
           break;
@@ -227,8 +238,12 @@ const deleteTemplate = async (req, lang) => {
             notifyReply.replyId = data.replyId;
             notifyReply.isRead=false;
             await Notification.findByIdAndUpdate({_id:notifyReply._id},notifyReply);
+            result = notifyReply._id;
+            tmpUser.push(notifyReply.receiverId);
           }else{
-            await Notification.create(data);
+            const rsNotify =await Notification.create(data);
+            result=rsNotify._id;
+            tmpUser.push(data.receiverId);
           }
           break;
         }
@@ -240,6 +255,7 @@ const deleteTemplate = async (req, lang) => {
           });
           if (listUser.length > 0) {
             userIds = map(listUser, 'userId');
+            tmpUser =map(listUser, 'userId');
           }
           break;
         } 
@@ -254,12 +270,22 @@ const deleteTemplate = async (req, lang) => {
         return {postId,groupId,senderId,templateId,commentId,replyId,receiverId};
       });
       const res = await Notification.insertMany(queue);
+      result=res[0]._id;
     }
+
+    const payload = await getNotify(result);
+    console.log(uniq(tmpUser));
+
+    socket.to(uniq(tmpUser)).emit(EVENT_NOTIFICATION_SSC.SEND_NOTIFICATION_SSC, {
+      data: payload.data,
+      msg: 'send notification room success',
+      status: 200,
+    });
 
     return {
       msg: msg.createNotify,
       statusCode: 200,
-      data: [],
+      data: result,
     };
   } catch (err) {
     return {
@@ -276,7 +302,7 @@ const deleteTemplate = async (req, lang) => {
  * 2.reply: ... đã phản hồi một bình luận bạn đang theo dõi
  * author Post .... và n người khác đã bình luận bài viết của bạn
  */
-const getNotify = async (userID, req, lang) => {
+const getNotifyByUserId = async (userID, req, lang) => {
   let perPage = 10;
   let { page = 1 } = req.query || {};
   const msg = getMsg(lang);
@@ -412,13 +438,44 @@ const readAllNotify = async (userID, req, lang) => {
   }
 };
 
+const getNotify = async (notifyId, lang) => {
+  const msg = getMsg(lang);
+  try {
+  
+    const notify =await Notification.findById({_id:notifyId});
+    if(notify)
+    {
+    const template = await notifyTemplate.findById({ _id:notify.templateId});
+    const profile = await Profile.findById({ _id: notify.senderId });
+    const group = await Group.findById({ _id: notify.groupId });
+    const groupName = group.nameEn||"";
+    const avatar =profile.avatar;
+    const contentEn = profile.fullname + ' ' + template.nameEn + ' ' + groupName;
+    const contentVi = profile.fullname + ' ' + template.nameVi + ' ' + groupName;
+    const result ={ notifyId, contentEn, contentVi, avatar };
+    return {
+      msg: msg.getNotify,
+      statusCode: 200,
+      data: result,
+    };
+  }
+  } catch (err) {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+
 module.exports = {
   createTemplate,
   getTemplate,
   updateTemplate,
   deleteTemplate,
   createNotify,
-  getNotify,
+  getNotifyByUserId,
   readNotify,
-  readAllNotify
+  readAllNotify,
+  getNotify
 };

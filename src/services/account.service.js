@@ -85,7 +85,6 @@ const signinService = async (req) => {
           data: {
             token,
             role: role.nameEn,
-            isAdminSG: data.isAdminSG,
             profile,
           },
         };
@@ -369,7 +368,6 @@ const deleteAccount = async (req) => {
       if (account) {
         let result ={...account._doc,deletedDate:moment().toDate()};
         result.isDelete = true;
-        result.isAdminSG=false;
         try {
           await Account.findOneAndUpdate({ _id: data._id },result);
         } catch {
@@ -458,6 +456,10 @@ const updateProfile = async (AccountId, req) => {
   let body = req.body || {};
   const msg = getMsg(req);
   try {
+    if(body._id)
+    {
+      AccountId=body._id;
+    }
     const res = await Profile.findById({ _id: AccountId });
     if (res) {
       await Profile.findOneAndUpdate({ _id: AccountId }, body);
@@ -468,7 +470,7 @@ const updateProfile = async (AccountId, req) => {
       };
     } else {
       return {
-        msg: msg.notFound.replace('%s', AccountId),
+        msg: msg.notFound.replace('%s', AccountId ),
         statusCode: 300,
       };
     }
