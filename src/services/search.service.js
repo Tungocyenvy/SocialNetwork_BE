@@ -3,6 +3,7 @@ const Group = require('../models/group.model');
 const userSubGroup = require('../models/user_subgroup.model');
 const userMainGroup = require('../models/user_maingroup.model');
 const Account = require('../models/account.model');
+const Post = require('../models/post.model');
 const { map, keyBy } = require('lodash');
 
 const I18n = require('../config/i18n');
@@ -245,9 +246,19 @@ const searchGroup = async (req, lang) => {
       isMain: false,
     });
     if (total > 0) {
-      result = await Group.find({ $or: [{ nameEn: key }, { nameVi: key }], isMain: false })
+      const group = await Group.find({ $or: [{ nameEn: key }, { nameVi: key }], isMain: false })
         .skip(perPage * page - perPage)
         .limit(perPage);
+
+      result =await Promise.all(group.map(async (item)=>{
+        const {_id,isMain,createdDate,cateId,image,nameEn,nameVi}=item||{};
+        const numMember = await userSubGroup.countDocuments({ groupId: _id });
+        const numPost = await Post.countDocuments({groupId:_id})
+
+        return{
+          groupId:_id,isMain,createdDate,cateId,image,nameEn,nameVi,numMember,numPost
+        };
+      }));
     }
     return {
       msg: msg.searchUser,
