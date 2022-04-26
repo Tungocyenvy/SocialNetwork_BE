@@ -48,7 +48,7 @@ const getId = (parentId, object, isComment) => {
   let lastedId = object[object.length - 1]._id;
   var str = lastedId.match(/[0-9]+$/)[0];
   //increment Id
-  var str2 = Number(str ? str[0] : 0) + 1;
+  var str2 = Number(str ? str : 0) + 1;
   if (str2 < 10) {
     _id = parentId + code + '0' + str2;
   } else {
