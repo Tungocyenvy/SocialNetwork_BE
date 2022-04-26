@@ -19,7 +19,7 @@ function MessageHandler(socket) {
       status: 200,
     });
     const receiverId= await getConversationId(payload.conversationId,payload.senderId);
-    const converOfflineId= "Chanel_offline_"+receiverId;
+    const converOfflineId= "Channel_offline_"+receiverId;
     socket.to(converOfflineId.trim()).emit(EVENT_MESSAGE_SSC.SEND_MESSAGE_OFFLINE_SSC, {
       data: {conversationId:payload.conversationId,userId:payload.senderId},
       msg: 'send mess room success',
