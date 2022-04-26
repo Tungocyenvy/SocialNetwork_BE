@@ -18,7 +18,7 @@ const getConversationId = async (userOne, userTwo) => {
   if (userOne.indexOf(sub) === 0 || userTwo.indexOf(sub) === 0) {
     if (userOne.indexOf(sub) !== 0) {
       //TH userOne is User, userTwo is admin
-      result = userOne + '' + userOne; //....admin
+      result = userOne + '' + userTwo; //....admin
     } else if (userTwo.indexOf(sub) !== 0) {
       //TH userOne is admin, userTwo is user
       result = userTwo + '' + userOne; //....admin
