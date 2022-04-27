@@ -328,6 +328,11 @@ const getNotifyByUserId = async (userID, req, lang) => {
     {$sort:{data:-1}}]) //sort for return
       .skip(perPage * page - perPage)
       .limit(perPage);
+
+    const countRead=await Notification
+    .aggregate([  { $match:{ "receiverId": userID,isRead:false}}, //sort for group by
+      { $group:{_id:{templateId:"$templateId",postId:"$postId",commentId:"$commentId"},
+      count : {$sum : 1}}}]);
  
 
     const notify =allNotify.map(x=>{
@@ -376,7 +381,7 @@ const getNotifyByUserId = async (userID, req, lang) => {
       }
       const contentEn = senderEn + ' ' + nameEn + ' ' + groupName;
       const contentVi = senderVi + ' ' + nameVi + ' ' + groupName;
-      return { notifyId:_id, contentEn, contentVi, avatar, isRead };
+      return { notifyId:_id, contentEn, contentVi, avatar, isRead,countRead:countRead.length };
 
     });
     return {

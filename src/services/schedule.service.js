@@ -68,4 +68,24 @@ cron.schedule('*/1 * * * * *', async () => {
     const notifyIds = map(notify,'_id');
     await Notification.deleteMany({_id:{$in:notifyIds}});
   }
+
+  //change student to alumni
+  const alumni = await Account.find({isAlumni:true});
+  if(alumni.length>0)
+  {
+    const alumniIds= map(alumni,'_id');
+    await Profile.updateMany({
+      _id: { $in: alumniIds }
+    }, { $set: { faculty: "alumni" } });
+
+    const data = alumniIds.map(x=>{
+      return {userId:x,groupId:"alumni"}
+    })
+    await userMainGroup.deleteMany({userId:{$in:alumniIds}});
+    await userMainGroup.insertMany(data);
+    // await userMainGroup.updateMany({
+    //   userId: { $in: alumniIds }
+    // }, { $set: { groupId: "alumni" } });
+
+  }
 });

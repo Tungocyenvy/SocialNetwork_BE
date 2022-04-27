@@ -10,6 +10,7 @@ router.delete('/', groupController.deleteGroup);
 router.get('/main/fac', groupController.getListFaculty);
 router.post('/main/fac', groupController.createFaculty);
 router.put('/main/fac', groupController.updateFaculty);
+router.put('/user/alumni', groupController.changetoAlumni);
 
 //sendNotify for maingroup
 router.post('/main/notify', groupController.sendNotifyForMainGroup);

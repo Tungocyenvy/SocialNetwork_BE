@@ -26,7 +26,8 @@
     "notHaveAccount": "Don't have any account!",
     "getListAccount": "Get list account successful!",
     "NotHaveGroup":"Don't have any group!",
-    "checkAdminSG":"Get list group successful!"
+    "checkAdminSG":"Get list group successful!",
+    "changetoAlumni":"Change the student status to alumni successful"
   },
   "category": {
     "notFound": "Don't have any category!",

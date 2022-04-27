@@ -88,6 +88,7 @@ const signinService = async (req) => {
             token,
             role: role.nameEn,
             profile,
+            isAlumni:data.isAlumni
           },
         };
       } else {

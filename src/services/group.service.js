@@ -426,6 +426,8 @@ const createSubGroup = async (userId, body, lang) => {
 };
 
 const getAllGroup = async (req, lang) => {
+  let{page} = req.query||-1;
+  let perPage = 10;
   const msg = getMsg(lang);
   try {
     let total = await Group.countDocuments({ isMain: false });
@@ -437,7 +439,16 @@ const getAllGroup = async (req, lang) => {
       };
     }
 
-    const result = await Group.find({ isMain: false })
+    let result =[];
+    if(page===-1)
+    {
+      result = await Group.find({ isMain: false })
+    }else{
+      result = await Group.find({ isMain: false })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+    }
+
 
     return {
       msg: msg.getSub,
@@ -500,12 +511,12 @@ const getRelativeGroup = async (UserID, req, lang) => {
         };
       }
       const result =await Promise.all(lstGroup.map(async (item)=>{
-        const {_id,isMain,createdDate,cateId,image,nameEn,nameVi}=item||{};
+        const {_id,isMain,createdDate,cateId,image,nameEn,nameVi,description}=item||{};
         const numMember = await userSubGroup.countDocuments({ groupId: _id });
         const numPost = await Post.countDocuments({groupId:_id})
 
         return{
-          _id,isMain,createdDate,cateId,image,nameEn,nameVi,numMember,numPost
+          _id,isMain,createdDate,cateId,image,nameEn,nameVi,description,numMember,numPost
         };
       }));
       
@@ -664,11 +675,11 @@ const getGroupByUserId = async (UserID, req, lang) => {
       const objGroup = keyBy(lstGroup, '_id');
       result =await Promise.all( group.map(async (item) => {
         const { groupId, isAdmin } = item||{};
-        const { nameEn, nameVi, createdDate, cateId, image } =
+        const { nameEn, nameVi, createdDate, cateId, image,description } =
           objGroup[groupId]||{};
         const numMember = await userSubGroup.countDocuments({ groupId: groupId });
         const numPost = await Post.countDocuments({groupId:groupId})
-        return { groupId, nameEn, nameVi, createdDate, cateId, image, isAdmin,numMember, numPost};
+        return { groupId, nameEn, nameVi, createdDate, cateId, image,description, isAdmin,numMember, numPost};
       }));
       return {
         msg: msg.getSub,
@@ -837,6 +848,32 @@ const getListGroupForAminSub = async (UserID,req,lang) => {
     }
 };
 
+//delete user from MainGroup
+const changetoAlumni = async (body, lang) => {
+  let { userIds } = body || {};
+  const msg = getMsg(lang);
+  try {
+    if (!userIds) {
+      return {
+        msg: msg.validator,
+        statusCode: 300,
+      };
+    }
+    await Account.updateMany({
+      _id: { $in: userIds }
+    }, { $set: { isAlumni: true } });
+    return {
+      msg: msg.changetoAlumni,
+      statusCode: 200,
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -857,5 +894,6 @@ module.exports = {
   checkAdminforSub,
   getFacultyByUserId,
   deleteGroup,
-  getListGroupForAminSub
+  getListGroupForAminSub,
+  changetoAlumni
 };

@@ -11,6 +11,7 @@ const GroupSchema = new schema({
   nameVi: { type: String, required: true },
   isMain: { type: Boolean, default: false },
   cateId: { type: String, required: true, default: 'none' },
+  description: { type: String, required: true, default: 'none' },
   image: { type: String, required: true, default: imageDefault },
   countReport:{ type: Number, required: true, default:0 },
   createdDate: {
