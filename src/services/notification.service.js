@@ -275,7 +275,7 @@ const deleteTemplate = async (req, lang) => {
       result=res[0]._id;
     }
 
-    let payload = (await getNotify(result)).data;
+    let payload = (await getNotify(result)).data||{};
     payload.userIds=uniq(tmpUser)||[];
 
     if (payload.userIds.length > 0) {

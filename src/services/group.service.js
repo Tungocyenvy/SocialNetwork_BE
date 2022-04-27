@@ -466,15 +466,15 @@ const getRelativeGroup = async (UserID, req, lang) => {
       groupIds = map(listGroup, 'groupId');
     }
     const group = count > 0 ? await Group.find({ _id: { $in: groupIds } }) : [];
-    const cateIds = map(group, 'cateId') || '6247e027aafeb586cb35c956';
+    const cateIds = map(group, 'cateId') || '6268190295d62b5930d5efc1';
 
     let total = await Group.countDocuments({
       isMain: false,
       cateId: { $in: cateIds },
       _id: { $nin: groupIds },
     });
-    if (total > 0) {
-      const group = await Group.find({
+    // if (total > 0) {
+      let lstGroup = await Group.find({
         isMain: false,
         cateId: { $in: cateIds },
         _id: { $nin: groupIds },
@@ -482,7 +482,24 @@ const getRelativeGroup = async (UserID, req, lang) => {
         .skip(perPage * page - perPage)
         .limit(perPage);
 
-      const result =await Promise.all(group.map(async (item)=>{
+      if(lstGroup.length<=0)
+      {
+        lstGroup = await Group.find({
+          isMain: false,
+          _id: { $nin: groupIds },
+        })
+          .skip(perPage * page - perPage)
+          .limit(perPage);
+      }
+
+      if(lstGroup.length<=0){
+        return {
+          msg: msg.getRalative,
+          statusCode: 200,
+          data: [],
+        };
+      }
+      const result =await Promise.all(lstGroup.map(async (item)=>{
         const {_id,isMain,createdDate,cateId,image,nameEn,nameVi}=item||{};
         const numMember = await userSubGroup.countDocuments({ groupId: _id });
         const numPost = await Post.countDocuments({groupId:_id})
@@ -498,13 +515,13 @@ const getRelativeGroup = async (UserID, req, lang) => {
         statusCode: 200,
         data: { total, result },
       };
-    } else {
-      return {
-        msg: msg.getRalative,
-        statusCode: 200,
-        data: [],
-      };
-    }
+    // } else {
+    //   return {
+    //     msg: msg.getRalative,
+    //     statusCode: 200,
+    //     data: [],
+    //   };
+    // }
   } catch {
     return {
       msg: msg.err,
@@ -769,6 +786,7 @@ const deleteGroup = async (req, lang) => {
       await Notification.deleteMany({ groupId: groupId });
       await Notify.deleteMany({ groupId: groupId});
       await Group.findByIdAndDelete({_id:groupId});
+      await userSubGroup.deleteMany({ groupId: groupId});
       return {
         msg: msg.deleteGroup,
         statusCode: 200,

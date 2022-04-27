@@ -577,7 +577,7 @@ const checkAdminSG = async (UserID,req) => {
     try {
       let isAdmin=false;
       const group = await UserSubGroup.countDocuments({userId:UserID,isAdmin:true});
-      if(group.length>0)
+      if(group>0)
       {
         isAdmin=true;
       }
