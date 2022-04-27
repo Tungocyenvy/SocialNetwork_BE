@@ -27,7 +27,7 @@
     "getListAccount": "Get list account successful!",
     "NotHaveGroup":"Don't have any group!",
     "checkAdminSG":"Get list group successful!",
-    "changetoAlumni":"Change the student status to alumni successful"
+    "addAOC":"Add Area of Concern successful!"
   },
   "category": {
     "notFound": "Don't have any category!",
@@ -100,7 +100,8 @@
     "errChangeAdmin" :"You're the only admin on the group, you must assign another admin before removing yoursel!",
     "checkAdmin" :"Check admin is successful!",
     "notFoundUser":"Profile's user not found!",
-    "deleteGroup":"Delete group successful!"
+    "deleteGroup":"Delete group successful!",
+    "changetoAlumni":"Change the student status to alumni successful!"
   },
   "jwt": {
     "noProvided": "No token provided!",

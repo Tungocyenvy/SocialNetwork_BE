@@ -82,6 +82,19 @@ const addUser = async (body, lang) => {
         }
         delete data.isStudent;
         await userSubGroup.create(data);
+        const group = await Group.findById({_id:groupId});
+        const cateId= group.cateId;
+        if(account.aoc[0]==="none")
+        {
+          account.aoc=cateId;
+        }
+        else{
+          if(!account.aoc.includes(cateId))
+          {
+            account.aoc.push(cateId);
+          }
+        }
+        await Account.findByIdAndUpdate({_id:userId},account);
       }
       return {
         msg: msg.group.replace('%s', userId),
@@ -410,6 +423,20 @@ const createSubGroup = async (userId, body, lang) => {
         const isAdmin = true;
         let dataUser = { userId, groupId, isAdmin };
         await userSubGroup.create(dataUser);
+
+        const account = await Account.findById({_id:userId});
+        const cateId= data.cateId;
+        if(account.aoc[0]==="none")
+        {
+          account.aoc=cateId;
+        }
+        else{
+          if(!account.aoc.includes(cateId))
+          {
+            account.aoc.push(cateId);
+          }
+        }
+        await Account.findByIdAndUpdate({_id:userId},account);
         return {
           msg: msg.createSub,
           statusCode: 200,
@@ -465,7 +492,7 @@ const getAllGroup = async (req, lang) => {
 
 const getRelativeGroup = async (UserID, req, lang) => {
   let { page = 1 } = req.query || {};
-  let perPage = 2;
+  let perPage = 3;
   const msg = getMsg(lang);
   try {
     req.query.isAll = true;
@@ -476,8 +503,11 @@ const getRelativeGroup = async (UserID, req, lang) => {
     if (count > 0) {
       groupIds = map(listGroup, 'groupId');
     }
-    const group = count > 0 ? await Group.find({ _id: { $in: groupIds } }) : [];
-    const cateIds = map(group, 'cateId') || '6268190295d62b5930d5efc1';
+    const account = await Account.findById({_id:UserID});
+    let cateIds='6268190295d62b5930d5efc1';
+    if(account.aoc.length>0 &&account.aoc[0]!=="none" ){
+      cateIds=account.aoc;
+    }
 
     let total = await Group.countDocuments({
       isMain: false,
@@ -495,6 +525,11 @@ const getRelativeGroup = async (UserID, req, lang) => {
 
       if(lstGroup.length<=0)
       {
+        total = await Group.countDocuments({
+          isMain: false,
+          _id: { $nin: groupIds },
+        });
+
         lstGroup = await Group.find({
           isMain: false,
           _id: { $nin: groupIds },

@@ -81,6 +81,11 @@ const signinService = async (req) => {
           };
         }
         //const token = data.Token;
+        isSurvey=false;
+        if(data.aoc.length>0)
+        {
+          isSurvey=true;
+        }
         return {
           msg: msg.login,
           statusCode: 200,
@@ -88,7 +93,8 @@ const signinService = async (req) => {
             token,
             role: role.nameEn,
             profile,
-            isAlumni:data.isAlumni
+            isAlumni:data.isAlumni,
+            isSurvey
           },
         };
       } else {
@@ -595,6 +601,25 @@ const checkAdminSG = async (UserID,req) => {
     }
 };
 
+const addAOC = async (userID,req) => {
+  const msg = getMsg(req);
+  // check account
+    try {
+      let data= req.body.cateId||["none"];
+      await Account.findByIdAndUpdate({_id:userID},{aoc:data});
+      return {
+        msg: msg.addAOC,
+        statusCode: 200,
+        data: {}
+      };
+    } catch {
+      return {
+        msg: msg.err,
+        statusCode: 300,
+      };
+    }
+};
+
 module.exports = {
   signinService,
   forgotPassword,
@@ -607,5 +632,6 @@ module.exports = {
   changePassword,
   getListAccount,
   verifyPhoneNumber,
-  checkAdminSG
+  checkAdminSG,
+  addAOC
 };

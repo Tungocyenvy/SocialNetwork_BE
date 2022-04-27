@@ -154,6 +154,19 @@ const checkAdminSG = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const addAOC = async (req, res, next) => {
+  const userID = req.value.body.token.data;
+  const resService = await accountService.addAOC(userID,req);
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 
 module.exports = {
   signin,
@@ -167,5 +180,6 @@ module.exports = {
   changePassword,
   getListAccount,
   verifyPhoneNumber,
-  checkAdminSG
+  checkAdminSG,
+  addAOC
 };

@@ -22,5 +22,6 @@ router.put('/profile', jwt.verify, accountController.updateProfile);
 router.get('/search', searchController.searchUser);
 
 router.get('/admin',jwt.verify, accountController.checkAdminSG);
+router.post('/aoc',jwt.verify, accountController.addAOC);
 
 module.exports = router;

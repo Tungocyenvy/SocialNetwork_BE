@@ -26,7 +26,8 @@
     "notHaveAccount": "Không có tài khoản nào trong nhóm này!",
     "getListAccount": "Lấy danh sách tài khoản thành công!",
     "NotHaveGroup":"Không có group nào!",
-    "checkAdminSG":"Lấy danh sách thông tin thành công!"
+    "checkAdminSG":"Lấy danh sách thông tin thành công!",
+    "addAOC":"Thêm lĩnh vực quan tâm thành công!"
   },
   "category": {
     "notFound": "Không có danh mục!",

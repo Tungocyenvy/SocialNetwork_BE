@@ -8,6 +8,7 @@ const AccountSchema = new schema({
   roleId: { type: Number, required: true },
   isDelete: { type: Boolean, required: true, default: false },
   isAlumni :{ type: Boolean, required: true, default: false },
+  aoc: { type: Array,default:null},
   deletedDate: { type: Date},
 });
 
