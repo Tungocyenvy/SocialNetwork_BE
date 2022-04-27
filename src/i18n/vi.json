@@ -24,7 +24,9 @@
     "getProfile": "Lấy thông tin người dùng thành công!",
     "updateProfile": "Cập nhập thông tin thành công!",
     "notHaveAccount": "Không có tài khoản nào trong nhóm này!",
-    "getListAccount": "Lấy danh sách tài khoản thành công!"
+    "getListAccount": "Lấy danh sách tài khoản thành công!",
+    "NotHaveGroup":"Không có group nào!",
+    "checkAdminSG":"Lấy danh sách thông tin thành công!"
   },
   "category": {
     "notFound": "Không có danh mục!",

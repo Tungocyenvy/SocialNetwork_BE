@@ -277,6 +277,20 @@ const deleteGroup = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const getListGroupForAminSub = async (req, res, next) => {
+  const UserID = req.value.body.token.data;
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.getListGroupForAminSub(UserID,req, lang);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
 
 module.exports = {
   addUser,
@@ -297,5 +311,6 @@ module.exports = {
   getDetailGroup,
   checkAdminforSub,
   getFacultyByUserId,
-  deleteGroup
+  deleteGroup,
+  getListGroupForAminSub
 };

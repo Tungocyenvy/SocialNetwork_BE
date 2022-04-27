@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const Account = require('../models/account.model');
 const Profile = require('../models/profile.model');
 const Role = require('../models/role.model');
+const UserSubGroup = require('../models/user_subgroup.model');
+const Group = require('../models/group.model');
 const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
 const moment = require('moment');
@@ -569,6 +571,28 @@ const verifyPhoneNumber = async (req) => {
 };
 
 
+const checkAdminSG = async (UserID,req) => {
+  const msg = getMsg(req);
+  // check account
+    try {
+      let isAdmin=false;
+      const group = await UserSubGroup.countDocuments({userId:UserID,isAdmin:true});
+      if(group.length>0)
+      {
+        isAdmin=true;
+      }
+      return {
+        msg: msg.checkAdminSG,
+        statusCode: 200,
+        data: isAdmin
+      };
+    } catch {
+      return {
+        msg: msg.err,
+        statusCode: 300,
+      };
+    }
+};
 
 module.exports = {
   signinService,
@@ -581,5 +605,6 @@ module.exports = {
   updateProfile,
   changePassword,
   getListAccount,
-  verifyPhoneNumber
+  verifyPhoneNumber,
+  checkAdminSG
 };

@@ -788,6 +788,37 @@ const deleteGroup = async (req, lang) => {
   }
 }
 
+const getListGroupForAminSub = async (UserID,req,lang) => {
+  const msg = getMsg(lang);
+  // check account
+    try {
+      let result=[];
+      let total=0;
+      const group = await userSubGroup.find({userId:UserID,isAdmin:true});
+      if(group.length<=0)
+      {
+        return {
+          msg: msg.notHaveSubGr,
+          statusCode: 200,
+          data: {total,result}
+        };
+      }
+      groupIds=map(group,'groupId');
+      result = await Group.find({_id:{$in:groupIds}});
+      total = result.length;
+      return {
+        msg: msg.getSub,
+        statusCode: 200,
+        data: {total,result}
+      };
+    } catch {
+      return {
+        msg: msg.err,
+        statusCode: 300,
+      };
+    }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -807,5 +838,6 @@ module.exports = {
   getDetailGroup,
   checkAdminforSub,
   getFacultyByUserId,
-  deleteGroup
+  deleteGroup,
+  getListGroupForAminSub
 };

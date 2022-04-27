@@ -141,6 +141,20 @@ const verifyPhoneNumber = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const checkAdminSG = async (req, res, next) => {
+  const userID = req.value.body.token.data;
+  const resService = await accountService.checkAdminSG(userID,req);
+  if (resService.statusCode === 200 || resService.statusCode === 201)
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+
 module.exports = {
   signin,
   forgotPass,
@@ -152,5 +166,6 @@ module.exports = {
   recoveryAccount,
   changePassword,
   getListAccount,
-  verifyPhoneNumber
+  verifyPhoneNumber,
+  checkAdminSG
 };

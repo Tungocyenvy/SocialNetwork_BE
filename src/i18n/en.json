@@ -24,7 +24,9 @@
     "getProfile": "Get user profile successful!",
     "updateProfile": "Update user profile successful!",
     "notHaveAccount": "Don't have any account!",
-    "getListAccount": "Get list account successful!"
+    "getListAccount": "Get list account successful!",
+    "NotHaveGroup":"Don't have any group!",
+    "checkAdminSG":"Get list group successful!"
   },
   "category": {
     "notFound": "Don't have any category!",

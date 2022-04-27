@@ -21,6 +21,6 @@ router.put('/profile', jwt.verify, accountController.updateProfile);
 //search
 router.get('/search', searchController.searchUser);
 
-//EXCEL
+router.get('/admin',jwt.verify, accountController.checkAdminSG);
 
 module.exports = router;
