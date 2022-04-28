@@ -213,7 +213,7 @@ const sendNotifyForMainGroup = async (body, lang) => {
 
 const getListFaculty = async (req, lang) => {
   let perPage = 10;
-  let { isAll = true, page = 1 } = req.query || {};
+  let { isAll = 'true', page = 1 } = req.query || {};
   const msg = getMsg(lang);
   try {
     const total = await Group.countDocuments({ isMain: true });
@@ -224,7 +224,7 @@ const getListFaculty = async (req, lang) => {
         data:{result:[],total}
       };
     }
-    if (isAll===true) perPage = total;
+    if (isAll==='true') perPage = total;
     const listGroupMain = await Group.find({ isMain: true, _id:{$nin:['grsv','grgv']} })
       .sort({_id:-1})
       .skip(perPage * page - perPage)
@@ -500,7 +500,7 @@ const getRelativeGroup = async (UserID, req, lang) => {
   let perPage = 3;
   const msg = getMsg(lang);
   try {
-    req.query.isAll = true;
+    req.query.isAll = 'true';
     const rs = (await getGroupByUserId(UserID, req, lang)).data;
     const count = rs.total;
     const listGroup = rs.result;
@@ -687,14 +687,14 @@ const getListUser = async (req, lang) => {
 };
 
 const getGroupByUserId = async (UserID, req, lang) => {
-  let { page = 1, isAll = false } = req.query || {};
+  let { page = 1, isAll = 'false' } = req.query || {};
   let perPage = 5;
   const msg = getMsg(lang);
   try {
     let total = await userSubGroup.countDocuments({ userId: UserID });
     let result = [];
     if (total > 0) {
-      if (isAll === true) {
+      if (isAll === 'true') {
         perPage = total;
         page = 1;
       }

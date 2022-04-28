@@ -12,7 +12,7 @@ const getMsg = (req) => {
 const getCategoryGroup = async (req, lang) => {
   let { isDelete } = req.params || false;
   let perPage = 10;
-  let { isAll = true, page = 1 } = req.query || {};
+  let { isAll = 'true', page = 1 } = req.query || {};
   const msg = getMsg(lang);
 
   try {
@@ -25,7 +25,7 @@ const getCategoryGroup = async (req, lang) => {
       };
     }
 
-    if (isAll) perPage = total;
+    if (isAll==='true') perPage = total;
 
     const result = await CategoryGroup.find({ isDelete: isDelete })
       .skip(perPage * page - perPage)
