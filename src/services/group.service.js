@@ -419,6 +419,7 @@ const createSubGroup = async (userId, body, lang) => {
         nameVi: body.name,
         cateId: body.cateId ? body.cateId : 'none',
         image: body.image ? body.image : imageDefault,
+        description:body.description
       });
       const res = await data.save();
 
