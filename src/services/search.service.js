@@ -261,7 +261,7 @@ const searchGroup = async (req, lang) => {
         const numPost = await Post.countDocuments({groupId:_id})
 
         return{
-          groupId:_id,isMain,createdDate,cateId,image,nameEn,nameVi,numMember,numPost,postPerWeek: getDaystoNow(createdDate,numPost)
+          groupId:_id,isMain,createdDate,cateId,image,nameEn,nameVi,numMember,numPost,postPerWeek: getWeekstoNow(createdDate,numPost)
         };
       }));
     }
