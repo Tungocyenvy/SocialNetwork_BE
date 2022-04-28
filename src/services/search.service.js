@@ -21,6 +21,11 @@ const removeVN = (Text) => {
     .replace(/Đ/g, 'D');
 };
 
+const getWeekstoNow=(day,numPost)=>{
+  const weeks=Math.ceil(moment.duration(moment().diff(moment(day))).asWeeks());
+  return Math.ceil(numPost/weeks);
+}
+
 const transferProfile = (profile) => {
   const { _id, fullname, avatar, dob, address, email, phone, year, faculty } = profile||{};
   return {
@@ -256,7 +261,7 @@ const searchGroup = async (req, lang) => {
         const numPost = await Post.countDocuments({groupId:_id})
 
         return{
-          groupId:_id,isMain,createdDate,cateId,image,nameEn,nameVi,numMember,numPost
+          groupId:_id,isMain,createdDate,cateId,image,nameEn,nameVi,numMember,numPost,postPerWeek: getDaystoNow(createdDate,numPost)
         };
       }));
     }

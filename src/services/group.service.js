@@ -19,6 +19,10 @@ const getMsg = (req) => {
   return (msg = I18n.__('group'));
 };
 
+const getWeekstoNow=(day,numPost)=>{
+  const weeks=Math.ceil(moment.duration(moment().diff(moment(day))).asWeeks());
+  return Math.ceil(numPost/weeks);
+}
 // const checkGroup= async (body) =>{
 //     let {group}=body;
 //     if(!group)
@@ -548,10 +552,9 @@ const getRelativeGroup = async (UserID, req, lang) => {
       const result =await Promise.all(lstGroup.map(async (item)=>{
         const {_id,isMain,createdDate,cateId,image,nameEn,nameVi,description}=item||{};
         const numMember = await userSubGroup.countDocuments({ groupId: _id });
-        const numPost = await Post.countDocuments({groupId:_id})
-
+        const numPost = await Post.countDocuments({groupId:_id});
         return{
-          _id,isMain,createdDate,cateId,image,nameEn,nameVi,description,numMember,numPost
+          _id,isMain,createdDate,cateId,image,nameEn,nameVi,description,numMember,numPost,postPerWeek: getWeekstoNow(createdDate,numPost),
         };
       }));
       
@@ -714,7 +717,7 @@ const getGroupByUserId = async (UserID, req, lang) => {
           objGroup[groupId]||{};
         const numMember = await userSubGroup.countDocuments({ groupId: groupId });
         const numPost = await Post.countDocuments({groupId:groupId})
-        return { groupId, nameEn, nameVi, createdDate, cateId, image,description, isAdmin,numMember, numPost};
+        return { groupId, nameEn, nameVi, createdDate, cateId, image,description, isAdmin,numMember, numPost,postPerWeek: getWeekstoNow(createdDate,numPost)};
       }));
       return {
         msg: msg.getSub,
