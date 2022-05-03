@@ -12,6 +12,7 @@ const Reply = require('../models/reply.model');
 const Notification =require('../models/notification.model');
 const { map, keyBy, groupBy } = require('lodash');
 const I18n = require('../config/i18n');
+const { post } = require('../routers/account.router');
 
 const getMsg = (req) => {
   let lang = req || 'en';
@@ -62,6 +63,7 @@ const createPost = async (userID, body, lang) => {
       author: userID,
       groupId,
       isMainGroup: body.isMainGroup,
+      categoryId: body.categoryId||null
     });
 
     const res = await newPost.save();
@@ -125,7 +127,7 @@ const createPost = async (userID, body, lang) => {
 const getListPostByUserId = async (userId, req, lang) => {
   let { groupId } = req.params || {};
   let perPage = 10;
-  let { isStudent = true, page = 1 } = req.query || {};
+  let { isStudent = true, page = 1,categoryId="62711cb8442b05ae533b8e60" } = req.query || {};
   const msg = getMsg(lang);
   try {
 
@@ -143,19 +145,44 @@ const getListPostByUserId = async (userId, req, lang) => {
           representId = represent.userId;
         }
       }
-      total = await NotifyMainGroup.countDocuments({
-        userId: representId,
-        groupId: groupId
-      });
+      if (groupId === 'grsv') {
+        total = await Post.countDocuments({
+          categoryId: categoryId,
+          groupId: groupId
+        });
+      }
+      else {
+        total = await NotifyMainGroup.countDocuments({
+          userId: representId,
+          groupId: groupId
+        });
+      }
       if (total > 0) {
-        const lstNotify =await NotifyMainGroup.find({userId: representId,groupId: groupId})
+        let lstNotify=[];
+        let listPost=[];
+        let postIds=[];
+        if(groupId === 'grsv')
+        {
+          listPost= await Post.find({
+            categoryId: categoryId,
+            groupId: groupId
+          }).sort({
+            createdDate: -1,
+          }).skip(perPage * page - perPage).limit(perPage);
+
+          postIds= map(listPost,'_id');
+          lstNotify =await NotifyMainGroup.find({userId: representId,postId: {$in:postIds}});
+        }
+        else{
+        lstNotify =await NotifyMainGroup.find({userId: representId,groupId: groupId})
         .sort({
           createdDate: -1,
         }).skip(perPage * page - perPage).limit(perPage);
 
         //get top 10 post
-        const postIds = map(lstNotify, 'postId');
-        const listPost = await Post.find({ _id: { $in: postIds } });
+        postIds = map(lstNotify, 'postId');
+        listPost = await Post.find({ _id: { $in: postIds } });
+      }
         const objPost = keyBy(listPost, '_id');
 
         //get profile author [fullname, avatar]

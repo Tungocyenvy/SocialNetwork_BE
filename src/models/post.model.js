@@ -10,6 +10,7 @@ const PostSchema = new schema({
   groupId: { type: String, require: true },
   isMainGroup: { type: Boolean, default: true },
   countReport:{ type: Number, required: true, default:0 },
+  categoryId:{ type: String, required: true, default:null },
   createdDate: {
     type: Date,
     default: Date.now,

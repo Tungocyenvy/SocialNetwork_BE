@@ -1,5 +1,6 @@
 const CategoryGroup = require('../models/category_group.model');
 const CategoryReport = require('../models/category_report.model');
+const CategoryPost = require('../models/category_post.model');
 const I18n = require('../config/i18n');
 
 const getMsg = (req) => {
@@ -201,6 +202,98 @@ const createCategoryReport = async (body, lang) => {
   }
 };
 
+//CATEGORY FOR POST (MAIN NOTIFY)
+const getCategoryPost = async (req, lang) => {
+  let { isDelete = false } = req.params || {};
+  const msg = getMsg(lang);
+  try {
+    const result = await CategoryPost.find({ isDelete: isDelete });
+    if (result.length <= 0) {
+      return {
+        msg: msg.notFound,
+        statusCode: 200,
+        data: [],
+      };
+    }
+    return {
+      msg: msg.getCate,
+      statusCode: 200,
+      data: result,
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+const updateCategoryPost = async (body, lang) => {
+  const msg = getMsg(lang);
+  try {
+    const checkName = await CategoryPost.find({
+      $or: [{ nameEn: body.nameEn }, { nameVi: body.nameVi }],
+      _id: { $nin: body._id },
+    });
+    if (checkName.length > 0) {
+      return {
+        msg: msg.exists,
+        statusCode: 300,
+      };
+    }
+    const res = await CategoryPost.findByIdAndUpdate({ _id: body._id }, body);
+    if (res) {
+      let rsMsg = msg.updateCate;
+      if (body.isDelete != null) {
+        if (body.isDelete == true) {
+          rsMsg = msg.deleteCate;
+        } else {
+          rsMsg = msg.recoveryCate;
+        }
+      }
+      const result = await CategoryPost.findById({ _id: body._id });
+      return {
+        msg: rsMsg,
+        statusCode: 200,
+        data: result,
+      };
+    }
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+const createCategoryPost = async (body, lang) => {
+  const msg = getMsg(lang);
+  try {
+    const checkName = await CategoryPost.find({
+      $or: [{ nameEn: body.nameEn }, { nameVi: body.nameVi }],
+    });
+    if (checkName.length > 0) {
+      return {
+        msg: msg.exists,
+        statusCode: 300,
+      };
+    }
+    const res = await CategoryPost.create(body);
+    if (res) {
+      return {
+        msg: msg.createCate,
+        statusCode: 200,
+        data: res,
+      };
+    }
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   getCategoryGroup,
   updateCategoryGroup,
@@ -208,4 +301,7 @@ module.exports = {
   getCategoryReport,
   updateCategoryReport,
   createCategoryReport,
+  getCategoryPost,
+  updateCategoryPost,
+  createCategoryPost
 };

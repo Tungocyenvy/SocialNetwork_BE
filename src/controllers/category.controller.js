@@ -86,6 +86,50 @@ const createCategoryReport = async (req, res, next) => {
   }
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
+
+//REPORT
+const getCategoryPost = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.getCategoryPost(req, lang);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const updateCategoryPost = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.updateCategoryPost(req.body, lang);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
+const createCategoryPost = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
+  const resService = await categoryService.createCategoryPost(req.body, lang);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   getCategoryGroup,
   updateCategoryGroup,
@@ -93,4 +137,7 @@ module.exports = {
   getCategoryReport,
   updateCategoryReport,
   createCategoryReport,
+  getCategoryPost,
+  createCategoryPost,
+  updateCategoryPost
 };
