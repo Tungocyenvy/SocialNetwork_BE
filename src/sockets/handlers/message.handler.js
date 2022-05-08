@@ -4,8 +4,8 @@ const message = require('../../services/message.service');
 const conversation = require('../../services/conversation.service');
 
 const getConversationId = async (conversationId, senderId) => {
- 
-  return (conversationId+'').replace(senderId,'');;
+
+  return (conversationId + '').replace(senderId, '');;
 };
 
 function MessageHandler(socket) {
@@ -18,10 +18,13 @@ function MessageHandler(socket) {
       msg: 'send mess room success',
       status: 200,
     });
-    const receiverId= await getConversationId(payload.conversationId,payload.senderId);
-    const converOfflineId= "Channel_offline_"+receiverId;
+    const receiverId = await getConversationId(payload.conversationId, payload.senderId);
+    const converOfflineId = "Channel_offline_" + receiverId;
     socket.to(converOfflineId.trim()).emit(EVENT_MESSAGE_SSC.SEND_MESSAGE_OFFLINE_SSC, {
-      data: {conversationId:payload.conversationId,userId:payload.senderId},
+      data: {
+        conversationId: payload.conversationId,
+        userId: payload.senderId
+      },
       msg: 'send mess room success',
       status: 200,
     });
