@@ -14,18 +14,18 @@ function NotificationHandler(socket) {
     });
   };
 
-  listens[EVENT_NOTIFICATION_CSS.JOIN_ROOM_CSS] = async (payload) => {
+  listens[EVENT_NOTIFICATION_CSS.JOIN_ROOM_NOTIFICATION_CSS] = async (payload) => {
     socket.join(payload._id);
-    socket.to(payload._id).emit(EVENT_NOTIFICATION_SSC.JOIN_ROOM_SSC, {
+    socket.to(payload._id).emit(EVENT_NOTIFICATION_SSC.JOIN_ROOM_NOTIFICATION_SSC, {
       data: payload,
       msg: 'joined room success',
       status: 200,
     });
   };
 
-  listens[EVENT_NOTIFICATION_CSS.LEAVE_ROOM_CSS] = (payload) => {
+  listens[EVENT_NOTIFICATION_CSS.LEAVE_ROOM_NOTIFICATION_CSS] = (payload) => {
     socket.leave(payload._id);
-    socket.to(payload._id).emit(EVENT_NOTIFICATION_SSC.LEAVE_ROOM_SSC, {
+    socket.to(payload._id).emit(EVENT_NOTIFICATION_SSC.LEAVE_ROOM_NOTIFICATION_SSC, {
       data: null,
       msg: 'leave room success',
       status: 200,
