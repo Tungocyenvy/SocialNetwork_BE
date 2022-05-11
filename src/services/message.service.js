@@ -83,6 +83,7 @@ const getMessage = async (req, userId, lang) => {
       lstMessage = message.map((x) => {
         var objMessage = {};
         objMessage.data = x.data||{};
+        objMessage.type= x.type;
         objMessage.isAuth = x.senderId === userId ? true : false;
         return objMessage;
       });
