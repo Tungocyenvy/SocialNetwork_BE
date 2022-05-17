@@ -14,7 +14,7 @@
     "incorrectConfirm": "Mật khẩu xác nhận không chính xác!",
     "errAddProfile": "Lỗi trong quá trình tạo thông tin cho người dùng %s!",
     "errHashPass": "Lỗi trong quá trình hash mật khẩu cho người dùng %s!",
-    "arrAddAccount": "Lỗi trong quá trình tạo account cho người dùng %s!",
+    "arrAddAccount": "Lỗi trong quá trình tạo tài khoản cho người dùng %s!",
     "faculty": "Không tìm thấy khoa của người dùng %s!",
     "group": "Lỗi trong quá trình thêm người dùng %s vào nhóm %s !",
     "signup": "Đăng ký tài khoản thành công!",
@@ -150,7 +150,8 @@
   "search": {
     "searchUser": "tìm kiếm thành công!",
     "err": "Xảy ra lỗi trong quá trình xử lý!",
-    "notHaveUser": "Không có người dùng nào !"
+    "notHaveUser": "Không có người dùng nào !",
+    "notHaveComapny": "Không có doanh nghiệp nào!"
   },
   "notify": {
     "validator": "Không có dữ liệu đầu vào!",
@@ -168,5 +169,11 @@
     "readNotify": "Đổi trạng thái đã đọc thông báo thành công!",
     "notFound":"Không tìm thấy thông báo!",
     "deleteNotify":"Xóa thông báo thành công!"
+  },
+  "company":{
+    "signup": "Đăng ký tài khoản thành công!",
+    "arrAddAccount": "Lỗi trong quá trình tạo tài khoản cho doanh nghiệp %s!",
+    "errHashPass": "Lỗi trong quá trình hash mật khẩu cho doanh nghiệp %s!",
+    "err": "Xảy ra lỗi trong quá trình xử lý!"
   }
 }

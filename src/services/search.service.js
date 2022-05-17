@@ -4,6 +4,7 @@ const userSubGroup = require('../models/user_subgroup.model');
 const userMainGroup = require('../models/user_maingroup.model');
 const Account = require('../models/account.model');
 const Post = require('../models/post.model');
+const Company = require('../models/company.model');
 const { map, keyBy } = require('lodash');
 const moment = require('moment');
 
@@ -279,9 +280,49 @@ const searchGroup = async (req, lang) => {
   }
 };
 
+//search by name or identify
+const searcCompany = async (req, lang) => {
+  let perPage = 10;
+  let { keyword, page = 1, isDelete=false } = req.query || {};
+  const msg = getMsg(lang);
+  try {
+    //filter special characters and uppercase, lowercase
+    let key = new RegExp(
+      removeVN(keyword).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      'i',
+    );
+
+    let total= await Company.countDocuments({ keyword: key });
+
+    if (total <= 0) {
+      return {
+        msg: msg.notHaveComapny,
+        statusCode: 200,
+        data: {result:[],total:0}
+      };
+    }
+    const result = await Company.find({ keyword: key })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+
+    return {
+      msg: msg.searchUser,
+      data: { result, total },
+      statusCode: 200,
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
+
 module.exports = {
   searchUser,
   searchGroup,
   searchUserForSubGroup,
   searchUserForMainGroup,
+  searcCompany
 };

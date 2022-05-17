@@ -11,8 +11,13 @@
 1811243:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiYWRtaW4xIiwiaXNzIjoiZ2FpIHh1b25nIHJvbmciLCJpYXQiOjE2NDk5NDg3NDgxNjEsImV4cCI6MTY1MDAzNTE0ODE2MX0.7OjTdGNTfuBLWM24hGOdu1ypM6VesfiSQrsttfnTBMk
 admin:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiYWRtaW4xIiwiaXNzIjoiZ2FpIHh1b25nIHJvbmciLCJpYXQiOjE2NDU1MTYwMzE5NTYsImV4cCI6MTY0NTYwMjQzMTk1Nn0.ah_DbDbDRQ-0Px1auEkIZo3NaY7KSnMiWWVKTLvbDkk
 
+
+//company
+fpt:fpt@social535861
+
 role
 1:admin
 2:dean
 3:teacher
 4:student
+5:company

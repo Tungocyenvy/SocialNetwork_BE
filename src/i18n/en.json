@@ -150,7 +150,8 @@
   "search": {
     "searchUser": "Search successful!",
     "err": "An error occurred during the process!",
-    "notHaveUser": "Don't have user!"
+    "notHaveUser": "Don't have user!",
+    "notHaveComapny": "Don't have company!"
   },
   "notify": {
     "validator": "Don't have data input!",
@@ -168,5 +169,11 @@
     "readNotify": "Change read notify successful!",
     "notFound":"Notify not found!",
     "deleteNotify":"Delete notify successful!"
+  },
+  "company":{
+    "signup": "Signup account successful!",
+    "arrAddAccount": "An error occurred during signup account at %s!",
+    "errHashPass": "An error occurred during hash password account at %s!",
+    "err": "An error occurred during the process!"
   }
 }

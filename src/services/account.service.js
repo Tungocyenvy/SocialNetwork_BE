@@ -5,6 +5,7 @@ const Profile = require('../models/profile.model');
 const Role = require('../models/role.model');
 const UserSubGroup = require('../models/user_subgroup.model');
 const Group = require('../models/group.model');
+const Company =require('../models/company.model');
 const { sendSMS } = require('./sms.service');
 const groupService = require('./group.service');
 const moment = require('moment');
@@ -71,7 +72,13 @@ const signinService = async (req) => {
       if (result) {
         const id = data._id;
         const token = createToken(id);
-        const profile = await Profile.findById({ _id: id });
+        let profile = {};
+        if(data.roleId ==5)//company
+        {
+          profile = await Company.findById({ _id: id });
+        }else{
+          profile = await Profile.findById({ _id: id });
+        }
         const role = await Role.findById({ _id: data.roleId });
 
         if (!profile) {
@@ -122,7 +129,11 @@ const forgotPassword = async (req) => {
   let { _id } = req.body || {};
   const msg = getMsg(req);
   // check account
-  var data = await Profile.findById({ _id });
+  let data = await Profile.findById({ _id });
+  if(data==null)
+  {
+    data = await Company.findById({_id});
+  }
   if (data != null) {
     try {
       var toPhone = data.phone;
@@ -440,7 +451,11 @@ const recoveryAccount = async (req) => {
 const getProfile = async (AccountId, req) => {
   const msg = getMsg(req);
   try {
-    const data = await Profile.findById({ _id: AccountId });
+    let data = await Profile.findById({ _id: AccountId });
+    if(data==null)
+    {
+      data= await Company.findById({_id:AccountId});
+    }
     if (!data) {
       return {
         msg: msg.notFound.replace('%s', AccountId),
@@ -469,9 +484,17 @@ const updateProfile = async (AccountId, req) => {
     {
       AccountId=body._id;
     }
-    const res = await Profile.findById({ _id: AccountId });
-    if (res) {
-      await Profile.findOneAndUpdate({ _id: AccountId }, body);
+    const account = await Account.findById({_id:AccountId});
+    if (account) {
+      let res={};
+      if(account.roleId==5)//company
+      {
+        await Company.findOneAndUpdate({_id:AccountId},body);
+        res= await Company.findById({_id:AccountId});
+      }else{
+        await Profile.findOneAndUpdate({ _id: AccountId }, body);
+        res = await Profile.findById({_id:AccountId});
+      }
       return {
         msg: msg.updateProfile,
         statusCode: 200,
@@ -552,7 +575,11 @@ const verifyPhoneNumber = async (req) => {
   let { _id } = req.body || {};
   const msg = getMsg(req);
   // check account
-  var data = await Profile.findById({ _id });
+  let data = await Profile.findById({ _id });
+  if(data==null)
+  {
+    data= await Company.findById({_id});
+  }
   if (data != null) {
     try {
       var toPhone = data.phone;
