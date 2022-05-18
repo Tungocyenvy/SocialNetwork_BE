@@ -10,9 +10,9 @@ const Paticipant = require('../models/participant.model');
 const Conversation = require('../models/conversation.model');
 const Message = require('../models/message.model');
 const Notification =require('../models/notification.model');
+const News =require('../models/recruitment_news.model');
 const moment = require('moment');
 const { map, keyBy } = require('lodash');
-const reply = require('../models/reply.model');
 
 //delete Account
 /**
@@ -26,7 +26,8 @@ const reply = require('../models/reply.model');
  * 8.delete notify
  */
 
-cron.schedule('*/1 * * * * *', async () => {
+//*/1 * * * * *  1s
+cron.schedule('0 0 0 * * *', async () => {
 
   //delete account overs 3 month
   let expirationDate = moment().subtract(3, 'months');
@@ -87,5 +88,7 @@ cron.schedule('*/1 * * * * *', async () => {
     //   userId: { $in: alumniIds }
     // }, { $set: { groupId: "alumni" } });
 
+    //delete recruitment news Expire
+    await News.updateMany({endDate:{$lte:moment().toDate()}},{ $set: { isExpire: true }})
   }
 });

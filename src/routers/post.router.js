@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('../services/jwt.service');
 const postController = require('../controllers/post.controller');
 const reportController = require('../controllers/report.controller');
+const companyController = require('../controllers/company.controller');
 
 //createPost
 router.post('/', jwt.verify, postController.createPost);
@@ -22,4 +23,6 @@ router.post('/sub/report', reportController.createReportPost);
 router.get('/sub/report/all', reportController.getReportAllPost);
 router.get('/user/all', jwt.verify, postController.getAllPostForUser);
 
+//get recruitment news
+router.get('/company/recruitment', companyController.getListPost);
 module.exports = router;

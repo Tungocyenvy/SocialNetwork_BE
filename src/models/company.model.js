@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const schema = mongoose.Schema;
 const logoDefaul =
-  'https://res.cloudinary.com/blogreview/image/upload/v1636626365/review_web/hzshd4vahy6hw6m0a9p5.png';
+  'https://res.cloudinary.com/blogreview/image/upload/v1652884439/fwur45xk4dnbrkcopxqm.png';
 const CompanySchema = new schema({
   _id:{ type: String, required: true },
   name: { type: String, required: true },

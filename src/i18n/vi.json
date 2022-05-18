@@ -174,6 +174,13 @@
     "signup": "Đăng ký tài khoản thành công!",
     "arrAddAccount": "Lỗi trong quá trình tạo tài khoản cho doanh nghiệp %s!",
     "errHashPass": "Lỗi trong quá trình hash mật khẩu cho doanh nghiệp %s!",
-    "err": "Xảy ra lỗi trong quá trình xử lý!"
+    "err": "Xảy ra lỗi trong quá trình xử lý!",
+    "createdPost":"Đăng bài tuyển dụng thành công!",
+    "updatePost":"Chỉnh sửa bài tuyển dụng thành công!",
+    "notFoundPost":"Không tìm thấy bài tuyển dụng!",
+    "deletePost":"Xóa bài tuyển dụng thành công!",
+    "getDetail":"Lấy chi tiết bài tuyển dụng thành công!",
+    "notHavePost":"Không có bài tuyển dụng nào!",
+    "getAllPost":"Lấy danh sách bài tuyển dụng thành công!"
   }
 }

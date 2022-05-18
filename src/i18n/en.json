@@ -174,6 +174,13 @@
     "signup": "Signup account successful!",
     "arrAddAccount": "An error occurred during signup account at %s!",
     "errHashPass": "An error occurred during hash password account at %s!",
-    "err": "An error occurred during the process!"
+    "err": "An error occurred during the process!",
+    "createdPost":"Create recruitment news successful!",
+    "updatePost":"Update recruitment news successful!",
+    "notFoundPost":"Recruitment news is not found!",
+    "deletePost":"Delete recruitment news successful!",
+    "getDetail":"Get detail recruitment news successful!",
+    "notHavePost":"Don't have any recruitment news!",
+    "getAllPost":"Get list recruitment news successful!"
   }
 }

@@ -8,4 +8,12 @@ const searchController = require('../controllers/search.controller');
 router.post('/signup', companyController.signup);
 router.get('/search', searchController.searchCompany);
 
+router.post('/news',jwt.verify, companyController.createPost);
+router.put('/news', companyController.updatePost);
+router.delete('/news', companyController.deletePost);
+
+router.get('/news/:newsId', companyController.getDetailPost);
+
+router.get('/news',jwt.verify, companyController.getPostByCompanyId);
+
 module.exports = router;
