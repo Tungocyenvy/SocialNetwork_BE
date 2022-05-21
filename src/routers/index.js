@@ -16,7 +16,7 @@ const company = require('./company.router');
 function router(app) {
   app.use('/account', account);
   app.use('/comment', comment);
-
+  app.use('/notification', notification);
   app.use('/image', image);
   app.use('/group', group);
   app.use('/conversation', conversation);

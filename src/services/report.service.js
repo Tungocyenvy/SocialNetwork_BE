@@ -1,6 +1,6 @@
 const ReportGroup = require('../models/report_group.model');
 const ReportPost = require('../models/report_port.model');
-const ReportCategory = require('../models/category_report.model');
+const Category = require('../models/category.model');
 const Group = require('../models/group.model');
 const Post = require('../models/post.model');
 const Comment = require('../models/comment.model');
@@ -97,7 +97,7 @@ const createReportPost = async (body, lang) => {
 const getReportGroup = async (groupId, lang) => {
   const msg = getMsg(lang);
   try {
-    const reportCate = await ReportCategory.find();
+    const reportCate = await Category.find({type:3});
     const reportIds = map(reportCate, '_id');
     const objReportCate = keyBy(reportCate, '_id');
     const listReport = await ReportGroup.find({ groupId: groupId });
@@ -134,7 +134,7 @@ const getReportGroup = async (groupId, lang) => {
 const getReportPost = async (postId, lang) => {
   const msg = getMsg(lang);
   try {
-    const reportCate = await ReportCategory.find();
+    const reportCate = await Category.find({type:3});
     const reportIds = map(reportCate, '_id');
     const objReportCate = keyBy(reportCate, '_id');
     const listReport = await ReportPost.find({ postId: postId });
