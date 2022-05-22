@@ -5,6 +5,7 @@ const userMainGroup = require('../models/user_maingroup.model');
 const Account = require('../models/account.model');
 const Post = require('../models/post.model');
 const Company = require('../models/company.model');
+const News = require('../models/recruitment_news.model');
 const { map, keyBy } = require('lodash');
 const moment = require('moment');
 
@@ -292,18 +293,29 @@ const searcCompany = async (req, lang) => {
       'i',
     );
 
-    let total= await Company.countDocuments({ keyword: key });
+    const company =await Company.find({ keyword: key });
+    if(company.length<=0)
+    {
+      return {
+            msg: msg.notHaveComapny,
+            statusCode: 200,
+            data: {result:[],total:0}
+          };
+    }
+    const compnayId= map(company,'_id');
+    const total= await News.count({companyId:{$in:compnayId}});
 
-    if (total <= 0) {
+     if (total <= 0) {
       return {
         msg: msg.notHaveComapny,
         statusCode: 200,
         data: {result:[],total:0}
       };
     }
-    const result = await Company.find({ keyword: key })
-      .skip(perPage * page - perPage)
-      .limit(perPage);
+
+    const result = await News.find({companyId:{$in:compnayId}})
+    .skip(perPage * page - perPage)
+    .limit(perPage);
 
     return {
       msg: msg.searchUser,
