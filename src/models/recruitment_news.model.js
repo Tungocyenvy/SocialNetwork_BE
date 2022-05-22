@@ -6,9 +6,11 @@ const posterDefaul =
 
 const newsSchema = new schema({
   companyId: { type: String, required: true },
+  title:{type: String, required: true},
   position: { type: String, required: true },
   salary: { type: String, required: true},
   experience: { type: String, required: true},
+  quantity:{type:String, required:true},
   description: { type: String, required: true},
   poster: { type: String, required: true, default:posterDefaul},
   startDate: { type: Date,required: true,default: Date.now},

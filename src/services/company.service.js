@@ -102,9 +102,7 @@ const createPost = async (companyId, body, lang) => {
   try {
     let data=body||{};
     data.companyId=companyId;
-    console.log("🐼 => data", data)
     const result = await News.create(data);
-    console.log("🐼 => result", result)
     return {
       msg: msg.createdPost,
       statusCode: 200,
