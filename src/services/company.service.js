@@ -44,7 +44,7 @@ const signup = async (req, lang) => {
     const companyId = body.abbreviation;
     let data = body;
     data._id = body.abbreviation;
-    data.keyword = companyId + " " + body.fullname + " " + removeVN(data.fullname);
+    data.keyword = companyId + " " + body.name + " " + removeVN(data.name);
     delete data.abbreviation;
     const res = await Company.create(data);
     if (res) {
