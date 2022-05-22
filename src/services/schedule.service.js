@@ -62,13 +62,13 @@ cron.schedule('0 0 0 * * *', async () => {
   }
 
   //delete notify over 7 days
-  let expirationNotifyDate = moment().subtract(7, 'days');
-  const notify = await Notification.find({ createdDate: { $lte: expirationNotifyDate.toDate() } });
-  if(notify.length>0)
-  {
-    const notifyIds = map(notify,'_id');
-    await Notification.deleteMany({_id:{$in:notifyIds}});
-  }
+  // let expirationNotifyDate = moment().subtract(7, 'days');
+  // const notify = await Notification.find({ createdDate: { $lte: expirationNotifyDate.toDate() } });
+  // if(notify.length>0)
+  // {
+  //   const notifyIds = map(notify,'_id');
+  //   await Notification.deleteMany({_id:{$in:notifyIds}});
+  // }
 
   //change student to alumni
   const alumni = await Account.find({isAlumni:true});

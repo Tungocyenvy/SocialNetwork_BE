@@ -1,7 +1,7 @@
 {
     "files.autoSave": "onWindowChange",
     "prettier.requireConfig": true,
-    "turboConsoleLog.logMessagePrefix": "🐼",
+    "turboConsoleLog.logMessagePrefix": "🌵",
     "turboConsoleLog.insertEnclosingFunction": false,
     "turboConsoleLog.delimiterInsideMessage": "=>",
     "turboConsoleLog.includeFileNameAndLineNum": false,
