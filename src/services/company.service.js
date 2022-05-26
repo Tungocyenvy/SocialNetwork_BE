@@ -163,8 +163,13 @@ const getDetailPost = async (req, lang) => {
   const msg = getMsg(lang);
   try {
     if (!newsId) newsId = '';
-    const result = await News.findById({ _id: newsId });
-    if (result) {
+    const news = await News.findById({ _id: newsId });
+    if (news) {
+      const company = await Company.findById({_id:news.companyId});
+      let tmp = {...company._doc};
+      tmp.companyDescription=company.description;
+      delete tmp.description;
+      const result = {...news._doc,...tmp};
       return {
         msg: msg.getDetail,
         data: result,
@@ -261,12 +266,16 @@ const getListPostSameCompany = async (req, lang) => {
       _id:{$nin:newsId},
       isExpire:false,
     });
-    const result = await News.find({companyId:companyId,_id:{$nin:newsId}, isExpire:false,})
+    const news = await News.find({companyId:companyId,_id:{$nin:newsId}, isExpire:false,})
     .sort({
       startDate: -1,
     })
     .skip(perPage * page - perPage)
     .limit(perPage);
+    const company = await Company.findById({_id:companyId});
+    const result = news.map(item=>{
+      return {...item._doc,fullname:company.fullname};
+    })
     return {
       msg: total<=0?msg.notHavePost:msg.getAllPost,
       statusCode: 200,
