@@ -15,5 +15,6 @@ router.delete('/news', companyController.deletePost);
 router.get('/news/:newsId', companyController.getDetailPost);
 
 router.get('/news',jwt.verify, companyController.getPostByCompanyId);
+router.get('/news/:companyId/:newsId', companyController.getListPostSameCompany);
 
 module.exports = router;

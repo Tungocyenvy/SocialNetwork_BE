@@ -13,6 +13,8 @@ const newsSchema = new schema({
   quantity:{type:String, required:true},
   description: { type: String, required: true},
   poster: { type: String, required: true, default:posterDefaul},
+  location: { type: String, required: true},
+  phone: { type: String, required: true},
   startDate: { type: Date,required: true,default: Date.now},
   endDate: { type: Date,required: true},
   isExpire:{type:Boolean,required: true, default:false}
