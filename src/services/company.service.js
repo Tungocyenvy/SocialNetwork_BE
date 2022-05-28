@@ -100,13 +100,13 @@ const signup = async (req, lang) => {
 const createPost = async (companyId, body, lang) => {
   const msg = getMsg(lang);
   try {
-    let data=body||{};
-    data.companyId=companyId;
+    let data = body || {};
+    data.companyId = companyId;
     const result = await News.create(data);
     return {
       msg: msg.createdPost,
       statusCode: 200,
-      data:result
+      data: result
     };
   } catch (err) {
     return {
@@ -145,7 +145,7 @@ const deletePost = async (req, lang) => {
   let { newsId = '' } = req.query || {};
   const msg = getMsg(lang);
   try {
-    await News.findByIdAndDelete({ _id: newsId});
+    await News.findByIdAndDelete({ _id: newsId });
     return {
       msg: msg.deletePost,
       statusCode: 200,
@@ -159,17 +159,17 @@ const deletePost = async (req, lang) => {
 };
 
 const getDetailPost = async (req, lang) => {
-  let {newsId}= req.params||{};
+  let { newsId } = req.params || {};
   const msg = getMsg(lang);
   try {
     if (!newsId) newsId = '';
     const news = await News.findById({ _id: newsId });
     if (news) {
-      const company = await Company.findById({_id:news.companyId});
-      let tmp = {...company._doc};
-      tmp.companyDescription=company.description;
+      const company = await Company.findById({ _id: news.companyId });
+      let tmp = { ...company._doc };
+      tmp.companyDescription = company.description;
       delete tmp.description;
-      const result = {...news._doc,...tmp};
+      const result = { ...news._doc, ...tmp };
       return {
         msg: msg.getDetail,
         data: result,
@@ -192,22 +192,22 @@ const getDetailPost = async (req, lang) => {
 const getPostByCompanyId = async (companyId, req, lang) => {
   const msg = getMsg(lang);
   let perPage = 10;
-  let { page=1,isExpire='false'} = req.query || {};
+  let { page = 1, isExpire = 'false' } = req.query || {};
   try {
     const total = await News.countDocuments({
-      companyId:companyId,
-      isExpire:isExpire,
+      companyId: companyId,
+      isExpire: isExpire,
     });
-    const result = await News.find({companyId:companyId,isExpire:isExpire})
-    .sort({
-      startDate: -1,
-    })
-    .skip(perPage * page - perPage)
-    .limit(perPage);
+    const result = await News.find({ companyId: companyId, isExpire: isExpire })
+      .sort({
+        startDate: -1,
+      })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
     return {
-      msg: total<=0?msg.notHavePost:msg.getAllPost,
+      msg: total <= 0 ? msg.notHavePost : msg.getAllPost,
       statusCode: 200,
-      data:{total,result}
+      data: { total, result }
     };
   } catch (err) {
     return {
@@ -219,32 +219,39 @@ const getPostByCompanyId = async (companyId, req, lang) => {
 
 //for newsfeed
 const getListPost = async (req, lang) => {
-  let perPage = 10;
+  let perPage = 3;
   let { page } = req.query || 1;
   const msg = getMsg(lang);
   try {
     const total = await News.countDocuments({
-      isExpire:false,
+      isExpire: false,
     });
-    let result=[];
-    if(total<=0)
-    {
+    let result = [];
+    if (total <= 0) {
       return {
         msg: msg.notHavePost,
         statusCode: 200,
-        data:result
+        data: result
       };
     }
-    result = await News.find({isExpire:false})
-    .sort({
-      startDate: -1,
+    const news = await News.find({ isExpire: false })
+      .sort({
+        startDate: -1,
+      })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+
+    const companyIds = map(news, 'companyId');
+    const company = await Company.find({ _id: { $in: companyIds } });
+    const objCompany = keyBy(company, '_id');
+    result = news.map(item => {
+      const fullname = objCompany[item.companyId].fullname;
+      return { ...item._doc, fullname };
     })
-    .skip(perPage * page - perPage)
-    .limit(perPage);;
     return {
       msg: msg.getAllPost,
       statusCode: 200,
-      data:{total,result}
+      data: { total, result }
     };
   } catch (err) {
     return {
@@ -258,28 +265,31 @@ const getListPost = async (req, lang) => {
 const getListPostSameCompany = async (req, lang) => {
   const msg = getMsg(lang);
   let perPage = 10;
-  let { page} = req.query || 1;
-  let {companyId=-1, newsId=-1}=req.params||{}
+  let { page } = req.query || 1;
+  let { companyId = -1, newsId = -1 } = req.params || {}
   try {
     const total = await News.countDocuments({
-      companyId:companyId,
-      _id:{$nin:newsId},
-      isExpire:false,
+      companyId: companyId,
+      _id: { $nin: newsId },
+      isExpire: false,
     });
-    const news = await News.find({companyId:companyId,_id:{$nin:newsId}, isExpire:false,})
-    .sort({
-      startDate: -1,
-    })
-    .skip(perPage * page - perPage)
-    .limit(perPage);
-    const company = await Company.findById({_id:companyId});
-    const result = news.map(item=>{
-      return {...item._doc,fullname:company.fullname};
-    })
+    const news = await News.find({ companyId: companyId, _id: { $nin: newsId }, isExpire: false, })
+      .sort({
+        startDate: -1,
+      })
+      .skip(perPage * page - perPage)
+      .limit(perPage);
+    let result = [];
+    if (total > 0) {
+      const company = await Company.findById({ _id: companyId });
+      result = news.map(item => {
+        return { ...item._doc, fullname: company.fullname };
+      })
+    }
     return {
-      msg: total<=0?msg.notHavePost:msg.getAllPost,
+      msg: total <= 0 ? msg.notHavePost : msg.getAllPost,
       statusCode: 200,
-      data:{total,result}
+      data: { total, result }
     };
   } catch (err) {
     return {
