@@ -219,8 +219,7 @@ const getPostByCompanyId = async (companyId, req, lang) => {
 
 //for newsfeed
 const getListPost = async (req, lang) => {
-  let perPage = 3;
-  let { page } = req.query || 1;
+  let {pageSize=3, page=1 } = req.query || {};
   const msg = getMsg(lang);
   try {
     const total = await News.countDocuments({
@@ -238,8 +237,8 @@ const getListPost = async (req, lang) => {
       .sort({
         startDate: -1,
       })
-      .skip(perPage * page - perPage)
-      .limit(perPage);
+      .skip(pageSize * page - pageSize)
+      .limit(pageSize);
 
     const companyIds = map(news, 'companyId');
     const company = await Company.find({ _id: { $in: companyIds } });
