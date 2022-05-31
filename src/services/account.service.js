@@ -486,6 +486,8 @@ const updateProfile = async (AccountId, req) => {
     }
     const account = await Account.findById({_id:AccountId});
     if (account) {
+      if(body.fullname!=null) body.keyword=AccountId+" "+body.fullname +" "+ removeVN(body.fullname);
+      console.log("🌵 => body", body)
       let res={};
       if(account.roleId==5)//company
       {
