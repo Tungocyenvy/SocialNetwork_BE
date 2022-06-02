@@ -282,9 +282,9 @@ const searchGroup = async (req, lang) => {
 };
 
 //search by name or identify
-const searcCompany = async (req, lang) => {
+const searchNewsCompany = async (req, lang) => {
   let perPage = 10;
-  let { keyword, page = 1, isDelete=false } = req.query || {};
+  let { keyword, page = 1} = req.query || {};
   const msg = getMsg(lang);
   try {
     //filter special characters and uppercase, lowercase
@@ -294,16 +294,10 @@ const searcCompany = async (req, lang) => {
     );
 
     const company =await Company.find({ keyword: key });
-    if(company.length<=0)
-    {
-      return {
-            msg: msg.notHaveComapny,
-            statusCode: 200,
-            data: {result:[],total:0}
-          };
-    }
-    const compnayId= map(company,'_id');
-    const total= await News.count({companyId:{$in:compnayId}});
+    const compnayIds= map(company,'_id');
+    const account = await Account.find({_id:{$in:compnayIds},isDelete:false});
+    const accountIds = map(account,"_id");
+    const total= await News.count({companyId:{$in:accountIds}});
     
      if (total <= 0) {
       return {
@@ -313,7 +307,7 @@ const searcCompany = async (req, lang) => {
       };
     }
 
-    const news = await News.find({companyId:{$in:compnayId}})
+    const news = await News.find({companyId:{$in:accountIds}})
     .skip(perPage * page - perPage)
     .limit(perPage);
 
@@ -336,11 +330,54 @@ const searcCompany = async (req, lang) => {
   }
 };
 
+const searchCompany = async (req, lang) => {
+  let perPage = 10;
+  let { keyword, page = 1} = req.query || {};
+  const msg = getMsg(lang);
+  try {
+    //filter special characters and uppercase, lowercase
+    let key = new RegExp(
+      removeVN(keyword).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      'i',
+    );
+
+    const company =await Company.find({ keyword: key });
+    const compnayIds= map(company,'_id');
+    const account = await Account.find({_id:{$in:compnayIds},isDelete:false});
+    const accountIds = map(account,"_id");
+    const total= await Company.countDocuments({_id:{$in:accountIds}});
+    
+     if (total <= 0) {
+      return {
+        msg: msg.notHaveComapny,
+        statusCode: 200,
+        data: {total:0,result:[]}
+      };
+    }
+
+    const result = await Company.find({_id:{$in:accountIds}})
+    .skip(perPage * page - perPage)
+    .limit(perPage);
+
+    return {
+      msg: msg.searchUser,
+      data: { total,result },
+      statusCode: 200,
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 
 module.exports = {
   searchUser,
   searchGroup,
   searchUserForSubGroup,
   searchUserForMainGroup,
-  searcCompany
+  searchNewsCompany,
+  searchCompany
 };

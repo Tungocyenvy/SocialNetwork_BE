@@ -181,6 +181,8 @@
     "deletePost":"Delete recruitment news successful!",
     "getDetail":"Get detail recruitment news successful!",
     "notHavePost":"Don't have any recruitment news!",
-    "getAllPost":"Get list recruitment news successful!"
+    "getAllPost":"Get list recruitment news successful!",
+    "notHaveCompany":"Don't have any company!",
+    "getCompany":"Get list company successful!"
   }
 }

@@ -13,6 +13,7 @@ const Notification =require('../models/notification.model');
 const News =require('../models/recruitment_news.model');
 const moment = require('moment');
 const { map, keyBy } = require('lodash');
+const Company = require('../models/company.model');
 
 //delete Account
 /**
@@ -57,7 +58,10 @@ cron.schedule('0 0 0 * * *', async () => {
 
     await Notification.deleteMany({$or:[{receiverId:{$in:accountIds}},{senderId:{$in:accountIds}}]});
 
+    
+    await News.deleteMany({companyId:{$in: accountIds}});
     await Profile.deleteMany({ _id: { $in: accountIds } });
+    await Company.deleteMany({_id:{ $in: accountIds }});
     await Account.deleteMany({ _id: { $in: accountIds } });
   }
 

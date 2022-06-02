@@ -57,9 +57,23 @@ const searchUserForMainGroup = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const searchNewsCompany = async (req, res, next) => {
+  const lang = req.headers['accept-language'];
+  const resService = await searchService.searchNewsCompany(req, lang);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 const searchCompany = async (req, res, next) => {
   const lang = req.headers['accept-language'];
-  const resService = await searchService.searcCompany(req, lang);
+  const resService = await searchService.searchCompany(req, lang);
   if (resService.statusCode === 200) {
     return controller.sendSuccess(
       res,
@@ -76,5 +90,6 @@ module.exports = {
   searchGroup,
   searchUserForSubGroup,
   searchUserForMainGroup,
+  searchNewsCompany,
   searchCompany
 };

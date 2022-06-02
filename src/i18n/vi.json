@@ -181,6 +181,8 @@
     "deletePost":"Xóa bài tuyển dụng thành công!",
     "getDetail":"Lấy chi tiết bài tuyển dụng thành công!",
     "notHavePost":"Không có bài tuyển dụng nào!",
-    "getAllPost":"Lấy danh sách bài tuyển dụng thành công!"
+    "getAllPost":"Lấy danh sách bài tuyển dụng thành công!",
+    "notHaveCompany":"Không có công ty này!",
+    "getCompany":"Lấy danh sách công ty thành công!"
   }
 }
