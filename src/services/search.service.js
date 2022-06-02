@@ -304,7 +304,7 @@ const searcCompany = async (req, lang) => {
     }
     const compnayId= map(company,'_id');
     const total= await News.count({companyId:{$in:compnayId}});
-
+    
      if (total <= 0) {
       return {
         msg: msg.notHaveComapny,
@@ -313,9 +313,15 @@ const searcCompany = async (req, lang) => {
       };
     }
 
-    const result = await News.find({companyId:{$in:compnayId}})
+    const news = await News.find({companyId:{$in:compnayId}})
     .skip(perPage * page - perPage)
     .limit(perPage);
+
+    const objCompany = keyBy(company, '_id');
+    result = news.map(item => {
+      const fullname = objCompany[item.companyId].fullname;
+      return { ...item._doc, fullname };
+    })
 
     return {
       msg: msg.searchUser,
