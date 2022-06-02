@@ -303,7 +303,7 @@ const searchNewsCompany = async (req, lang) => {
       return {
         msg: msg.notHaveComapny,
         statusCode: 200,
-        data: {result:[],total:0}
+        data: {total:0,result:[]}
       };
     }
 
@@ -319,7 +319,7 @@ const searchNewsCompany = async (req, lang) => {
 
     return {
       msg: msg.searchUser,
-      data: { result, total },
+      data: { total,result },
       statusCode: 200,
     };
   } catch {
