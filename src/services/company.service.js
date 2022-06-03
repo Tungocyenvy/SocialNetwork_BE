@@ -298,40 +298,6 @@ const getListPostSameCompany = async (req, lang) => {
   }
 }
 
-const getListCompany = async (req, lang) => {
-  let perPage = 10;
-  let {page=1}=req.query||{};
-  const msg = getMsg(lang);
-  try{
-    const total = await Account.countDocuments({roleId:5,isDelete:false});
-    let result=[];
-    if(total<=0)
-    {
-      return {
-        msg: msg.notHaveCompany,
-        statusCode: 300,
-        data: { total, result }
-      };
-    }
-    const account =await Account.find({roleId:5,isDelete:false})
-    .sort({_id:-1})
-    .skip(perPage * page - perPage)
-    .limit(perPage);
-    const companyIds= map(account,"_id");
-    result = await Company.find({_id:{$in:companyIds}});
-    return {
-      msg: msg.getCompany,
-      statusCode: 200,
-      data: { total, result }
-    };
-  } catch (err) {
-    return {
-      msg: msg.err,
-      statusCode: 300,
-    };
-  }
-}
-
 module.exports = {
   signup,
   createPost,
@@ -340,6 +306,5 @@ module.exports = {
   getDetailPost,
   getPostByCompanyId,
   getListPost,
-  getListPostSameCompany,
-  getListCompany
+  getListPostSameCompany
 };

@@ -332,35 +332,34 @@ const searchNewsCompany = async (req, lang) => {
 
 const searchCompany = async (req, lang) => {
   let perPage = 10;
-  let { keyword, page = 1} = req.query || {};
+  let { keyword=null, page = 1} = req.query || {};
   const msg = getMsg(lang);
   try {
-    //filter special characters and uppercase, lowercase
-    let key = new RegExp(
-      removeVN(keyword).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
-      'i',
-    );
-
-    const company =await Company.find({ keyword: key });
-    const compnayIds= map(company,'_id');
-    const account = await Account.find({_id:{$in:compnayIds},isDelete:false});
+    let account=await Account.find({roleId:5,isDelete:false});
     const accountIds = map(account,"_id");
-    const total= await Company.countDocuments({_id:{$in:accountIds}});
-    
-     if (total <= 0) {
-      return {
-        msg: msg.notHaveComapny,
-        statusCode: 200,
-        data: {total:0,result:[]}
-      };
-    }
-
-    const result = await Company.find({_id:{$in:accountIds}})
+    //filter special characters and uppercase, lowercase
+    let total=0;
+    let result=[];
+    //search by keyword
+    if(keyword!=null)
+    {
+      let key = new RegExp(
+        removeVN(keyword).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+        'i',
+      );
+      total= await Company.countDocuments({_id:{$in:accountIds},keyword: key});
+      result = await Company.find({_id:{$in:accountIds},keyword: key})
     .skip(perPage * page - perPage)
     .limit(perPage);
+    }else{//get all
+      total= await Company.countDocuments({_id:{$in:accountIds}});
+      result = await Company.find({_id:{$in:accountIds}})
+    .skip(perPage * page - perPage)
+    .limit(perPage);
+    }
 
     return {
-      msg: msg.searchUser,
+      msg: total<=0?msg.notHaveComapny:msg.searchUser,
       data: { total,result },
       statusCode: 200,
     };

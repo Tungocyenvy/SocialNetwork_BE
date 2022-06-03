@@ -6,9 +6,8 @@ const searchController = require('../controllers/search.controller');
 
 //ACCOUNT
 router.post('/signup', companyController.signup);
-router.get('/search/news', searchController.searchNewsCompany);
-router.get('/search', searchController.searchCompany);
-router.get('/', companyController.getListCompany);
+router.get('/search', searchController.searchNewsCompany);
+router.get('/', searchController.searchCompany);
 
 router.post('/news',jwt.verify, companyController.createPost);
 router.put('/news', companyController.updatePost);
