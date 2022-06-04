@@ -69,7 +69,7 @@
   },
   "group": {
     "notExists":"Người dùng này không tồn tại!",
-    "validator": "Thiếu userId hoặc postId!",
+    "validator": "Thiếu userId hoặc groupId!",
     "group": "Thêm người dùng %s vào nhóm thành công!",
     "errGroup": "Xảy ra lỗi trong qua trình thêm người dùng %s vào nhóm!",
     "notFoundGroup": "Không tìm thấy nhóm!",
