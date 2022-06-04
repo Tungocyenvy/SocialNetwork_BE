@@ -555,7 +555,7 @@ const getRelativeGroup = async (UserID, req, lang) => {
         const numMember = await userSubGroup.countDocuments({ groupId: _id });
         const numPost = await Post.countDocuments({groupId:_id});
         return{
-          _id,isMain,createdDate,cateId,image,nameEn,nameVi,description,numMember,numPost,postPerWeek: getWeekstoNow(createdDate,numPost),
+          groupId:_id,isMain,createdDate,cateId,image,nameEn,nameVi,description,numMember,numPost,postPerWeek: getWeekstoNow(createdDate,numPost),
         };
       }));
       
