@@ -170,10 +170,19 @@ const deleteUser = async (body, lang) => {
           groupId: groupId,
         });
       } else {
-        await userSubGroup.findOneAndDelete({
-          userId: userId,
-          groupId: groupId,
-        });
+        const total = await userSubGroup.countDocuments({ groupId: groupId});
+        console.log("🌵 => total", total)
+        if (total === 1) {
+          let req={};
+          const query={groupId};
+          req=Object.assign(req,{query});
+          await deleteGroup(req,lang);
+        }else{
+          await userSubGroup.findOneAndDelete({
+            userId: userId,
+            groupId: groupId,
+          });
+        }
       }
       return {
         msg: msg.deleteUser.replace('%s', userId),
@@ -817,6 +826,7 @@ const getFacultyByUserId = async (UserID, req, lang) => {
 
 const deleteGroup = async (req, lang) => {
   let{groupId} = req.query||{}
+  console.log("🌵 => groupId", groupId)
   const msg = getMsg(lang);
   try {
     const group = await Group.findById({_id:groupId});
