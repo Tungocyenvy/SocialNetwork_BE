@@ -28,7 +28,8 @@ const Company = require('../models/company.model');
  */
 
 //*/1 * * * * *  1s
-cron.schedule('0 0 0 * * *', async () => {
+//midnight 0 0 * * *
+cron.schedule('midnight 0 0 * * *', async () => {
 
   //delete account overs 3 month
   let expirationDate = moment().subtract(3, 'months');
@@ -76,23 +77,28 @@ cron.schedule('0 0 0 * * *', async () => {
 
   //change student to alumni
   const alumni = await Account.find({isAlumni:true});
+  const alumniIds= map(alumni,'_id');
+  const profile = await Profile.find({ _id: { $in: alumniIds },faculty:{$nin:["alumni"]}});
+  const accountIds = map(profile,"_id");
   if(alumni.length>0)
   {
-    const alumniIds= map(alumni,'_id');
     await Profile.updateMany({
-      _id: { $in: alumniIds }
+      _id: { $in: accountIds }
     }, { $set: { faculty: "alumni" } });
 
-    const data = alumniIds.map(x=>{
+    const data = accountIds.map(x=>{
       return {userId:x,groupId:"alumni"}
     })
-    await userMainGroup.deleteMany({userId:{$in:alumniIds}});
+    await userMainGroup.deleteMany({userId:{$in:accountIds}});
     await userMainGroup.insertMany(data);
     // await userMainGroup.updateMany({
     //   userId: { $in: alumniIds }
     // }, { $set: { groupId: "alumni" } });
-
-    //delete recruitment news Expire
-    await News.updateMany({endDate:{$lte:moment().toDate()}},{ $set: { isExpire: true }})
   }
+});
+
+//30s
+cron.schedule("*/30 * * * * *", async () => {
+ //delete recruitment news Expire
+ await News.updateMany({endDate:{$lt:moment().toDate()}},{ $set: { isExpire: true }});
 });
