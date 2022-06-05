@@ -29,7 +29,7 @@ const Company = require('../models/company.model');
 
 //*/1 * * * * *  1s
 //midnight 0 0 * * *
-cron.schedule('midnight 0 0 * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
 
   //delete account overs 3 month
   let expirationDate = moment().subtract(3, 'months');
