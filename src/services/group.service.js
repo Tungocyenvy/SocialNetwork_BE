@@ -171,7 +171,6 @@ const deleteUser = async (body, lang) => {
         });
       } else {
         const total = await userSubGroup.countDocuments({ groupId: groupId});
-        console.log("🌵 => total", total)
         if (total === 1) {
           let req={};
           const query={groupId};
