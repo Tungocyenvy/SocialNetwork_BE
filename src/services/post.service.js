@@ -163,15 +163,17 @@ const getListPostByUserId = async (userId, req, lang) => {
         let postIds=[];
         if(groupId === 'grsv')
         {
+          perPage=5;
           listPost= await Post.find({
             categoryId: categoryId,
             groupId: groupId
-          }).sort({
-            createdDate: -1,
-          }).skip(perPage * page - perPage).limit(perPage);
+          });
 
           postIds= map(listPost,'_id');
-          lstNotify =await NotifyMainGroup.find({userId: representId,postId: {$in:postIds}});
+          lstNotify =await NotifyMainGroup.find({userId: representId,postId: {$in:postIds}})
+          .sort({
+            createdDate: -1,
+          }).skip(perPage * page - perPage).limit(perPage);
         }
         else{
         lstNotify =await NotifyMainGroup.find({userId: representId,groupId: groupId})
