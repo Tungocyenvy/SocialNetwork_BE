@@ -183,6 +183,7 @@
     "notHavePost":"Don't have any recruitment news!",
     "getAllPost":"Get list recruitment news successful!",
     "notHaveCompany":"Don't have any company!",
-    "getCompany":"Get list company successful!"
+    "getCompany":"Get list company successful!",
+    "exists": "Abbreviation already exists!"
   }
 }

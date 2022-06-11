@@ -42,6 +42,14 @@ const signup = async (req, lang) => {
   const msg = getMsg(lang);
   try {
     const companyId = body.abbreviation;
+    const check = await Company.findById({_id:companyId});
+    if(check)
+    {
+      return {
+        msg: msg.exists,
+        statusCode: 300
+      };
+    }
     let data = body;
     data._id = body.abbreviation;
     data.keyword = companyId + " " + body.fullname + " " + removeVN(data.fullname);

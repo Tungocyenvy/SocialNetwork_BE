@@ -183,6 +183,7 @@
     "notHavePost":"Không có bài tuyển dụng nào!",
     "getAllPost":"Lấy danh sách bài tuyển dụng thành công!",
     "notHaveCompany":"Không có công ty này!",
-    "getCompany":"Lấy danh sách công ty thành công!"
+    "getCompany":"Lấy danh sách công ty thành công!",
+    "exists": "Tên viết tắt công ty đã tồn tại!"
   }
 }
