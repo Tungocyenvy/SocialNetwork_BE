@@ -640,25 +640,25 @@ const getListUser = async (req, lang) => {
     const objUser = keyBy(listUser,'userId');
 
     const userIds = map(listUser, 'userId');
-    const account = await Account.find({_id:{$in:userIds},isDelete:false});
-    if(account.length<=0)
-    {
-      return {
-        msg: msg.notHaveUser,
-        statusCode: 200,
-        data: {result:[],total:0},
-      };
-    }
-    const accountIds= map(account,'_id');
+    // const account = await Account.find({_id:{$in:userIds},isDelete:false});
+    // if(account.length<=0)
+    // {
+    //   return {
+    //     msg: msg.notHaveUser,
+    //     statusCode: 200,
+    //     data: {result:[],total:0},
+    //   };
+    // }
+    // const accountIds= map(account,'_id');
     const profile = await Profile.find({
       _id: {
-        $in: accountIds,
+        $in: userIds,
       },
     });
 
-    objProfile = keyBy(profile, '_id');
+    const objProfile = keyBy(profile, '_id');
 
-    const result = accountIds.map((item) => {
+    const result = userIds.map((item) => {
       const { userId, isAdmin } = objUser[item]||{};
       const { fullname, avatar, dob, address, phone, email, year, faculty } =
         objProfile[userId]||{};
@@ -677,9 +677,9 @@ const getListUser = async (req, lang) => {
     });
     if(type==='main')
     {
-      total = await userMainGroup.countDocuments({userId:{$in:accountIds}, groupId: groupId});
+      total = await userMainGroup.countDocuments({ groupId: groupId, isStudent: isStudent,isAdmin:isAdmin})
     }else{
-      total = await userSubGroup.countDocuments({userId:{$in:accountIds}, groupId: groupId});
+      total = await userSubGroup.countDocuments({ groupId: groupId,isAdmin:isAdmin});
     }
     return {
       msg: msg.getUser,
@@ -922,6 +922,25 @@ const changetoAlumni = async (body, lang) => {
   }
 };
 
+const checkMemberforSub = async (userID,req, lang) => {
+  let { groupId } = req.query || {};
+  const msg = getMsg(lang);
+  try {
+    const user = await userSubGroup.findOne({userId:userID,groupId:groupId});
+    const isMember = user?true:false;
+    return {
+      msg: msg.checkMember,
+      statusCode: 200,
+      data:isMember
+    };
+  } catch {
+    return {
+      msg: msg.err,
+      statusCode: 300,
+    };
+  }
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -943,5 +962,6 @@ module.exports = {
   getFacultyByUserId,
   deleteGroup,
   getListGroupForAminSub,
-  changetoAlumni
+  changetoAlumni,
+  checkMemberforSub
 };

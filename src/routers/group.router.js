@@ -34,6 +34,7 @@ router.post('/sub', jwt.verify, groupController.createSubgroup);
 router.put('/sub', groupController.updateGroup);
 router.post('/sub/report', reportController.createReportGroup);
 router.get('/sub/admin',jwt.verify, groupController.checkAdminforSub);
+router.get('/sub/member',jwt.verify, groupController.checkMemberforSub);
 router.get('/admin/manager',jwt.verify, groupController.getListGroupForAminSub);
 
 //get for admin

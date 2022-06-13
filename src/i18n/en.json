@@ -99,6 +99,7 @@
     "getDetailGr": "Get detail group successful!",
     "errChangeAdmin" :"You're the only admin on the group, you must assign another admin before removing yoursel!",
     "checkAdmin" :"Check admin is successful!",
+    "checkMember" :"Check member is successful!",
     "notFoundUser":"Profile's user not found!",
     "deleteGroup":"Delete group successful!",
     "changetoAlumni":"Change the student status to alumni successful!"

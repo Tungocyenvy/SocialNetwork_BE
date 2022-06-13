@@ -307,6 +307,21 @@ const changetoAlumni = async (req, res, next) => {
   return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
 };
 
+const checkMemberforSub = async (req, res, next) => {
+  const UserID = req.value.body.token.data;
+  const lang = req.headers['accept-language'];
+  const resService = await groupService.checkMemberforSub(UserID,req, lang);
+  if (resService.statusCode === 200) {
+    return controller.sendSuccess(
+      res,
+      resService.data,
+      resService.statusCode,
+      resService.msg,
+    );
+  }
+  return controller.sendSuccess(res, {}, resService.statusCode, resService.msg);
+};
+
 module.exports = {
   addUser,
   sendNotifyForMainGroup,
@@ -328,5 +343,6 @@ module.exports = {
   getFacultyByUserId,
   deleteGroup,
   getListGroupForAminSub,
-  changetoAlumni
+  changetoAlumni,
+  checkMemberforSub
 };
